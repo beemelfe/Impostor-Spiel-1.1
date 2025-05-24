@@ -1,0 +1,2412 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impostor Spiel Sammlung V3 - Accordion UI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        :root {
+            --primary-color: #6a11cb;
+            --secondary-color: #2575fc;
+            --background-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --card-background: #ffffff;
+            --text-color: #333;
+            --light-text-color: #f4f4f4;
+            --button-background: #ff6b6b;
+            --button-hover-background: #ff4757;
+            --button-alt-background: #4CAF50;
+            --button-alt-hover-background: #45a049;
+            --button-spicy-background: #e91e63;
+            --button-spicy-hover-background: #c2185b;
+            --accordion-button-bg: rgba(255, 255, 255, 0.1);
+            --accordion-button-hover-bg: rgba(255, 255, 255, 0.18);
+            --accordion-content-bg: rgba(0, 0, 0, 0.1);
+            --input-background: rgba(255, 255, 255, 0.2);
+            --border-radius: 12px;
+            --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            --transition-speed: 0.4s; /* Slightly longer for accordion effect */
+            --container-transition-speed: 0.4s; /* For game container fades */
+            --success-color: #4CAF50;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow-x: hidden; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; background: var(--background-gradient);
+            color: var(--light-text-color); padding: 15px;
+        }
+
+        .app-container {
+            width: 100%; max-width: 700px; min-height: 90vh; max-height: 95vh;
+            display: flex; flex-direction: column;
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px);
+            border-radius: var(--border-radius); box-shadow: var(--box-shadow);
+            overflow: hidden; position: relative; /* Needed for absolute positioned children */
+        }
+
+        .game-collection-container,
+        .game-instance-container {
+            width: 100%; height: 100%; /* Fill app-container */
+            display: flex; flex-direction: column; /* Ensures content flows downwards */
+            overflow-y: auto; 
+            padding: 20px; /* Default padding, game instances will override top for header */
+            
+            position: absolute; /* Stack containers for fade transition */
+            top: 0; left: 0;
+            
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--container-transition-speed) ease-in-out, 
+                        visibility 0s linear var(--container-transition-speed);
+            pointer-events: none;
+        }
+        
+        .game-instance-container {
+             padding: 45px 20px 20px 20px; /* More top padding for back button */
+        }
+        
+        /* Specific padding for landing screen container if no header */
+        #landingScreenContainer {
+            padding: 20px; /* Uniform padding as it has no fixed header */
+            justify-content: center; /* Vertically center the #landingScreen content */
+            align-items: center; /* Horizontally center the #landingScreen content */
+        }
+
+
+        .game-collection-container.active,
+        .game-instance-container.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition-delay: 0s; /* Show immediately */
+        }
+
+        /* Top Header for Back Button */
+        .game-header {
+            position: absolute; top: 0; left: 0; width: 100%;
+            padding: 10px 15px;
+            background: rgba(0,0,0,0.15); backdrop-filter: blur(3px);
+            z-index: 50;
+            display: flex; align-items: center;
+        }
+        .top-back-button {
+            background-color: #777; color: var(--light-text-color); border: none;
+            padding: 6px 12px; border-radius: 18px; cursor: pointer;
+            font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+            transition: background-color 0.3s ease, transform 0.2s ease, filter 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .top-back-button:hover { background-color: #666; }
+        .top-back-button:active:not(:disabled) {
+            transform: scale(0.97);
+            filter: brightness(0.9);
+        }
+
+        .screen {
+            width: 100%; padding: 0 5px; 
+            display: none; /* <<<< KEY CHANGE: Default to none */
+            flex-direction: column; justify-content: flex-start; 
+            align-items: center; flex-grow: 1; text-align: center;
+        }
+        .screen.active {
+            display: flex; /* <<<< KEY CHANGE: Only active screens are flex */
+        }
+
+        #landingScreen { /* Content of the landing page */
+             /* display: flex; is handled by .screen.active now */
+             justify-content: center; /* Vertically center title and buttons */
+        }
+
+        h1, h2 { margin-bottom: 20px; font-weight: 600; color: var(--light-text-color); text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
+        h3 { margin-bottom: 12px; font-weight: 400; font-size: 1.15rem; }
+        #landingScreen h1 { font-size: 2rem; margin-bottom: 25px; }
+        .screen h1 { margin-top: 10px; } 
+
+
+        .form-group { margin-bottom: 12px; text-align: left; width: 100%; }
+        .form-group.inline-group { display: flex; align-items: flex-end; gap: 10px; }
+        .form-group.inline-group .form-group { margin-bottom: 0; flex-grow: 1; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 400; color: var(--light-text-color); font-size: 0.9rem; }
+        .form-group input[type="number"], .form-group input[type="text"], .form-group select, .form-group input[type="range"] {
+            width: 100%; padding: 9px 11px; border: none; border-radius: 7px; background: var(--input-background);
+            color: var(--light-text-color); font-family: inherit; font-size: 0.95rem; outline: none; transition: background 0.3s ease;
+        }
+        .form-group input::placeholder { color: rgba(255, 255, 255, 0.7); }
+        .form-group input:focus { background: rgba(255, 255, 255, 0.3); }
+        .form-group input[type="number"]:disabled, .form-group input[type="range"]:disabled { background: rgba(255, 255, 255, 0.1); cursor: not-allowed; opacity: 0.7; }
+        .form-group select option { background-color: var(--secondary-color); color: var(--light-text-color); }
+
+        input[type="range"] { -webkit-appearance: none; appearance: none; height: 8px; background: rgba(255,255,255,0.3); border-radius: 5px; cursor: pointer; padding: 0; margin-top: 5px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--button-background); border-radius: 50%; cursor: pointer; border: 2px solid var(--light-text-color); box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+        input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; background: var(--button-background); border-radius: 50%; cursor: pointer; border: 2px solid var(--light-text-color); box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+        .range-value-display { font-weight: 600; color: #ffc107; }
+
+        .name-inputs-container-class { width: 100%; max-height: 150px; overflow-y: auto; margin-top: 8px; margin-bottom: 8px; padding: 10px; padding-right: 5px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(0,0,0,0.05); }
+        .name-inputs-container-class .form-group { margin-bottom: 8px; }
+        .name-inputs-container-class::-webkit-scrollbar { width: 6px; }
+        .name-inputs-container-class::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 3px; }
+        .name-inputs-container-class::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+        .name-inputs-container-class::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+
+        .optional-note { font-size: 0.8rem; color: rgba(255, 255, 255, 0.8); text-align: center; margin-bottom: 12px; margin-top: 5px; }
+
+        .category-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 8px; max-height: 130px; overflow-y: auto; padding: 10px; background: rgba(0,0,0, 0.05); border-radius: 8px; margin-top: 5px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        #spicySetupScreen .category-list { grid-template-columns: 1fr; max-height: 150px; }
+        .category-item { background: var(--input-background); padding: 8px 12px; border-radius: 6px; display: flex; align-items: center; cursor: pointer; transition: background 0.3s ease; font-size: 0.9rem; }
+        .category-item:hover { background: rgba(255, 255, 255, 0.3); }
+        .category-item input[type="checkbox"] { margin-right: 8px; accent-color: var(--button-background); width: 15px; height: 15px;}
+
+        .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 10px 0; justify-content: flex-start; font-size: 0.9rem; }
+        .checkbox-label input[type="checkbox"] { accent-color: var(--button-background); width: 16px; height: 16px; }
+        .checkbox-label.disabled { opacity: 0.6; cursor: not-allowed; }
+        .setup-options-container { 
+             display: flex; flex-direction: column; align-items: flex-start;
+             width: 100%; max-width: 450px; margin-bottom: 15px;
+             padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;
+             border: 1px solid rgba(255,255,255,0.1);
+        }
+         .setup-options-container h3 { width: 100%; text-align: center; margin-bottom: 8px;}
+
+
+        button, .game-choice-button, .accordion-button {
+            background-color: var(--button-background); color: var(--light-text-color); border: none;
+            padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 0.9rem;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
+            transition: background-color var(--transition-speed) ease, transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease; /* Added filter */
+            margin-top: 8px; margin-right: 5px; box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .game-choice-button { 
+            padding: 14px 28px; font-size: 1.1rem; width: 90%; max-width: 320px; 
+            margin-bottom: 18px; background-color: var(--button-alt-background); 
+        }
+        .game-choice-button:hover { background-color: var(--button-alt-hover-background); transform: translateY(-1px); }
+        .game-choice-button.spicy-game-btn { background-color: var(--button-spicy-background); }
+        .game-choice-button.spicy-game-btn:hover { background-color: var(--button-spicy-hover-background); }
+        .game-choice-button:active:not(:disabled) {
+            transform: scale(0.97); /* Specific active style for game choice buttons */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            filter: brightness(0.9);
+        }
+
+
+        .accordion-button {
+            background-color: var(--accordion-button-bg);
+            width: 100%; max-width: 450px; 
+            margin-bottom: 5px; 
+            justify-content: space-between; 
+            border-radius: 8px; 
+            padding: 12px 18px;
+            font-size: 1rem;
+        }
+        .accordion-button:hover { background-color: var(--accordion-button-hover-bg); transform: none; }
+        .accordion-button .icon { transition: transform 0.3s ease-out; }
+        .accordion-button.active .icon { transform: rotate(180deg); }
+        .accordion-button:active:not(:disabled) { /* Subtle active for accordion */
+            filter: brightness(0.95);
+            transform: scale(0.99);
+        }
+
+
+        button.small-btn { padding: 8px 16px; font-size: 0.85rem; margin-top: 0; border-radius: 6px; }
+        button:last-of-type { margin-right: 0; }
+        
+        button:not(.accordion-button):not(.game-choice-button):not(.top-back-button):hover:not(:disabled) { 
+            transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+            /* background-color is handled by specific hover styles or default button hover */
+        }
+        button:not(.game-choice-button):not(.success-btn):not(.top-back-button):not(.accordion-button):hover:not(:disabled) { background-color: var(--button-hover-background); }
+
+        button:not(.accordion-button):not(.game-choice-button):not(.top-back-button):active:not(:disabled) { /* General button active */
+            transform: translateY(1px) scale(0.98);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            filter: brightness(0.9);
+        }
+        button:disabled { background-color: #aaa !important; cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.7; }
+        button.success-btn { background-color: var(--success-color); }
+        button.success-btn:hover:not(:disabled) { background-color: var(--success-color); opacity:0.9; }
+        button.success-btn:active:not(:disabled) { filter: brightness(0.9); transform: translateY(1px) scale(0.98); }
+
+
+        .accordion-content {
+            background-color: var(--accordion-content-bg);
+            border-radius: 8px;
+            padding: 0 15px; 
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height var(--transition-speed) ease-out,
+                        padding var(--transition-speed) ease-out,
+                        opacity calc(var(--transition-speed) * 0.7) ease-out; 
+            width: 100%; max-width: 450px; margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .accordion-content.active {
+            max-height: 1000px; 
+            opacity: 1;
+            padding: 15px; 
+        }
+
+        #wordCardScreen .card-container { perspective: 1000px; width: 200px; height: 280px; margin-bottom: 12px; }
+        #wordCardScreen .card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform var(--transition-speed) ease-in-out; cursor: pointer; border-radius: var(--border-radius); box-shadow: var(--box-shadow); }
+        #wordCardScreen .card.is-flipped { transform: rotateY(180deg); }
+        #wordCardScreen .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: var(--border-radius); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 12px; text-align: center; }
+        #wordCardScreen .card-face--front { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); color: var(--text-color); font-size: 1.2rem; }
+        #wordCardScreen .card-face--front span { font-size: 3rem; }
+        #wordCardScreen .card-face--back { background: var(--card-background); color: var(--text-color); transform: rotateY(180deg); font-size: 1.4rem; font-weight: 600; }
+        #wordCardScreen .word-display { margin-bottom: 7px; font-weight: 600; }
+        #wordCardScreen .hint-display { font-size: 0.85rem; font-weight: 400; color: #555; margin-top: 8px; font-style: italic; max-width: 90%; }
+
+        #messageArea { margin-top: 12px; font-size: 0.95rem; min-height: 35px; }
+        .error-message, .success-message { color: #ff6b6b; background-color: rgba(255,107,107,0.2); padding: 7px; border-radius: 5px; margin-top: 7px; font-size: 0.8rem; display: none; width: 100%; max-width: 450px; }
+        .success-message { color: var(--success-color); background-color: rgba(76,175,80,0.2); }
+
+        #wordDiscussionScreen #rankingDisplayArea { margin-top: 12px; padding: 8px; background: rgba(0,0,0,0.15); border-radius: 8px; width: 100%; max-width: 300px; text-align: left; }
+        #wordDiscussionScreen #rankingDisplayArea h3 { text-align: center; margin-bottom: 7px; font-size: 0.95rem; }
+        #wordDiscussionScreen #rankingList { list-style: none; padding: 0; font-size: 0.85rem; }
+        #wordDiscussionScreen #rankingList li { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #wordDiscussionScreen #rankingList li:last-child { border-bottom: none; }
+        #wordDiscussionScreen #gameOutcomeButtons button { margin: 4px; }
+
+        #numberQuestionInputScreen .question-display, #numberAnswerRevealScreen .revealed-question-display { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 1.1rem; line-height: 1.5; width: 100%; max-width: 500px; }
+        #numberQuestionInputScreen .question-display strong, #numberAnswerRevealScreen .revealed-question-display strong { color: #ffda77; }
+        #numberQuestionInputScreen input[type="number"] { font-size: 1.5rem; padding: 10px; text-align: center; max-width: 200px; margin-bottom: 15px; }
+        #numberAnswerRevealScreen #playerAnswersList { list-style: none; padding: 0; width: 100%; max-width: 400px; margin-bottom: 20px; }
+        #numberAnswerRevealScreen #playerAnswersList li { background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 1rem; display: flex; justify-content: space-between; }
+        #numberAnswerRevealScreen #playerAnswersList li .player-name { font-weight: 600; }
+        #numberAnswerRevealScreen #playerAnswersList li .player-answer { font-style: italic; }
+        #numberDiscussionScreen p { margin-bottom: 10px; }
+
+        #spicyQuestionDisplayScreen .question-text-display { background: rgba(0,0,0,0.25); padding: 18px; border-radius: 10px; margin-bottom: 20px; font-size: 1.15rem; line-height: 1.6; width: 100%; max-width: 550px; border-left: 5px solid var(--button-spicy-background); }
+        #spicyQuestionDisplayScreen .question-text-display strong { color: #ffc107; }
+        #spicyQuestionDisplayScreen .instruction-text { font-size: 0.9rem; color: rgba(255,255,255,0.85); margin-top: 10px; max-width: 500px; }
+        .coin-flipper-container { margin: 20px 0; perspective: 800px; }
+        .coin-visual-style { width: 120px; height: 120px; border-radius: 50%; background-color: gold; color: var(--text-color); display: flex; justify-content: center; align-items: center; font-size: 2.5em; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3), inset 0 0 10px rgba(0,0,0,0.2); transition: transform 1.8s cubic-bezier(0.32, 0.01, 0.36, 1), background-color 0.3s ease-in-out 1.8s; transform-style: preserve-3d; }
+        .coin-visual-style.is-flipping { transform: rotateY(1800deg); }
+        #spicyCoinFlipScreen p { max-width: 90%; }
+        #spicyOutcomeScreen .outcome-message-display { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 1.1rem; line-height: 1.5; width: 100%; max-width: 500px; }
+        #spicyOutcomeScreen .outcome-message-display strong { color: #ff8a80; }
+
+        @media (max-width: 500px) {
+            body { padding: 5px; }
+            .app-container { min-height: 90vh; max-height: 95vh; }
+            .game-instance-container { padding: 50px 10px 10px 10px; }
+            #landingScreenContainer { padding: 10px; }
+
+            .screen { padding: 0; }
+            .screen h1 { font-size: 1.3rem; margin-top: 5px; margin-bottom: 15px;}
+            h2 { font-size: 1.05rem; }
+            button, .game-choice-button, .accordion-button { padding: 9px 16px; font-size: 0.85rem; }
+            .game-choice-button { padding: 12px 24px; font-size: 1rem; }
+            button.small-btn { padding: 7px 12px; font-size: 0.8rem; }
+            .accordion-button { padding: 10px 15px; font-size: 0.9rem;}
+            .accordion-content { padding: 0 10px; }
+            .accordion-content.active { padding: 10px; }
+            .name-inputs-container-class { max-height: 120px; }
+            .category-list { max-height: 110px; }
+            #wordCardScreen .card-container { width: 160px; height: 230px; margin-bottom: 8px;}
+            #wordCardScreen .card-face--front { font-size: 0.9rem; }
+            #wordCardScreen .card-face--front span { font-size: 2rem; }
+            #wordCardScreen .card-face--back { font-size: 1rem; }
+            #wordCardScreen .hint-display { font-size: 0.7rem; }
+            .form-group label { font-size: 0.8rem; }
+            .checkbox-label { font-size: 0.8rem; }
+            .optional-note { font-size: 0.7rem; }
+            #numberQuestionInputScreen .question-display, #numberAnswerRevealScreen .revealed-question-display { font-size: 1rem; padding: 12px; }
+            #numberQuestionInputScreen input[type="number"] { font-size: 1.2rem; }
+            #numberAnswerRevealScreen #playerAnswersList li { font-size: 0.9rem; }
+            .top-back-button { padding: 5px 10px; font-size: 0.75rem; }
+            #spicyQuestionDisplayScreen .question-text-display { font-size: 1rem; padding: 12px; }
+            .coin-visual-style { width: 100px; height: 100px; font-size: 2em;}
+            #spicyCoinFlipScreen p { font-size: 0.9rem; }
+            #spicyOutcomeScreen .outcome-message-display { font-size: 1rem; padding: 12px;}
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Landing Page Container -->
+        <div id="landingScreenContainer" class="game-collection-container"> 
+            <div id="landingScreen" class="screen"> 
+                <h1>Impostor-Partyspiel made by Felix 🤫</h1>
+                <button class="game-choice-button" data-game="wordImpostor">Wort Impostor🧾</button>
+                <button class="game-choice-button" data-game="numberImpostor">Zahlen Impostor 🔢</button>
+                <button class="game-choice-button spicy-game-btn" data-game="spicyQuestions">Pikante Fragen 🌶️</button>
+            </div>
+        </div>
+
+        <!-- Word Impostor Game Container -->
+        <div id="wordImpostorGameContainer" class="game-instance-container">
+            <div class="game-header">
+                 <button class="top-back-button" data-targetgame="wordImpostor">&laquo; Hauptmenü</button>
+            </div>
+            <div id="wordSetupScreen" class="screen">
+                <h1>Wort Impostor: Setup</h1>
+
+                <div class="settings-accordion-container" style="width: 100%; max-width: 450px; margin-bottom: 15px;">
+                    <!-- Player Settings Accordion -->
+                    <button class="accordion-button" data-target="wordPlayerSettingsContent">
+                        <span>🧑‍🤝‍🧑 Spieler</span>
+                        <span class="icon">▼</span>
+                    </button>
+                    <div id="wordPlayerSettingsContent" class="accordion-content">
+                        <div class="form-group">
+                            <label for="wordPlayerCountSlider">Anzahl: <span id="wordPlayerCountValueDisplay" class="range-value-display">4</span></label>
+                            <input type="range" id="wordPlayerCountSlider" min="3" max="15" value="4">
+                        </div>
+                        <div class="form-group">
+                            <label>Namen (optional):</label>
+                            <div id="wordNameInputsContainer" class="name-inputs-container-class"></div>
+                            <p class="optional-note">Leer für "Spieler X". Für Ranking eindeutige Namen nötig.</p>
+                        </div>
+                         <label class="checkbox-label">
+                            <input type="checkbox" id="wordRandomStartPlayerCheckbox"> 🎲 Zufälliger Startspieler?
+                        </label>
+                    </div>
+
+                    <!-- Impostor Settings Accordion -->
+                    <button class="accordion-button" data-target="wordImpostorSettingsContent">
+                        <span>🤫 Impostor</span>
+                        <span class="icon">▼</span>
+                    </button>
+                    <div id="wordImpostorSettingsContent" class="accordion-content">
+                        <div class="form-group">
+                            <label for="wordImpostorCountSlider">Anzahl: <span id="wordImpostorCountValueDisplay" class="range-value-display">1</span></label>
+                            <input type="range" id="wordImpostorCountSlider" min="1" value="1">
+                        </div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="wordRandomImpostorCheckbox"> ❓ Zufällige Anzahl?
+                        </label>
+                    </div>
+
+                    <!-- Custom Content Accordion -->
+                    <button class="accordion-button" data-target="wordCustomContent">
+                         <span>✨ Eigene Inhalte</span>
+                         <span class="icon">▼</span>
+                    </button>
+                    <div id="wordCustomContent" class="accordion-content">
+                        <h3>Eigene Inhalte hinzufügen</h3>
+                        <div class="form-group inline-group">
+                            <div class="form-group"> <label for="wordNewCategoryName">Neue Kategorie:</label> <input type="text" id="wordNewCategoryName" placeholder="Name der Kategorie"> </div>
+                            <button id="wordAddCategoryButton" class="small-btn">Erstellen</button>
+                        </div>
+                        <div class="form-group"> <label for="wordSelectCustomCategory">Wort zu Kategorie hinzufügen:</label> <select id="wordSelectCustomCategory"></select> </div>
+                        <div class="form-group"> <label for="wordNewWord">Neues Wort:</label> <input type="text" id="wordNewWord" placeholder="Geheimes Wort"> </div>
+                        <div class="form-group inline-group">
+                            <div class="form-group"> <label for="wordNewHint">Hinweis (optional):</label> <input type="text" id="wordNewHint" placeholder="Abstrakter Hinweis"> </div>
+                            <button id="wordAddWordButton" class="small-btn">Wort Hinzuf.</button>
+                        </div>
+                        <div id="wordCustomContentMessage" class="success-message" style="text-align:center;"></div>
+                    </div>
+
+                    <!-- Category Selection Accordion -->
+                     <button class="accordion-button" data-target="wordCategorySelectionContent">
+                         <span>🗂️ Kategorien</span>
+                         <span class="icon">▼</span>
+                    </button>
+                    <div id="wordCategorySelectionContent" class="accordion-content">
+                         <h3>Kategorien auswählen (mind. 1)</h3>
+                        <div id="wordCategoryList" class="category-list"></div>
+                    </div>
+                </div>
+
+                 <!-- Other Options (Hint/Ranking) -->
+                <div class="setup-options-container">
+                    <h3>Weitere Optionen</h3>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="wordEnableHintCheckbox"> 💡 Hinweis für Impostor
+                    </label>
+                    <label class="checkbox-label" id="wordRankingCheckboxLabel">
+                        <input type="checkbox" id="wordEnableRankingCheckbox"> 🏆 Ranking aktivieren
+                    </label>
+                </div>
+
+                <button id="wordStartGameButton" style="margin-top: 15px;">Spiel starten</button>
+                <div id="wordSetupError" class="error-message"></div>
+            </div>
+             <div id="wordHandoverScreen" class="screen"> <h2 id="wordPlayerNameDisplay"></h2> <p>Gib das Handy an <strong id="wordNextPlayerName"></strong> weiter.</p> <p>Nur <strong id="wordCurrentPlayerName"></strong> darf jetzt auf den Bildschirm schauen!</p> <button id="wordReadyButton">Bereit (Karte ansehen)</button> </div>
+            <div id="wordCardScreen" class="screen"> <h2>Deine Rolle</h2> <p>Tippe auf die Karte, um sie umzudrehen.</p> <div class="card-container"> <div id="wordCard" class="card"> <div class="card-face card-face--front"> <span>?</span> <p>Tippen zum Umdrehen</p> </div> <div class="card-face card-face--back"> <span id="wordCardWordDisplay" class="word-display"></span> <span id="wordCardHintDisplay" class="hint-display"></span> </div> </div> </div> <button id="wordNextPlayerButton" style="display: none;">Verstanden & Weitergeben</button> <p>Tippe erneut auf die Karte oder den Button, um sie zurückzudrehen und weiterzugeben.</p> </div>
+            <div id="wordDiscussionScreen" class="screen"> <h2>Diskussion!</h2> <p>Alle Spieler haben ihre Rolle gesehen.</p> <p>Impostor-Anzahl diese Runde: <strong id="wordRoundImpostorCount">?</strong></p> <p>(Das weitere Spiel findet außerhalb der App statt)</p> <div id="wordSolutionRevealArea" style="display: none; margin-top: 15px;"> <p>Das Wort war: <strong id="wordRevealWord"></strong></p> <p>Impostor war(en): <strong id="wordRevealImpostors"></strong></p> </div> <div id="gameOutcomeButtons" style="display: none; margin-top: 15px;"> <h3>Wer hat gewonnen?</h3> <button id="wordImpostorWonButton" class="success-btn">Impostor(s) gewonnen</button> <button id="wordCrewmatesWonButton" class="success-btn">Crewmates gewonnen</button> </div> <div id="rankingDisplayArea" style="display: none;"> <h3>Ranking</h3> <ul id="wordRankingList"></ul> </div> <div style="margin-top:15px;"> <button id="wordRevealSolutionButton">Lösung anzeigen</button> <button id="wordRestartButton">Nächstes Spiel</button> </div> </div>
+        </div>
+
+        <!-- Number Impostor Game Container -->
+        <div id="numberImpostorGameContainer" class="game-instance-container">
+             <div class="game-header">
+                 <button class="top-back-button" data-targetgame="numberImpostor">&laquo; Hauptmenü</button>
+            </div>
+            <div id="numberSetupScreen" class="screen">
+                <h1>Zahlen Impostor: Setup</h1>
+
+                 <div class="settings-accordion-container" style="width: 100%; max-width: 450px; margin-bottom: 15px;">
+                     <!-- Player Settings Accordion -->
+                    <button class="accordion-button" data-target="numberPlayerSettingsContent">
+                        <span>🧑‍🤝‍🧑 Spieler</span>
+                        <span class="icon">▼</span>
+                    </button>
+                    <div id="numberPlayerSettingsContent" class="accordion-content">
+                        <div class="form-group">
+                            <label for="numberPlayerCountSlider">Anzahl: <span id="numberPlayerCountValueDisplay" class="range-value-display">3</span></label>
+                            <input type="range" id="numberPlayerCountSlider" min="3" max="15" value="3">
+                        </div>
+                        <div class="form-group">
+                            <label>Namen (optional):</label>
+                            <div id="numberNameInputsContainer" class="name-inputs-container-class"></div>
+                            <p class="optional-note">Leer lassen für "Spieler X".</p>
+                        </div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="numberRandomStartPlayerCheckbox"> 🎲 Zufälliger Startspieler?
+                        </label>
+                    </div>
+
+                     <!-- Impostor Settings Accordion -->
+                    <button class="accordion-button" data-target="numberImpostorSettingsContent">
+                        <span>🤫 Impostor</span>
+                        <span class="icon">▼</span>
+                    </button>
+                    <div id="numberImpostorSettingsContent" class="accordion-content">
+                        <div class="form-group">
+                            <label for="numberImpostorCountSlider">Anzahl: <span id="numberImpostorCountValueDisplay" class="range-value-display">1</span></label>
+                            <input type="range" id="numberImpostorCountSlider" min="1" value="1">
+                        </div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="numberRandomImpostorCheckbox"> ❓ Zufällige Anzahl?
+                        </label>
+                    </div>
+                 </div>
+
+                <button id="numberStartGameButton" style="margin-top: 20px;">Spiel starten</button>
+                <div id="numberSetupError" class="error-message"></div>
+            </div>
+             <div id="numberHandoverScreen" class="screen"> <h2 id="numberPlayerNameDisplay"></h2> <p>Gib das Handy an <strong id="numberNextPlayerName"></strong> weiter.</p> <p>Nur <strong id="numberCurrentPlayerName"></strong> darf jetzt auf den Bildschirm schauen!</p> <button id="numberReadyButton">Bereit (Frage ansehen)</button> </div>
+            <div id="numberQuestionInputScreen" class="screen"> <h2>Deine Frage:</h2> <div id="numberQuestionDisplay" class="question-display"></div> <input type="number" id="numberAnswerInput" placeholder="Deine Zahl"> <button id="numberSubmitAnswerButton">Antwort absenden & Weitergeben</button> </div>
+            <div id="numberAnswerRevealScreen" class="screen"> <h2>Eingegebene Zahlen:</h2> <ul id="playerAnswersList"></ul> <h2>Die Frage für die Crewmates war:</h2> <div id="revealedCrewQuestionDisplay" class="revealed-question-display"></div> <p>Diskutiert nun, wer eine andere Frage hatte!</p> <button id="numberRevealImpostorsButton">Impostor(s) auflösen</button> </div>
+            <div id="numberDiscussionScreen" class="screen"> <h2>Auflösung</h2> <p>Die Impostor-Frage war: <strong id="revealedImpostorQuestionDisplay"></strong></p> <p>Impostor war(en): <strong id="numberRevealImpostorsResult"></strong></p> <p>(Das weitere Spiel & die Abstimmung finden außerhalb der App statt)</p> <button id="numberNewGameButton">Neues Spiel</button> </div>
+        </div>
+
+        <!-- Spicy Questions Game Container -->
+        <div id="spicyQuestionsGameContainer" class="game-instance-container">
+             <div class="game-header">
+                 <button class="top-back-button" data-targetgame="spicyQuestions">&laquo; Hauptmenü</button>
+            </div>
+            <div id="spicySetupScreen" class="screen">
+                <h1>Pikante Fragen: Setup</h1>
+
+                 <div class="settings-accordion-container" style="width: 100%; max-width: 450px; margin-bottom: 15px;">
+                    <!-- Player Settings Accordion -->
+                    <button class="accordion-button" data-target="spicyPlayerSettingsContent">
+                        <span>🧑‍🤝‍🧑 Spieler</span>
+                        <span class="icon">▼</span>
+                    </button>
+                    <div id="spicyPlayerSettingsContent" class="accordion-content">
+                         <div class="form-group"> 
+                            <label for="spicyPlayerCount">Anzahl (min. 2):</label>
+                            <input type="number" id="spicyPlayerCount" min="2" max="15" value="3">
+                        </div>
+                        <div class="form-group">
+                            <label>Namen (optional):</label>
+                            <div id="spicyNameInputsContainer" class="name-inputs-container-class"></div>
+                            <p class="optional-note">Leer lassen für "Spieler X".</p>
+                        </div>
+                         <label class="checkbox-label">
+                            <input type="checkbox" id="spicyRandomStartPlayerCheckbox"> 🎲 Zufälliger Startspieler?
+                        </label>
+                    </div>
+
+                     <!-- Category Selection Accordion -->
+                     <button class="accordion-button" data-target="spicyCategorySelectionContent">
+                         <span>🌶️ Kategorien</span>
+                         <span class="icon">▼</span>
+                    </button>
+                    <div id="spicyCategorySelectionContent" class="accordion-content">
+                        <h3>Fragen-Kategorien auswählen (mind. 1)</h3>
+                        <div id="spicyCategoryList" class="category-list"> </div>
+                    </div>
+
+                     <!-- Custom Content Accordion -->
+                     <button class="accordion-button" data-target="spicyCustomContent">
+                         <span>➕ Eigene Fragen</span>
+                         <span class="icon">▼</span>
+                    </button>
+                    <div id="spicyCustomContent" class="accordion-content">
+                        <h3>Eigene Fragen hinzufügen</h3>
+                        <div class="form-group"> <label for="spicySelectCategoryForNewQuestion">Zu welcher Kategorie hinzufügen:</label> <select id="spicySelectCategoryForNewQuestion"> <option value="Chill">Chill</option> <option value="Spicy">Spicy</option> <option value="Extrem Spicy">Extrem Spicy</option> </select> </div>
+                        <div class="form-group"> <label for="spicyNewQuestionText">Neue Frage:</label> <input type="text" id="spicyNewQuestionText" placeholder="Deine pikante Frage..."> </div>
+                        <button id="spicyAddQuestionButton" class="small-btn">Frage Hinzuf.</button>
+                        <div id="spicyCustomQuestionMessage" class="success-message" style="text-align:center;"></div>
+                    </div>
+                 </div>
+
+
+                <button id="spicyStartGameButton" style="margin-top: 15px;">Spiel starten</button>
+                <div id="spicySetupError" class="error-message"></div>
+            </div>
+            <div id="spicyHandoverScreen" class="screen"> <h2 id="spicyPlayerNameDisplay"></h2> <p>Gib das Handy an <strong id="spicyCurrentPlayerName"></strong> weiter.</p> <p>Nur <strong id="spicyCurrentPlayerNameConfirm"></strong> darf jetzt auf den Bildschirm schauen!</p> <button id="spicyReadyButton">Bereit (Frage ansehen)</button> </div>
+            <div id="spicyQuestionDisplayScreen" class="screen"> <h2>Für <span id="spicyQuestionForPlayerName"></span>:</h2> <p class="instruction-text">Denke an eine Person in der Runde. Auf wen trifft diese Frage am ehesten zu?</p> <div id="spicyQuestionText" class="question-text-display"> </div> <p class="instruction-text">Zeige auf die Person und gib das Handy dann an die Person <strong>LINKS</strong> von dir weiter (für den Münzwurf).</p> <button id="spicyPassToNeighborButton">Verstanden & Weitergeben für Münzwurf</button> </div>
+            <div id="spicyCoinFlipScreen" class="screen"> <h2 id="spicyCoinFlipTitle">Münzwurf für <span id="spicyCoinFlipForPlayerName"></span></h2> <p>Die Person <strong>LINKS</strong> von <span id="spicyCoinFlipOriginalPlayerName"></span> wirft jetzt die Münze.</p> <div class="coin-flipper-container"> <div id="spicyCoinVisual" class="coin-visual-style"> <span>?</span> </div> </div> <button id="spicyFlipCoinButton">Münze werfen!</button> <p id="spicyCoinResultMessage" style="display:none; margin-top:15px; font-size: 1.3em; font-weight: bold;"></p> <button id="spicyProceedToOutcomeButton" style="display: none; margin-top:15px;">Ergebnis anzeigen</button> </div>
+            <div id="spicyOutcomeScreen" class="screen"> <h2>Ergebnis für <span id="spicyOutcomeForPlayerName"></span></h2> <div id="spicyOutcomeMessage" class="outcome-message-display"> </div> <div style="margin-top: 20px;"> <button id="spicyNextRoundButton">Nächste Runde (<span id="spicyNextPlayerForRound"></span>)</button> <button id="spicyNewGameSetupButton">Neues Spiel</button> </div> </div>
+        </div>
+
+    </div> 
+
+    <script>
+        // --- SHARED STATE & DOM ---
+        const appContainer = document.querySelector('.app-container');
+        const landingScreenContainer = document.getElementById('landingScreenContainer');
+        const wordImpostorGameContainer = document.getElementById('wordImpostorGameContainer');
+        const numberImpostorGameContainer = document.getElementById('numberImpostorGameContainer');
+        const spicyQuestionsGameContainer = document.getElementById('spicyQuestionsGameContainer');
+        const gameChoiceButtons = document.querySelectorAll('.game-choice-button');
+        const backToMenuButtons = document.querySelectorAll('.top-back-button'); 
+        let activeGameContainerId = null;
+
+        // --- ACCORDION HANDLING ---
+        const accordionButtons = document.querySelectorAll('.accordion-button');
+
+        function toggleAccordion(button) {
+            const targetId = button.dataset.target;
+            const content = document.getElementById(targetId);
+            if (!content) return;
+
+            button.classList.toggle('active');
+            content.classList.toggle('active');
+
+            if (content.classList.contains('active')) {
+                content.style.maxHeight = content.scrollHeight + 40 + "px";
+            } else {
+                content.style.maxHeight = null; 
+            }
+        }
+
+        accordionButtons.forEach(button => {
+            button.addEventListener('click', () => toggleAccordion(button));
+        });
+
+
+        // --- WORD IMPOSTOR GAME ---
+        let wordGame_wordList = {
+  "Rund um die Welt": [
+    {"word": "Eiffelturm", "hint": "Konstruktion"},
+    {"word": "Pyramiden", "hint": "Monument"},
+    {"word": "Big Ben", "hint": "Zeitgeber"},
+    {"word": "Freiheitsstatue", "hint": "Symbol"},
+    {"word": "Chinesische Mauer", "hint": "Grenze"},
+    {"word": "Taj Mahal", "hint": "Grabstätte"},
+    {"word": "Kolosseum", "hint": "Arena"},
+    {"word": "Opernhaus Sydney", "hint": "Architektur"},
+    {"word": "Mount Everest", "hint": "Höhe"},
+    {"word": "Amazonas", "hint": "Fließend"},
+    {"word": "Sahara", "hint": "Trockenheit"},
+    {"word": "Nordpol", "hint": "Extrempunkt"},
+    {"word": "Südpol", "hint": "Gegenstück"},
+    {"word": "Pazifik", "hint": "Weite"},
+    {"word": "Atlantik", "hint": "Verbindung"},
+    {"word": "Berlin", "hint": "Metropole"},
+    {"word": "Paris", "hint": "Hauptstadt"},
+    {"word": "London", "hint": "Großstadt"},
+    {"word": "New York", "hint": "Urban"},
+    {"word": "Tokio", "hint": "Millionenstadt"},
+    {"word": "Rom", "hint": "Historisch"},
+    {"word": "Moskau", "hint": "Zentrum"},
+    {"word": "Kairo", "hint": "Bevölkerungsreich"},
+    {"word": "Rio de Janeiro", "hint": "Küstenstadt"},
+    {"word": "Peking", "hint": "Asiatisch"},
+    {"word": "Machu Picchu", "hint": "Ruinenstätte"},
+    {"word": "Akropolis", "hint": "Erhöhung"},
+    {"word": "Fudschijama", "hint": "Berg"},
+    {"word": "Serengeti", "hint": "Ebene"},
+    {"word": "Venedig", "hint": "Wasserstadt"},
+    {"word": "Grand Canyon", "hint": "Schlucht"},
+    {"word": "Niagarafälle", "hint": "Wasserfall"},
+    {"word": "Galapagosinseln", "hint": "Inselgruppe"},
+    {"word": "Stonehenge", "hint": "Steinformation"},
+    {"word": "Angkor Wat", "hint": "Tempelkomplex"},
+    {"word": "Neuschwanstein", "hint": "Schloss"},
+    {"word": "Kilimandscharo", "hint": "Massiv"},
+    {"word": "Baikalsee", "hint": "Gewässer"},
+    {"word": "Totes Meer", "hint": "Salzig"},
+    {"word": "Island", "hint": "Inselstaat"},
+    {"word": "Havanna", "hint": "Karibisch"},
+    {"word": "Dubai", "hint": "Modern"},
+    {"word": "Jerusalem", "hint": "Religiös"},
+    {"word": "Kyoto", "hint": "Traditionell"},
+    {"word": "Sankt Petersburg", "hint": "Kulturell"},
+    {"word": "Buenos Aires", "hint": "Südamerikanisch"},
+    {"word": "Kapstadt", "hint": "Afrikanisch"},
+    {"word": "Bangkok", "hint": "Südostasien"},
+    {"word": "Amsterdam", "hint": "Europäisch"},
+    {"word": "Prag", "hint": "Osteuropa"},
+    {"word": "Wien", "hint": "Kaiserlich"},
+    {"word": "Lissabon", "hint": "Südeuropa"},
+    {"word": "Himalaya", "hint": "Gebirgskette"},
+    {"word": "Anden", "hint": "Langes Gebirge"},
+    {"word": "Alpen", "hint": "Zentralgebirge"},
+    {"word": "Rocky Mountains", "hint": "Westliches Gebirge"},
+    {"word": "Nil", "hint": "Lebensader"},
+    {"word": "Mississippi", "hint": "Großer Fluss"},
+    {"word": "Ganges", "hint": "Heiliger Fluss"},
+    {"word": "Yangtse", "hint": "Wichtiger Fluss"},
+    {"word": "Kongo", "hint": "Tiefer Fluss"},
+    {"word": "Äquator", "hint": "Gedachte Linie"},
+    {"word": "Wendekreis", "hint": "Sonnenstand"},
+    {"word": "Kontinent", "hint": "Erdteil"},
+    {"word": "Insel", "hint": "Landmasse"},
+    {"word": "Halbinsel", "hint": "Landzunge"},
+    {"word": "Archipel", "hint": "Viele Inseln"},
+    {"word": "Fjord", "hint": "Meeresbucht"},
+    {"word": "Vulkan", "hint": "Geologisch aktiv"},
+    {"word": "Geysir", "hint": "Thermalquelle"},
+    {"word": "Savanne", "hint": "Grasland"},
+    {"word": "Tundra", "hint": "Kältesteppe"},
+    {"word": "Taiga", "hint": "Nadelwald"},
+    {"word": "Korallenriff", "hint": "Marines Ökosystem"},
+    {"word": "Antarktis", "hint": "Eiskontinent"},
+    {"word": "Ätna", "hint": "Vulkan in Italien"},
+    {"word": "Antarktis", "hint": "Kältester Kontinent"},
+    {"word": "KAPSTADT", "hint": "Tafelbergblick"},
+    {"word": "PETRA", "hint": "Felsenstadt"},
+    {"word": "SANTORINI", "hint": "Kykladeninsel"},
+    {"word": "VERDON", "hint": "Türkisschlucht"},
+    {"word": "ULLURU", "hint": "Roter Monolith"},
+    {"word": "PAMUKKALE", "hint": "Baumwollburg"},
+    {"word": "LUXOR", "hint": "Theben-West"},
+    {"word": "MARRAKESCH", "hint": "Djemaa el Fna"},
+    {"word": "KUBA", "hint": "Zigarreninsel"},
+    {"word": "KAMTSCHATKA", "hint": "Geysir-Halbinsel"}
+  ],
+  "Unterhaltung": [
+    {"word": "Kino", "hint": "Vorführung"},
+    {"word": "Film", "hint": "Medium"},
+    {"word": "Musik", "hint": "Akustisch"},
+    {"word": "Konzert", "hint": "Darbietung"},
+    {"word": "Theater", "hint": "Bühnenkunst"},
+    {"word": "Oper", "hint": "Musiktheater"},
+    {"word": "Museum", "hint": "Sammlung"},
+    {"word": "Galerie", "hint": "Ausstellungsort"},
+    {"word": "Buch", "hint": "Schriftwerk"},
+    {"word": "Videospiel", "hint": "Interaktiv"},
+    {"word": "Brettspiel", "hint": "Analoges Spiel"},
+    {"word": "Kartenspiel", "hint": "Spielkarten"},
+    {"word": "Fernsehen", "hint": "Übertragung"},
+    {"word": "Streaming", "hint": "Abruf"},
+    {"word": "Netflix", "hint": "Anbieter"},
+    {"word": "Youtube", "hint": "Plattform"},
+    {"word": "Podcast", "hint": "Audiodatei"},
+    {"word": "Radio", "hint": "Funk"},
+    {"word": "Festival", "hint": "Großveranstaltung"},
+    {"word": "Zirkus", "hint": "Manege"},
+    {"word": "Comedy", "hint": "Humor"},
+    {"word": "Musical", "hint": "Gesang & Tanz"},
+    {"word": "Ballett", "hint": "Klassischer Tanz"},
+    {"word": "Manga", "hint": "Japanisch"},
+    {"word": "Comic", "hint": "Bildgeschichte"},
+    {"word": "Regisseur", "hint": "Leitung"},
+    {"word": "Drehbuch", "hint": "Vorlage"},
+    {"word": "Schauspieler", "hint": "Darsteller"},
+    {"word": "Synchronsprecher", "hint": "Stimme"},
+    {"word": "Soundtrack", "hint": "Begleitmusik"},
+    {"word": "Blockbuster", "hint": "Erfolg"},
+    {"word": "Trailer", "hint": "Vorschau"},
+    {"word": "Genre", "hint": "Kategorie"},
+    {"word": "Applaus", "hint": "Zustimmung"},
+    {"word": "Zugabe", "hint": "Wiederholung"},
+    {"word": "Dirigent", "hint": "Anführer"},
+    {"word": "Partitur", "hint": "Notation"},
+    {"word": "Instrument", "hint": "Klangerzeuger"},
+    {"word": "Band", "hint": "Gruppe"},
+    {"word": "Sänger", "hint": "Vokalist"},
+    {"word": "Liedtext", "hint": "Worte"},
+    {"word": "Plattenspieler", "hint": "Abspielgerät"},
+    {"word": "Kopfhörer", "hint": "Hörgerät"},
+    {"word": "Lautsprecher", "hint": "Schallwandler"},
+    {"word": "Bibliothek", "hint": "Leihanstalt"},
+    {"word": "Bestseller", "hint": "Verkaufsschlager"},
+    {"word": "Hörbuch", "hint": "Gesprochen"},
+    {"word": "E-Book", "hint": "Digital"},
+    {"word": "Roman", "hint": "Erzählung"},
+    {"word": "Krimi", "hint": "Spannung"},
+    {"word": "Fantasy", "hint": "Übernatürlich"},
+    {"word": "Science-Fiction", "hint": "Zukunftsvision"},
+    {"word": "Konsole", "hint": "Spielgerät"},
+    {"word": "PC-Spiel", "hint": "Computerspiel"},
+    {"word": "Rollenspiel", "hint": "Charakterentwicklung"},
+    {"word": "Strategie", "hint": "Taktik"},
+    {"word": "Puzzle", "hint": "Geduldsspiel"},
+    {"word": "Quiz", "hint": "Ratespiel"},
+    {"word": "Zaubershow", "hint": "Illusion"},
+    {"word": "Varieté", "hint": "Showprogramm"},
+    {"word": "Kabarett", "hint": "Satirisch"},
+    {"word": "Poetry Slam", "hint": "Wortkunst"},
+    {"word": "Ausstellung", "hint": "Präsentation"},
+    {"word": "Vernissage", "hint": "Eröffnung"},
+    {"word": "Auktion", "hint": "Versteigerung"},
+    {"word": "Flohmarkt", "hint": "Trödel"},
+    {"word": "Freizeitpark", "hint": "Vergnügen"},
+    {"word": "Wasserpark", "hint": "Nass"},
+    {"word": "Zoo", "hint": "Tierhaltung"},
+    {"word": "Aquarium", "hint": "Wasserwelt"},
+    {"word": "Planetarium", "hint": "Sternenhimmel"},
+    {"word": "Open-Air-Kino", "hint": "Draußen"},
+    {"word": "Autokino", "hint": "Fahrzeug"},
+    {"word": "Dokumentation", "hint": "Bericht"},
+    {"word": "Nachrichten", "hint": "Information"},
+    {"word": "Talkshow", "hint": "Gesprächsrunde"},
+    {"word": "Serie", "hint": "Fortsetzung"},
+    {"word": "Sitcom", "hint": "Humorvoll"},
+    {"word": "Reality-TV", "hint": "Beobachtung?"},
+    {"word": "Werbung", "hint": "Reklame"},
+    {"word": "Social Media", "hint": "Netzwerk"},
+    {"word": "Blog", "hint": "Online-Journal"},
+    {"word": "Vlog", "hint": "Video-Tagebuch"},
+    {"word": "Memes", "hint": "Internetkultur"},
+    {"word": "Streaming-Dienst", "hint": "Mediathek"},
+    {"word": "Karaoke", "hint": "Mitsingen"},
+    {"word": "Escape Room", "hint": "Rätselraum"},
+    {"word": "Kabarett", "hint": "Satirische Bühnenkunst"},
+    {"word": "Streaming-Dienst", "hint": "Video auf Abruf"},
+    {"word": "IMPROVISATIONSTHEATER", "hint": "Spontanbühne"},
+    {"word": "ARTHOUSE KINO", "hint": "Filmkunsttempel"},
+    {"word": "KAMMERSPIELE", "hint": "Intimbühne"},
+    {"word": "NOUVELLE VAGUE", "hint": "Filmströmung 60er"},
+    {"word": "DREIGROSCHENOPER", "hint": "Brecht-Weill-Werk"},
+    {"word": "SURREALISMUS", "hint": "Traumkunst"},
+    {"word": "MINNESANG", "hint": "Höfische Liedkunst"},
+    {"word": "EXPRESSIONISMUS", "hint": "Ausdruckskunst"},
+    {"word": "BAUHAUS", "hint": "Designschule"},
+    {"word": "FINSTERWORLD", "hint": "Deutscher Episodenfilm"}
+  ],
+  "Alltag": [
+    {"word": "Supermarkt", "hint": "Versorgung"},
+    {"word": "Bäckerei", "hint": "Handwerk"},
+    {"word": "Metzgerei", "hint": "Fleischerei"},
+    {"word": "Arbeit", "hint": "Tätigkeit"},
+    {"word": "Büro", "hint": "Arbeitsplatz"},
+    {"word": "Schule", "hint": "Bildungseinrichtung"},
+    {"word": "Universität", "hint": "Hochschule"},
+    {"word": "Hausaufgaben", "hint": "Lernstoff"},
+    {"word": "Frühstück", "hint": "Morgenmahlzeit"},
+    {"word": "Mittagessen", "hint": "Hauptmahlzeit?"},
+    {"word": "Abendessen", "hint": "Tagesausklang"},
+    {"word": "Zähneputzen", "hint": "Hygiene"},
+    {"word": "Duschen", "hint": "Reinigung"},
+    {"word": "Schlafen", "hint": "Ruhezustand"},
+    {"word": "Aufwachen", "hint": "Bewusstsein"},
+    {"word": "Wecker", "hint": "Signalgeber"},
+    {"word": "Handy", "hint": "Mobilgerät"},
+    {"word": "Computer", "hint": "Rechenmaschine"},
+    {"word": "Internet", "hint": "Netzwerk"},
+    {"word": "Soziale Medien", "hint": "Online-Community"},
+    {"word": "Zeitung", "hint": "Printmedium"},
+    {"word": "Post", "hint": "Korrespondenz"},
+    {"word": "Bank", "hint": "Geldinstitut"},
+    {"word": "Putzen", "hint": "Säubern"},
+    {"word": "Kochen", "hint": "Zubereitung"},
+    {"word": "Waschen", "hint": "Textilpflege"},
+    {"word": "Stau", "hint": "Verkehrshindernis"},
+    {"word": "Rechnung", "hint": "Forderung"},
+    {"word": "Feierabend", "hint": "Arbeitsschluss"},
+    {"word": "Terminkalender", "hint": "Zeitplan"},
+    {"word": "Schlüsselbund", "hint": "Zugangsmittel"},
+    {"word": "Portemonnaie", "hint": "Aufbewahrung"},
+    {"word": "Rucksack", "hint": "Tragehilfe"},
+    {"word": "Handtasche", "hint": "Begleiter"},
+    {"word": "Regenschirm", "hint": "Wetterschutz"},
+    {"word": "Sonnenbrille", "hint": "Sichtschutz"},
+    {"word": "Wohnung", "hint": "Domizil"},
+    {"word": "Haus", "hint": "Eigenheim"},
+    {"word": "Miete", "hint": "Nutzungsgebühr"},
+    {"word": "Stromrechnung", "hint": "Energiekosten"},
+    {"word": "Heizung", "hint": "Temperaturregelung"},
+    {"word": "Kühlschrank", "hint": "Konservierung"},
+    {"word": "Herd", "hint": "Kochstelle"},
+    {"word": "Mikrowelle", "hint": "Schnellerwärmung"},
+    {"word": "Geschirrspüler", "hint": "Reinigungsgerät"},
+    {"word": "Mülltonne", "hint": "Entsorgungsbehälter"},
+    {"word": "Recycling", "hint": "Wiederverwertung"},
+    {"word": "Haustür", "hint": "Eingangsbereich"},
+    {"word": "Fenster", "hint": "Öffnung"},
+    {"word": "Balkon", "hint": "Außenfläche"},
+    {"word": "Garten", "hint": "Grünanlage"},
+    {"word": "Keller", "hint": "Untergeschoss"},
+    {"word": "Dachboden", "hint": "Speicher"},
+    {"word": "Treppenhaus", "hint": "Verbindung"},
+    {"word": "Aufzug", "hint": "Transportmittel"},
+    {"word": "Nachbar", "hint": "Anwohner"},
+    {"word": "Straße", "hint": "Verkehrsfläche"},
+    {"word": "Gehweg", "hint": "Fußweg"},
+    {"word": "Ampel", "hint": "Signal"},
+    {"word": "Zebrastreifen", "hint": "Überweg"},
+    {"word": "Bushaltestelle", "hint": "Wartepunkt"},
+    {"word": "Bahnhof", "hint": "Verkehrsknotenpunkt"},
+    {"word": "Flughafen", "hint": "Luftverkehr"},
+    {"word": "Tankstelle", "hint": "Versorgungsstelle"},
+    {"word": "Werkstatt", "hint": "Reparaturdienst"},
+    {"word": "Arzttermin", "hint": "Konsultation"},
+    {"word": "Apotheke", "hint": "Pharmazie"},
+    {"word": "Krankenhaus", "hint": "Medizinische Einrichtung"},
+    {"word": "Friseur", "hint": "Haarpflege"},
+    {"word": "Kosmetikstudio", "hint": "Schönheitspflege"},
+    {"word": "Fitnessstudio", "hint": "Trainingsort"},
+    {"word": "Restaurant", "hint": "Gastronomie"},
+    {"word": "Café", "hint": "Treffpunkt"},
+    {"word": "Kneipe", "hint": "Lokal"},
+    {"word": "Wochenmarkt", "hint": "Handelsplatz"},
+    {"word": "Shoppingcenter", "hint": "Einkaufszentrum"},
+    {"word": "Online-Shopping", "hint": "Distanzhandel"},
+    {"word": "Paketbote", "hint": "Zusteller"},
+    {"word": "Warteschlange", "hint": "Reihe"},
+    {"word": "Telefonieren", "hint": "Kommunikation"},
+    {"word": "E-Mail", "hint": "Nachricht"},
+    {"word": "Meeting", "hint": "Besprechung"},
+    {"word": "Präsentation", "hint": "Darstellung"},
+    {"word": "Überstunden", "hint": "Mehrleistung"},
+    {"word": "Urlaub", "hint": "Freizeit"},
+    {"word": "Wochenende", "hint": "Ruhetage"},
+    {"word": "Pendeln", "hint": "Wegstrecke"},
+    {"word": "Mittagspause", "hint": "Unterbrechung"},
+    {"word": "Kaffeepause", "hint": "Kurzpause"},
+    {"word": "Smalltalk", "hint": "Plauderei"},
+    {"word": "Aufräumen", "hint": "Ordnung"},
+    {"word": "Hausarbeit", "hint": "Routine"},
+    {"word": "Einkaufszettel", "hint": "Gedächtnisstütze"},
+    {"word": "Fernsehprogramm", "hint": "Übersicht"},
+    {"word": "Wecker stellen", "hint": "Vorbereitung"},
+    {"word": "Schlafanzug", "hint": "Nachtkleidung"},
+    {"word": "Guten Morgen", "hint": "Grußformel"},
+    {"word": "Gute Nacht", "hint": "Verabschiedung"},
+    {"word": "Geldautomat", "hint": "Bargeldbeschaffung"},
+    {"word": "Fahrkartenkontrolleur", "hint": "Ticketprüfung"},
+    {"word": "PENDLERPAUSCHALE", "hint": "Wegkostenabzug"},
+    {"word": "SCHUFA", "hint": "Bonitätsprüfung"},
+    {"word": "IBAN", "hint": "Kontonummer neu"},
+    {"word": "GEZ", "hint": "Rundfunkbeitrag"},
+    {"word": "MIETPREISBREMSE", "hint": "Wohnkostenregulierung"},
+    {"word": "FLENSBURG", "hint": "Verkehrssünderdatei"},
+    {"word": "ELSTER", "hint": "Steuersoftware"},
+    {"word": "TARIFVERTRAG", "hint": "Lohnvereinbarung"},
+    {"word": "BEWERBUNGSGESPRÄCH", "hint": "Jobinterview"},
+    {"word": "KREDITWÜRDIGKEIT", "hint": "Finanzzuverlässigkeit"}
+  ],
+  "Tiere & Natur": [
+    {"word": "Hund", "hint": "Begleiter"},
+    {"word": "Katze", "hint": "Anschmiegsam?"},
+    {"word": "Pferd", "hint": "Reittier"},
+    {"word": "Elefant", "hint": "Dickhäuter"},
+    {"word": "Löwe", "hint": "Raubtier"},
+    {"word": "Tiger", "hint": "Großkatze"},
+    {"word": "Bär", "hint": "Pranke"},
+    {"word": "Wolf", "hint": "Wildtier"},
+    {"word": "Fuchs", "hint": "Listig?"},
+    {"word": "Hase", "hint": "Pflanzenfresser"},
+    {"word": "Vogel", "hint": "Gefiedert"},
+    {"word": "Fisch", "hint": "Wasserbewohner"},
+    {"word": "Schlange", "hint": "Kriechtier"},
+    {"word": "Spinne", "hint": "Gliederfüßer"},
+    {"word": "Biene", "hint": "Insekt"},
+    {"word": "Ameise", "hint": "Sozial"},
+    {"word": "Baum", "hint": "Pflanze"},
+    {"word": "Blume", "hint": "Gewächs"},
+    {"word": "Gras", "hint": "Bodendecker"},
+    {"word": "Wald", "hint": "Bewuchs"},
+    {"word": "Wiese", "hint": "Grünfläche"},
+    {"word": "Berg", "hint": "Erhebung"},
+    {"word": "Fluss", "hint": "Gewässer"},
+    {"word": "See", "hint": "Stillgewässer"},
+    {"word": "Meer", "hint": "Ozean"},
+    {"word": "Wüste", "hint": "Karg"},
+    {"word": "Dschungel", "hint": "Tropenwald"},
+    {"word": "Sonne", "hint": "Himmelskörper"},
+    {"word": "Mond", "hint": "Satellit"},
+    {"word": "Sterne", "hint": "Lichtpunkte"},
+    {"word": "Regen", "hint": "Niederschlag"},
+    {"word": "Schnee", "hint": "Kristallin"},
+    {"word": "Wind", "hint": "Luftbewegung"},
+    {"word": "Korallenriff", "hint": "Unterwasserstruktur"},
+    {"word": "Fotosynthese", "hint": "Prozess"},
+    {"word": "Winterschlaf", "hint": "Ruhephase"},
+    {"word": "Gletscher", "hint": "Eisstrom"},
+    {"word": "Fledermaus", "hint": "Flugsäuger"},
+    {"word": "Wal", "hint": "Meeressäuger"},
+    {"word": "Delfin", "hint": "Intelligent"},
+    {"word": "Hai", "hint": "Knorpelfisch"},
+    {"word": "Pinguin", "hint": "Seevogel"},
+    {"word": "Krokodil", "hint": "Echse"},
+    {"word": "Schildkröte", "hint": "Reptil"},
+    {"word": "Eichhörnchen", "hint": "Nagetier"},
+    {"word": "Igel", "hint": "Stachelig"},
+    {"word": "Maulwurf", "hint": "Gräbt"},
+    {"word": "Schmetterling", "hint": "Verwandlung"},
+    {"word": "Libelle", "hint": "Fluginsekt"},
+    {"word": "Marienkäfer", "hint": "Käfer"},
+    {"word": "Grashüpfer", "hint": "Springt"},
+    {"word": "Regenwurm", "hint": "Ringelwurm"},
+    {"word": "Adler", "hint": "Greifvogel"},
+    {"word": "Eule", "hint": "Nachtvogel"},
+    {"word": "Schwan", "hint": "Wasservogel"},
+    {"word": "Storch", "hint": "Schreitvogel"},
+    {"word": "Pflanze", "hint": "Organismus"},
+    {"word": "Wurzel", "hint": "Pflanzenteil"},
+    {"word": "Stamm", "hint": "Hauptachse"},
+    {"word": "Ast", "hint": "Verzweigung"},
+    {"word": "Blatt", "hint": "Pflanzenorgan"},
+    {"word": "Blüte", "hint": "Fortpflanzungsorgan"},
+    {"word": "Frucht", "hint": "Samenbehälter"},
+    {"word": "Samen", "hint": "Keim"},
+    {"word": "Moos", "hint": "Bodenpflanze"},
+    {"word": "Farn", "hint": "Gefäßsporenpflanze"},
+    {"word": "Pilz", "hint": "Organismus"},
+    {"word": "Alge", "hint": "Wasserorganismus"},
+    {"word": "Kaktus", "hint": "Sukkulente"},
+    {"word": "Ökosystem", "hint": "Lebensraum & Bewohner"},
+    {"word": "Biotop", "hint": "Lebensraum"},
+    {"word": "Nahrungskette", "hint": "Energiefluss"},
+    {"word": "Evolution", "hint": "Entwicklung"},
+    {"word": "Klima", "hint": "Atmosphärenzustand"},
+    {"word": "Wetter", "hint": "Aktuell"},
+    {"word": "Temperatur", "hint": "Messwert"},
+    {"word": "Luftfeuchtigkeit", "hint": "Wassergehalt"},
+    {"word": "Luftdruck", "hint": "Atmosphärendruck"},
+    {"word": "Wolke", "hint": "Kondensation"},
+    {"word": "Nebel", "hint": "Bodennah"},
+    {"word": "Tau", "hint": "Feuchtigkeit"},
+    {"word": "Reif", "hint": "Gefroren"},
+    {"word": "Hagel", "hint": "Eiskorn"},
+    {"word": "Gewitter", "hint": "Entladung"},
+    {"word": "Blitz", "hint": "Lichtbogen"},
+    {"word": "Donner", "hint": "Geräusch"},
+    {"word": "Regenbogen", "hint": "Optisches Phänomen"},
+    {"word": "Sonnenaufgang", "hint": "Tagesbeginn"},
+    {"word": "Sonnenuntergang", "hint": "Tagesende"},
+    {"word": "Jahreszeiten", "hint": "Zyklus"},
+    {"word": "Erdbeben", "hint": "Erschütterung"},
+    {"word": "Tsunami", "hint": "Welle"},
+    {"word": "Hurrikan", "hint": "Sturm"},
+    {"word": "Tornado", "hint": "Wirbel"},
+    {"word": "Landschaft", "hint": "Region"},
+    {"word": "Gebirge", "hint": "Bergkette"},
+    {"word": "Tal", "hint": "Senke"},
+    {"word": "Hügel", "hint": "Anhöhe"},
+    {"word": "Küste", "hint": "Grenzlinie"},
+    {"word": "Strand", "hint": "Sandfläche"},
+    {"word": "Düne", "hint": "Sandhügel"},
+    {"word": "Quelle", "hint": "Ursprung"},
+    {"word": "Wasserfall", "hint": "Fallhöhe"},
+    {"word": "Höhle", "hint": "Hohlraum"},
+    {"word": "Libelle", "hint": "Fluginsekt mit großen Augen"},
+    {"word": "Fotosynthese", "hint": "Pflanzlicher Prozess"},
+    {"word": "AXOLOTL", "hint": "Schwanzlurch"},
+    {"word": "QUOKKA", "hint": "Kurzschwanzkänguru"},
+    {"word": "NARWAL", "hint": "Einhornwal"},
+    {"word": "OKAPI", "hint": "Waldgiraffe"},
+    {"word": "KOLIBRI", "hint": "Schwirlvogel"},
+    {"word": "TAMANDUA", "hint": "Kleiner Ameisenbär"},
+    {"word": "GINKGO", "hint": "Lebendes Fossil (Baum)"},
+    {"word": "RAFFLESIA", "hint": "Riesenblume (Aasgeruch)"},
+    {"word": "SEQUOIA", "hint": "Mammutbaum"},
+    {"word": "NILPFERD", "hint": "Flusspferd"}
+  ],
+  "Sport & Freizeit": [
+    {"word": "Fußball", "hint": "Ballsport"},
+    {"word": "Basketball", "hint": "Korbjäger"},
+    {"word": "Handball", "hint": "Teamsport"},
+    {"word": "Tennis", "hint": "Rückschlagsport"},
+    {"word": "Schwimmen", "hint": "Wassersport"},
+    {"word": "Fahrradfahren", "hint": "Fortbewegung"},
+    {"word": "Joggen", "hint": "Laufsport"},
+    {"word": "Wandern", "hint": "Gehen"},
+    {"word": "Klettern", "hint": "Aufstieg"},
+    {"word": "Skifahren", "hint": "Wintersport"},
+    {"word": "Snowboarden", "hint": "Brettsport"},
+    {"word": "Fitnessstudio", "hint": "Training"},
+    {"word": "Yoga", "hint": "Körperübung"},
+    {"word": "Tanzen", "hint": "Bewegungskunst"},
+    {"word": "Reiten", "hint": "Pferdesport"},
+    {"word": "Angeln", "hint": "Fischfang"},
+    {"word": "Segeln", "hint": "Windkraft"},
+    {"word": "Surfen", "hint": "Wellenritt"},
+    {"word": "Camping", "hint": "Übernachtung"},
+    {"word": "Grillen", "hint": "Garen"},
+    {"word": "Picknick", "hint": "Mahlzeit im Freien"},
+    {"word": "Freizeitpark", "hint": "Attraktion"},
+    {"word": "Zoo", "hint": "Tiergarten"},
+    {"word": "Schwimmbad", "hint": "Badeanstalt"},
+    {"word": "Stadion", "hint": "Sportstätte"},
+    {"word": "Schiedsrichter", "hint": "Regelhüter"},
+    {"word": "Medaille", "hint": "Auszeichnung"},
+    {"word": "Training", "hint": "Vorbereitung"},
+    {"word": "Hobby", "hint": "Interesse"},
+    {"word": "Rucksack", "hint": "Behälter"},
+    {"word": "Mannschaft", "hint": "Gruppe"},
+    {"word": "Wettkampf", "hint": "Konkurrenz"},
+    {"word": "Turnier", "hint": "Wettbewerb"},
+    {"word": "Olympische Spiele", "hint": "Großereignis"},
+    {"word": "Weltmeisterschaft", "hint": "Titelkampf"},
+    {"word": "Leichtathletik", "hint": "Disziplinen"},
+    {"word": "Turnen", "hint": "Akrobatik"},
+    {"word": "Volleyball", "hint": "Netzspiel"},
+    {"word": "Beachvolleyball", "hint": "Sandvariante"},
+    {"word": "Hockey", "hint": "Schlägersport"},
+    {"word": "Eishockey", "hint": "Kufensport"},
+    {"word": "Golf", "hint": "Präzisionssport"},
+    {"word": "Badminton", "hint": "Federballspiel"},
+    {"word": "Tischtennis", "hint": "Plattensport"},
+    {"word": "Boxen", "hint": "Kampfsport"},
+    {"word": "Ringen", "hint": "Zweikampf"},
+    {"word": "Judo", "hint": "Kampfkunst"},
+    {"word": "Karate", "hint": "Asiatisch"},
+    {"word": "Fechten", "hint": "Waffensport"},
+    {"word": "Rudern", "hint": "Bootssport"},
+    {"word": "Kanu", "hint": "Paddelsport"},
+    {"word": "Wasserski", "hint": "Gleitsport"},
+    {"word": "Tauchen", "hint": "Unterwasser"},
+    {"word": "Schnorcheln", "hint": "Oberfläche"},
+    {"word": "Bergsteigen", "hint": "Alpinismus"},
+    {"word": "Mountainbiken", "hint": "Geländeradsport"},
+    {"word": "Skateboarden", "hint": "Rollbrett"},
+    {"word": "Inlineskaten", "hint": "Rollschuhvariante"},
+    {"word": "Drachenfliegen", "hint": "Luftsport"},
+    {"word": "Fallschirmspringen", "hint": "Absprung"},
+    {"word": "Bungeejumping", "hint": "Sprung in die Tiefe"},
+    {"word": "Wohnmobil", "hint": "Fahrzeug"},
+    {"word": "Zelten", "hint": "Temporär"},
+    {"word": "Lagerfeuer", "hint": "Feuerstelle"},
+    {"word": "Wandernadel", "hint": "Abzeichen"},
+    {"word": "Gesellschaftsspiel", "hint": "Gemeinschaft"},
+    {"word": "Strategiespiel", "hint": "Denksport"},
+    {"word": "Glücksspiel", "hint": "Zufallsprinzip"},
+    {"word": "Sammeln", "hint": "Kollektion"},
+    {"word": "Basteln", "hint": "Handarbeit"},
+    {"word": "Malen", "hint": "Gestaltung"},
+    {"word": "Zeichnen", "hint": "Darstellung"},
+    {"word": "Fotografieren", "hint": "Bildaufnahme"},
+    {"word": "Musizieren", "hint": "Klangproduktion"},
+    {"word": "Singen", "hint": "Vokal"},
+    {"word": "Lesen", "hint": "Textaufnahme"},
+    {"word": "Gärtnern", "hint": "Pflanzenpflege"},
+    {"word": "Heimwerken", "hint": "DIY"},
+    {"word": "Modellbau", "hint": "Miniatur"},
+    {"word": "Stricken", "hint": "Maschen"},
+    {"word": "Häkeln", "hint": "Garntechnik"},
+    {"word": "Nähen", "hint": "Textilverarbeitung"},
+    {"word": "Kochen", "hint": "Speisenzubereitung"},
+    {"word": "Backen", "hint": "Teigwarenherstellung"},
+    {"word": "Ausflug", "hint": "Unternehmung"},
+    {"word": "Museumsbesuch", "hint": "Bildungsausflug"},
+    {"word": "Theaterbesuch", "hint": "Kulturausflug"},
+    {"word": "Triathlon", "hint": "Mehrkampf-Sportart"},
+    {"word": "Bogenschießen", "hint": "Präzisionssport mit Pfeil"},
+    {"word": "BIATHLON", "hint": "Skijagd"},
+    {"word": "CURLING", "hint": "Eisstockschieben"},
+    {"word": "DREISPUNG", "hint": "Hop-Step-Jump"},
+    {"word": "PARKOUR", "hint": "Hindernislauf (urban)"},
+    {"word": "SKELETON", "hint": "Kopfüber-Rodeln"},
+    {"word": "CAPOEIRA", "hint": "Brasilianischer Kampftanz"},
+    {"word": "ULTRAMARATHON", "hint": "Extremlanglauf"},
+    {"word": "WASSERBALL", "hint": "Handball im Pool"},
+    {"word": "GEOCACHING", "hint": "GPS-Schatzsuche"},
+    {"word": "QUIZDUEL", "hint": "Wissens-App-Battle"}
+  ],
+  "Wissen & Schule": [
+    {"word": "Mathematik", "hint": "Abstraktion"},
+    {"word": "Physik", "hint": "Naturwissenschaft"},
+    {"word": "Chemie", "hint": "Stofflehre"},
+    {"word": "Biologie", "hint": "Lehre vom Leben"},
+    {"word": "Geschichte", "hint": "Vergangenheit"},
+    {"word": "Geographie", "hint": "Erdkunde"},
+    {"word": "Deutsch", "hint": "Muttersprache?"},
+    {"word": "Englisch", "hint": "Fremdsprache"},
+    {"word": "Kunst", "hint": "Gestalterisch"},
+    {"word": "Musik", "hint": "Auditiv"},
+    {"word": "Sport", "hint": "Körperlich"},
+    {"word": "Lehrer", "hint": "Vermittler"},
+    {"word": "Schüler", "hint": "Lernender"},
+    {"word": "Klassenzimmer", "hint": "Lernort"},
+    {"word": "Tafel", "hint": "Schreibfläche"},
+    {"word": "Kreide", "hint": "Schreibmittel"},
+    {"word": "Stift", "hint": "Schreibgerät"},
+    {"word": "Heft", "hint": "Aufzeichnung"},
+    {"word": "Buch", "hint": "Lehrmittel"},
+    {"word": "Prüfung", "hint": "Leistungskontrolle"},
+    {"word": "Note", "hint": "Bewertung"},
+    {"word": "Zeugnis", "hint": "Dokument"},
+    {"word": "Ferien", "hint": "Unterrichtsfrei"},
+    {"word": "Hausaufgaben", "hint": "Übung"},
+    {"word": "Bibliothek", "hint": "Wissensspeicher"},
+    {"word": "Experiment", "hint": "Versuch"},
+    {"word": "Formel", "hint": "Symbolsprache"},
+    {"word": "Periodensystem", "hint": "Tabelle"},
+    {"word": "Vokabel", "hint": "Worteinheit"},
+    {"word": "Referat", "hint": "Vortrag"},
+    {"word": "Mikroskop", "hint": "Optisches Gerät"},
+    {"word": "Globus", "hint": "Modell"},
+    {"word": "Atlas", "hint": "Kartenwerk"},
+    {"word": "Lineal", "hint": "Messinstrument"},
+    {"word": "Zirkel", "hint": "Zeichengerät"},
+    {"word": "Taschenrechner", "hint": "Rechenhilfe"},
+    {"word": "Radiergummi", "hint": "Korrekturmittel"},
+    {"word": "Spitzer", "hint": "Werkzeug"},
+    {"word": "Schultüte", "hint": "Tradition"},
+    {"word": "Stundenplan", "hint": "Organisation"},
+    {"word": "Pause", "hint": "Erholung"},
+    {"word": "Klingel", "hint": "Akustisches Signal"},
+    {"word": "Vertretungsplan", "hint": "Information"},
+    {"word": "Klassenfahrt", "hint": "Gruppenreise"},
+    {"word": "Ab Meliusorem", "hint": "Abschluss"},
+    {"word": "Studium", "hint": "Akademische Bildung"},
+    {"word": "Vorlesung", "hint": "Lehrveranstaltung"},
+    {"word": "Seminar", "hint": "Arbeitsgruppe"},
+    {"word": "Examen", "hint": "Prüfung"},
+    {"word": "Doktorarbeit", "hint": "Wissenschaftliche Arbeit"},
+    {"word": "Wissenschaft", "hint": "Forschung"},
+    {"word": "Theorie", "hint": "Gedankengebäude"},
+    {"word": "Hypothese", "hint": "Annahme"},
+    {"word": "Definition", "hint": "Begriffsbestimmung"},
+    {"word": "Analyse", "hint": "Untersuchung"},
+    {"word": "Synthese", "hint": "Zusammenführung"},
+    {"word": "Argument", "hint": "Begründung"},
+    {"word": "Logik", "hint": "Schlussfolgern"},
+    {"word": "Philosophie", "hint": "Denkrichtung"},
+    {"word": "Psychologie", "hint": "Verhaltenswissenschaft"},
+    {"word": "Soziologie", "hint": "Gesellschaftswissenschaft"},
+    {"word": "Politik", "hint": "Machtausübung"},
+    {"word": "Wirtschaft", "hint": "Ökonomie"},
+    {"word": "Recht", "hint": "Normensystem"},
+    {"word": "Medizin", "hint": "Heilkunde"},
+    {"word": "Astronomie", "hint": "Sternenkunde"},
+    {"word": "Archäologie", "hint": "Altertumskunde"},
+    {"word": "Linguistik", "hint": "Sprachwissenschaft"},
+    {"word": "Pädagogik", "hint": "Erziehungswissenschaft"},
+    {"word": "Algebra", "hint": "Teilgebiet"},
+    {"word": "Geometrie", "hint": "Raumlehre"},
+    {"word": "Statistik", "hint": "Datenanalyse"},
+    {"word": "Genetik", "hint": "Vererbungslehre"},
+    {"word": "Ökologie", "hint": "Umweltlehre"},
+    {"word": "Grammatik", "hint": "Regelwerk"},
+    {"word": "Rechtschreibung", "hint": "Schreibweise"},
+    {"word": "Interpretation", "hint": "Deutung"},
+    {"word": "Zusammenfassung", "hint": "Essenz"},
+    {"word": "Prozentrechnung", "hint": "Anteilsberechnung"},
+    {"word": "Bruchrechnung", "hint": "Teilberechnung"},
+    {"word": "Einheit", "hint": "Maß"},
+    {"word": "Reagenzglas", "hint": "Laborgerät"},
+    {"word": "Bunsenbrenner", "hint": "Hitzequelle"},
+    {"word": "Schutzbrille", "hint": "Sicherheit"},
+    {"word": "Latein", "hint": "Alte Sprache"},
+    {"word": "Griechisch", "hint": "Antike Sprache"},
+    {"word": "Projektwoche", "hint": "Themenarbeit"},
+    {"word": "Nachhilfe", "hint": "Lernhilfe"},
+    {"word": "Spickzettel", "hint": "Unerlaubt"},
+    {"word": "Pythagoras", "hint": "Antiker Mathematiker"},
+    {"word": "Molekül", "hint": "Kleinste chemische Verbindung"},
+    {"word": "QUANTENPHYSIK", "hint": "Kleinste Teilchen"},
+    {"word": "NEUROBIOLOGIE", "hint": "Gehirnforschung"},
+    {"word": "PALÄONTOLOGIE", "hint": "Fossilienkunde"},
+    {"word": "SOZIOLEKT", "hint": "Gruppensprache"},
+    {"word": "ONTOLOGIE", "hint": "Seinslehre"},
+    {"word": "EPISTEMOLOGIE", "hint": "Erkenntnistheorie"},
+    {"word": "ALGORITHMUS", "hint": "Rechenvorschrift"},
+    {"word": "PHOTOSHOP", "hint": "Bildbearbeitungsprofi"},
+    {"word": "BLACKHOLE", "hint": "Massenanziehung"},
+    {"word": "STRINGTHEORIE", "hint": "Alles-Modell?"}
+  ],
+  "Feste & Feiern": [
+    {"word": "Weihnachten", "hint": "Winterfest"},
+    {"word": "Ostern", "hint": "Frühlingsfest"},
+    {"word": "Geburtstag", "hint": "Jahrestag"},
+    {"word": "Hochzeit", "hint": "Verbindung"},
+    {"word": "Silvester", "hint": "Jahreswechsel"},
+    {"word": "Karneval", "hint": "Verkleidungszeit"},
+    {"word": "Fasching", "hint": "Närrisch"},
+    {"word": "Halloween", "hint": "Gruselfest?"},
+    {"word": "Oktoberfest", "hint": "Volksfest"},
+    {"word": "Jubiläum", "hint": "Gedenktag"},
+    {"word": "Party", "hint": "Zusammenkunft"},
+    {"word": "Feiertag", "hint": "Anlass"},
+    {"word": "Geschenk", "hint": "Gabe"},
+    {"word": "Kuchen", "hint": "Gebäck"},
+    {"word": "Torte", "hint": "Süßspeise"},
+    {"word": "Einladung", "hint": "Aufforderung"},
+    {"word": "Gäste", "hint": "Besucher"},
+    {"word": "Musik", "hint": "Beschallung"},
+    {"word": "Tanz", "hint": "Bewegung"},
+    {"word": "Feuerwerk", "hint": "Lichteffekt"},
+    {"word": "Dekoration", "hint": "Schmuck"},
+    {"word": "Familie", "hint": "Verwandtschaft"},
+    {"word": "Freunde", "hint": "Sozialkontakt"},
+    {"word": "Brautstrauß", "hint": "Blumengebinde"},
+    {"word": "Konfetti", "hint": "Papierschnipsel"},
+    {"word": "Ständchen", "hint": "Darbietung"},
+    {"word": "Jubilar", "hint": "Hauptperson"},
+    {"word": "Countdown", "hint": "Zeitzählung"},
+    {"word": "Sektempfang", "hint": "Begrüßung"},
+    {"word": "Buffet", "hint": "Speisenangebot"},
+    {"word": "Menü", "hint": "Speisenfolge"},
+    {"word": "Rede", "hint": "Ansprache"},
+    {"word": "Toast", "hint": "Trinkspruch"},
+    {"word": "Polterabend", "hint": "Brauch"},
+    {"word": "Junggesellenabschied", "hint": "Abschiedsfeier"},
+    {"word": "Babyparty", "hint": "Vorfreude"},
+    {"word": "Taufe", "hint": "Ritual"},
+    {"word": "Kommunion", "hint": "Sakrament"},
+    {"word": "Konfirmation", "hint": "Zeremonie"},
+    {"word": "Abschlussball", "hint": "Tanzveranstaltung"},
+    {"word": "Firmenfeier", "hint": "Betrieblich"},
+    {"word": "Weihnachtsfeier", "hint": "Jahresabschluss"},
+    {"word": "Gartenparty", "hint": "Im Freien"},
+    {"word": "Grillparty", "hint": "Draußen essen"},
+    {"word": "Mottoparty", "hint": "Thematisch"},
+    {"word": "Überraschungsparty", "hint": "Unangekündigt"},
+    {"word": "Karnevalsumzug", "hint": "Parade"},
+    {"word": "Maskenball", "hint": "Kostümball"},
+    {"word": "Valentinstag", "hint": "Liebe"},
+    {"word": "Muttertag", "hint": "Ehrentag"},
+    {"word": "Vatertag", "hint": "Männlich"},
+    {"word": "Erntedankfest", "hint": "Danksagung"},
+    {"word": "Laternenumzug", "hint": "Lichterfest"},
+    {"word": "Adventskranz", "hint": "Vorweihnachtszeit"},
+    {"word": "Weihnachtsmarkt", "hint": "Markt"},
+    {"word": "Bescherung", "hint": "Geschenkübergabe"},
+    {"word": "Osterfeuer", "hint": "Feuerbrauch"},
+    {"word": "Maibaum", "hint": "Symbol"},
+    {"word": "Hochzeitstag", "hint": "Ehejubiläum"},
+    {"word": "Silberhochzeit", "hint": "25 Jahre"},
+    {"word": "Goldene Hochzeit", "hint": "50 Jahre"},
+    {"word": "Einweihungsparty", "hint": "Neubeginn"},
+    {"word": "Richtfest", "hint": "Bauphase"},
+    {"word": "Gala", "hint": "Abendveranstaltung"},
+    {"word": "Empfang", "hint": "Offiziell"},
+    {"word": "Parade", "hint": "Aufmarsch"},
+    {"word": "Volksfest", "hint": "Jahrmarkt"},
+    {"word": "Schützenfest", "hint": "Vereinsfest"},
+    {"word": "Festival", "hint": "Großevent"},
+    {"word": "Straßenfest", "hint": "Nachbarschaftlich"},
+    {"word": "Picknick", "hint": "Mahlzeit im Grünen"},
+    {"word": "Feiertagsbrunch", "hint": "Langes Frühstück"},
+    {"word": "Gastgeschenk", "hint": "Mitbringsel"},
+    {"word": "Polterabend", "hint": "Hochzeitsbrauch mit Scherben"},
+    {"word": "Feiertagsbrunch", "hint": "Ausgiebiges spätes Frühstück"},
+    {"word": "WALPURGISNACHT", "hint": "Hexenfest"},
+    {"word": "CHANUKKA", "hint": "Lichterfest (jüd.)"},
+    {"word": "DIWALI", "hint": "Lichterfest (hind.)"},
+    {"word": "HOLI", "hint": "Farbenfest (ind.)"},
+    {"word": "THANKSGIVING", "hint": "Erntedank (US)"},
+    {"word": "PASSAHFEST", "hint": "Auszug aus Ägypten"},
+    {"word": "RAMADAN", "hint": "Fastenmonat"},
+    {"word": "ROSENMONTAG", "hint": "Karnevalshöhepunkt"},
+    {"word": "SONNWENDFEIER", "hint": "Mittsommerfest"},
+    {"word": "ASSEMBLE", "hint": "Weinfest (frz.)"}
+  ],
+  "Deutsche Begriffe": [
+    {"word": "Biergarten", "hint": "Gesellig"},
+    {"word": "Autobahn", "hint": "Verkehrsader"},
+    {"word": "Sauerkraut", "hint": "Beilage"},
+    {"word": "Gartenzwerg", "hint": "Figur"},
+    {"word": "Fachwerkhaus", "hint": "Bauweise"},
+    {"word": "Dirndl", "hint": "Kleidungsstück"},
+    {"word": "Lederhose", "hint": "Beinkleid"},
+    {"word": "Schützenfest", "hint": "Vereinswesen"},
+    {"word": "Wanderlust", "hint": "Reisefieber"},
+    {"word": "Doppelgänger", "hint": "Ebenbild"},
+    {"word": "Kindergarten", "hint": "Betreuung"},
+    {"word": "Polterabend", "hint": "Hochzeitsbrauch"},
+    {"word": "Kaffeeklatsch", "hint": "Sozialritus"},
+    {"word": "Leitkultur", "hint": "Diskurs"},
+    {"word": "Weltschmerz", "hint": "Empfindung"},
+    {"word": "Zeitgeist", "hint": "Epochenstimmung"},
+    {"word": "Fernweh", "hint": "Sehnsucht"},
+    {"word": "Gemütlichkeit", "hint": "Atmosphäre"},
+    {"word": "Schadenfreude", "hint": "Emotion"},
+    {"word": "Stammtisch", "hint": "Runde"},
+    {"word": "Currywurst", "hint": "Imbiss"},
+    {"word": "Döner Kebab", "hint": "Gericht"},
+    {"word": "Spätzle", "hint": "Teigware"},
+    {"word": "Brezel", "hint": "Gebäck"},
+    {"word": "Pünktlichkeit", "hint": "Eigenschaft"},
+    {"word": "Vereinsmeier", "hint": "Engagement?"},
+    {"word": "Kehrwoche", "hint": "Pflicht"},
+    {"word": "Strandkorb", "hint": "Sitzmöbel"},
+    {"word": "Glühwein", "hint": "Heißgetränk"},
+    {"word": "Feierabendbier", "hint": "Ritual?"},
+    {"word": "Reinheitsgebot", "hint": "Vorschrift"},
+    {"word": "Mittelstand", "hint": "Wirtschaftsfaktor"},
+    {"word": "Kurzarbeit", "hint": "Arbeitszeitmodell"},
+    {"word": "Handwerksmeister", "hint": "Qualifikation"},
+    {"word": "Dualsystem", "hint": "Ausbildungsmodell"},
+    {"word": "Föderalismus", "hint": "Staatsprinzip"},
+    {"word": "Grundgesetz", "hint": "Verfassung"},
+    {"word": "Bundestag", "hint": "Legislative"},
+    {"word": "Bundesrat", "hint": "Länderkammer"},
+    {"word": "Ampelkoalition", "hint": "Regierungsform"},
+    {"word": "Sozialpartnerschaft", "hint": "Kooperation"},
+    {"word": "Energiewende", "hint": "Politikziel"},
+    {"word": "Made in Germany", "hint": "Herkunftsbezeichnung?"},
+    {"word": "TÜV", "hint": "Prüforganisation"},
+    {"word": "Waldsterben", "hint": "Umweltphänomen"},
+    {"word": "Mülltrennung", "hint": "Abfallwirtschaft"},
+    {"word": "Pfandflasche", "hint": "Mehrwegsystem"},
+    {"word": "Sparfuchs", "hint": "Charakterzug?"},
+    {"word": "Schrebergarten", "hint": "Parzelle"},
+    {"word": "Heimatfilm", "hint": "Filmgenre"},
+    {"word": "Tatort", "hint": "Fernsehreihe"},
+    {"word": "Sandmännchen", "hint": "Fernsehfigur"},
+    {"word": "Volksmusik", "hint": "Musikstil"},
+    {"word": "Schlager", "hint": "Musikgenre"},
+    {"word": "Wiesn", "hint": "Großes Fest"},
+    {"word": "Reeperbahn", "hint": "Amüsiermeile"},
+    {"word": "Brandenburger Tor", "hint": "Bauwerk"},
+    {"word": "Kölner Dom", "hint": "Sakralbau"},
+    {"word": "Zugspitze", "hint": "Gipfel"},
+    {"word": "Nordsee", "hint": "Meer"},
+    {"word": "Ostsee", "hint": "Binnenmeer?"},
+    {"word": "Rhein", "hint": "Strom"},
+    {"word": "Elbe", "hint": "Fluss"},
+    {"word": "Donau", "hint": "Europäischer Fluss"},
+    {"word": "Schwarzwald", "hint": "Mittelgebirge"},
+    {"word": "Waldeinsamkeit", "hint": "Alleinsein im Forst"},
+    {"word": "Fingerspitzengefühl", "hint": "Feingefühl"},
+    {"word": "BACKPFEIFENGESICHT", "hint": "Provokante Mimik"},
+    {"word": "VERSCHLIMMBESSERN", "hint": "Negativoptimierung"},
+    {"word": "SCHNAPSIDEE", "hint": "Unausgegorener Plan"},
+    {"word": "TREPPENWITZ", "hint": "Verspätete Pointe"},
+    {"word": "ZEITGEIST", "hint": "Epochenstimmung"},
+    {"word": "WELTSCHMERZ", "hint": "Globale Melancholie"},
+    {"word": "KUDDELMUDDEL", "hint": "Wirrwarr"},
+    {"word": "INNERER SCHWEINEHUND", "hint": "Willensschwäche"},
+    {"word": "ERKLÄRUNGSNOT", "hint": "Rechtfertigungsdruck"},
+    {"word": "FUTTERNEID", "hint": "Missgunst beim Essen"}
+  ],
+  "Stars und Promis": [
+    {"word": "Albert Einstein", "hint": "Theoretiker"},
+    {"word": "Angela Merkel", "hint": "Politikerin"},
+    {"word": "Günther Jauch", "hint": "Fernsehgesicht"},
+    {"word": "Thomas Müller", "hint": "Sportler"},
+    {"word": "Heidi Klum", "hint": "Medienperson"},
+    {"word": "Taylor Swift", "hint": "Musikerin"},
+    {"word": "Leonardo DiCaprio", "hint": "Darsteller"},
+    {"word": "Beyoncé", "hint": "Entertainerin"},
+    {"word": "Cristiano Ronaldo", "hint": "Fußballprofi"},
+    {"word": "Lionel Messi", "hint": "Ballkünstler"},
+    {"word": "Elon Musk", "hint": "Unternehmer"},
+    {"word": "Bill Gates", "hint": "Pionier"},
+    {"word": "Queen Elizabeth II", "hint": "Monarchin"},
+    {"word": "Barack Obama", "hint": "Staatsmann"},
+    {"word": "Donald Trump", "hint": "Öffentliche Figur"},
+    {"word": "Lady Gaga", "hint": "Künstlerin"},
+    {"word": "Brad Pitt", "hint": "Hollywoodstar"},
+    {"word": "Angelina Jolie", "hint": "Aktivistin"},
+    {"word": "Johnny Depp", "hint": "Charakterkopf"},
+    {"word": "Helene Fischer", "hint": "Sängerin"},
+    {"word": "Manuel Neuer", "hint": "Torwart"},
+    {"word": "Sebastian Vettel", "hint": "Rennfahrer"},
+    {"word": "Dirk Nowitzki", "hint": "Basketballer"},
+    {"word": "Marie Curie", "hint": "Forscherin"},
+    {"word": "Nelson Mandela", "hint": "Freiheitskämpfer"},
+    {"word": "Mozart", "hint": "Komponist"},
+    {"word": "Stephen Hawking", "hint": "Kosmologe"},
+    {"word": "Greta Thunberg", "hint": "Aktivistin"},
+    {"word": "Ludwig van Beethoven", "hint": "Musikgenie"},
+    {"word": "William Shakespeare", "hint": "Dichter"},
+    {"word": "Mahatma Gandhi", "hint": "Pazifist"},
+    {"word": "Martin Luther King Jr.", "hint": "Redner"},
+    {"word": "Mutter Teresa", "hint": "Humanitär"},
+    {"word": "Steve Jobs", "hint": "Innovator"},
+    {"word": "Mark Zuckerberg", "hint": "Gründer"},
+    {"word": "Jeff Bezos", "hint": "Milliardär"},
+    {"word": "Oprah Winfrey", "hint": "Moderatorin"},
+    {"word": "Dalai Lama", "hint": "Religionsführer"},
+    {"word": "Papst Franziskus", "hint": "Kirchenoberhaupt"},
+    {"word": "Michael Jackson", "hint": "Popikone"},
+    {"word": "Madonna", "hint": "Popstar"},
+    {"word": "Elvis Presley", "hint": "Musiklegende"},
+    {"word": "The Beatles", "hint": "Musikgruppe"},
+    {"word": "Freddie Mercury", "hint": "Frontmann"},
+    {"word": "Bob Marley", "hint": "Musikikone"},
+    {"word": "Marilyn Monroe", "hint": "Filmstar"},
+    {"word": "Charlie Chaplin", "hint": "Komiker"},
+    {"word": "Audrey Hepburn", "hint": "Stilikone"},
+    {"word": "Alfred Hitchcock", "hint": "Filmemacher"},
+    {"word": "Steven Spielberg", "hint": "Regisseur"},
+    {"word": "Quentin Tarantino", "hint": "Kultregisseur"},
+    {"word": "Tom Hanks", "hint": "Schauspieler"},
+    {"word": "Meryl Streep", "hint": "Charakterdarstellerin"},
+    {"word": "Robert De Niro", "hint": "Method Actor?"},
+    {"word": "Al Pacino", "hint": "Filmlegende"},
+    {"word": "Morgan Freeman", "hint": "Erzähler?"},
+    {"word": "Jennifer Aniston", "hint": "Serienstar"},
+    {"word": "George Clooney", "hint": "Charmeur?"},
+    {"word": "Julia Roberts", "hint": "Filmstar"},
+    {"word": "Will Smith", "hint": "Multitalent"},
+    {"word": "Dwayne Johnson", "hint": "Actionstar"},
+    {"word": "Serena Williams", "hint": "Tennis-Ass"},
+    {"word": "Roger Federer", "hint": "Tennis-Virtuose"},
+    {"word": "Michael Jordan", "hint": "Sportikone"},
+    {"word": "LeBron James", "hint": "Aktiver Star"},
+    {"word": "Usain Bolt", "hint": "Sprinter"},
+    {"word": "Michael Schumacher", "hint": "Motorsportlegende"},
+    {"word": "Tiger Woods", "hint": "Golfprofi"},
+    {"word": "Boris Becker", "hint": "Tennisidol"},
+    {"word": "Steffi Graf", "hint": "Tennisikone"},
+    {"word": "Franz Beckenbauer", "hint": "Lichtgestalt?"},
+    {"word": "Uwe Seeler", "hint": "Fußballidol"},
+    {"word": "Lothar Matthäus", "hint": "Rekordspieler"},
+    {"word": "Bastian Schweinsteiger", "hint": "Mittelfeldspieler"},
+    {"word": "Annalena Baerbock", "hint": "Außenministerin?"},
+    {"word": "Olaf Scholz", "hint": "Bundeskanzler?"},
+    {"word": "Karl Lagerfeld", "hint": "Modezar"},
+    {"word": "Wolfgang Joop", "hint": "Designer"},
+    {"word": "Til Schweiger", "hint": "Filmschaffender"},
+    {"word": "Matthias Schweighöfer", "hint": "Jungstar?"},
+    {"word": "Elyas M'Barek", "hint": "Publikumsliebling"},
+    {"word": "Romy Schneider", "hint": "Sissi-Darstellerin"},
+    {"word": "Udo Lindenberg", "hint": "Panikrocker"},
+    {"word": "BANKSY", "hint": "Phantom-Künstler"},
+    {"word": "HAPE KERKELING", "hint": "Horst Schlämmer"},
+    {"word": "MARLENE DIETRICH", "hint": "Blauer Engel"},
+    {"word": "JOSEPH BEUYS", "hint": "Fett und Filz"},
+    {"word": "WIM WENDERS", "hint": "Himmel über Berlin"},
+    {"word": "PINA BAUSCH", "hint": "Tanztheater-Ikone"},
+    {"word": "RAINER WERNER FASSBINDER", "hint": "Enfant terrible (Film)"},
+    {"word": "CAMPINO", "hint": "Tote Hosen Frontmann"},
+    {"word": "SOPHIE SCHOLL", "hint": "Widerstandskämpferin"},
+    {"word": "JÜRGEN KLOPP", "hint": "Fußballtrainer (Liverpool)"}
+  ],
+  "Spicy": [
+    {"word": "Kuss", "hint": "Intimität"},
+    {"word": "Flirten", "hint": "Signal"},
+    {"word": "Verführung", "hint": "Strategie?"},
+    {"word": "Leidenschaft", "hint": "Emotion"},
+    {"word": "Romantik", "hint": "Gefühl"},
+    {"word": "Unterwäsche", "hint": "Kleidung"},
+    {"word": "Aphrodisiakum", "hint": "Stimulans?"},
+    {"word": "Erotik", "hint": "Genre"},
+    {"word": "Intimität", "hint": "Nähe"},
+    {"word": "Begehren", "hint": "Wunsch"},
+    {"word": "Date", "hint": "Verabredung"},
+    {"word": "Striptease", "hint": "Darbietung"},
+    {"word": "Massage", "hint": "Berührung"},
+    {"word": "Domina", "hint": "Rolle"},
+    {"word": "Fetisch", "hint": "Neigung"},
+    {"word": "Orgasmus", "hint": "Höhepunkt"},
+    {"word": "Verhütung", "hint": "Vorsorge"},
+    {"word": "Sexspielzeug", "hint": "Hilfsmittel"},
+    {"word": "Liebeskummer", "hint": "Herzschmerz"},
+    {"word": "One-Night-Stand", "hint": "Begegnung"},
+    {"word": "Swingerclub", "hint": "Treffpunkt"},
+    {"word": "Polyamorie", "hint": "Beziehungsform"},
+    {"word": "Tantra", "hint": "Lehre"},
+    {"word": "Kamasutra", "hint": "Schriftwerk"},
+    {"word": "Nacktheit", "hint": "Unbekleidet"},
+    {"word": "Dessous", "hint": "Reizwäsche"},
+    {"word": "Rollenspiel", "hint": "Fantasieauslebung"},
+    {"word": "LIBIDO", "hint": "Sexueller Trieb"},
+    {"word": "VOYEURISMUS", "hint": "Schaulust"},
+    {"word": "NYMPHOMANIE", "hint": "Sexsucht (w)"},
+    {"word": "SATYRIASIS", "hint": "Sexsucht (m)"},
+    {"word": "PETTING", "hint": "Intimes Streicheln"},
+    {"word": "EXHIBITIONISMUS", "hint": "Entblößungsdrang"},
+    {"word": "SCHMUTZIGE GEDANKEN", "hint": "Unzüchtige Ideen"},
+    {"word": "DILDO", "hint": "Phallusimitat"},
+    {"word": "GLEITGEL", "hint": "Schmiermittel"},
+    {"word": "SPANKING", "hint": "Versohlen"}
+  ],
+  "Fußballspieler": [
+    {"word": "Pelé", "hint": "Legende"},
+    {"word": "Maradona", "hint": "Wunderhand"},
+    {"word": "Beckenbauer", "hint": "Kaiser"},
+    {"word": "Cruyff", "hint": "Philosoph"},
+    {"word": "Zidane", "hint": "Köpfen"},
+    {"word": "Ronaldinho", "hint": "Artist"},
+    {"word": "Lionel Messi", "hint": "Dribbler"},
+    {"word": "Cristiano Ronaldo", "hint": "Flügel"},
+    {"word": "Franz Beckenbauer", "hint": "Visionär"},
+    {"word": "Gerd Müller", "hint": "Knipser"},
+    {"word": "Oliver Kahn", "hint": "Titan"},
+    {"word": "Paolo Maldini", "hint": "Introvert"},
+    {"word": "Ferenc Puskás", "hint": "Goldschuss"},
+    {"word": "Diego Forlán", "hint": "Treffsicher"},
+    {"word": "Marco van Basten", "hint": "Volley"},
+    {"word": "Johan Neeskens", "hint": "Tulpe"},
+    {"word": "Roberto Baggio", "hint": "Zopf"},
+    {"word": "Zlatan Ibrahimović", "hint": "Phänomen"},
+    {"word": "Andrés Iniesta", "hint": "Regisseur"},
+    {"word": "Xavi Hernández", "hint": "Taktik"},
+    {"word": "Luka Modrić", "hint": "Zauberer"},
+    {"word": "Kevin De Bruyne", "hint": "Passgeber"},
+    {"word": "Sergio Ramos", "hint": "Fels"},
+    {"word": "Virgil van Dijk", "hint": "Mauer"},
+    {"word": "Manuel Neuer", "hint": "Mitspieler"},
+    {"word": "Kylian Mbappé", "hint": "Blitz"},
+    {"word": "Neymar Jr.", "hint": "Trick"}
+  ],
+
+  "Fußball": [
+    {"word": "Abseits", "hint": "Linie"},
+    {"word": "Elfmeter", "hint": "Duell"},
+    {"word": "Torwart", "hint": "Bastion"},
+    {"word": "Stadion", "hint": "Arena"},
+    {"word": "Bundesliga", "hint": "Spitze"},
+    {"word": "Champions League", "hint": "Krone"},
+    {"word": "Trainer", "hint": "Lenker"},
+    {"word": "Kapitän", "hint": "Binde"},
+    {"word": "Freistoß", "hint": "Freiheit"},
+    {"word": "Eckball", "hint": "Kurve"},
+    {"word": "Rote Karte", "hint": "Flucht"},
+    {"word": "Gelbe Karte", "hint": "Warnung"},
+    {"word": "Linienrichter", "hint": "Wächter"},
+    {"word": "Strafraum", "hint": "Zone"},
+    {"word": "Torlinie", "hint": "Grenze"},
+    {"word": "Anstoß", "hint": "Start"},
+    {"word": "Halbzeit", "hint": "Pause"},
+    {"word": "Verlängerung", "hint": "Extra"},
+    {"word": "Elfmeterschießen", "hint": "Nerven"},
+    {"word": "Abpfiff", "hint": "Ende"},
+    {"word": "Flanke", "hint": "Luft"},
+    {"word": "Kopfball", "hint": "Kopf"},
+    {"word": "Dribbling", "hint": "Tanz"},
+    {"word": "Pass", "hint": "Weiter"},
+    {"word": "Tackling", "hint": "Bein"},
+    {"word": "Konter", "hint": "Gegenstoß"},
+    {"word": "Abseitsfalle", "hint": "Locke"}
+  ],
+
+  "Schauspieler": [
+    {"word": "Marlon Brando", "hint": "Don"},
+    {"word": "Marlene Dietrich", "hint": "Schatten"},
+    {"word": "Tom Hanks", "hint": "Paketzusteller"},
+    {"word": "Kate Winslet", "hint": "Eis"},
+    {"word": "Christoph Waltz", "hint": "Sprach"},
+    {"word": "Sophie Rois", "hint": "Bühne"},
+    {"word": "Heath Ledger", "hint": "Joker"},
+    {"word": "Joaquin Phoenix", "hint": "Clown"},
+    {"word": "Cate Blanchett", "hint": "Wandlung"},
+    {"word": "Daniel Day-Lewis", "hint": "Methoden"},
+    {"word": "Anthony Hopkins", "hint": "Fannibal"},
+    {"word": "Emma Thompson", "hint": "Akrobat"},
+    {"word": "Denzel Washington", "hint": "Charisma"},
+    {"word": "Sigourney Weaver", "hint": "Alien"},
+    {"word": "Gary Oldman", "hint": "Chameleon"},
+    {"word": "Natalie Portman", "hint": "Auserwählt"},
+    {"word": "Christian Bale", "hint": "Batman"},
+    {"word": "Emma Stone", "hint": "Lachen"},
+    {"word": "Ian McKellen", "hint": "Elbe"},
+    {"word": "Helen Mirren", "hint": "Krone"},
+    {"word": "Philip Seymour Hoffman", "hint": "Tiefe"},
+    {"word": "Viola Davis", "hint": "Intensität"},
+    {"word": "Liam Neeson", "hint": "Rache"},
+    {"word": "Glenn Close", "hint": "Packend"},
+    {"word": "Russell Crowe", "hint": "Feldherr"},
+    {"word": "Audrey Tautou", "hint": "Träumerin"},
+    {"word": "Robert Downey Jr.", "hint": "Eiserner"}
+  ],
+
+  "Marken": [
+    {"word": "Mercedes", "hint": "Stern"},
+    {"word": "Volkswagen", "hint": "Käfer"},
+    {"word": "Adidas", "hint": "Streifen"},
+    {"word": "Puma", "hint": "Raubkatze"},
+    {"word": "Nivea", "hint": "Dose"},
+    {"word": "Haribo", "hint": "Bär"},
+    {"word": "Apple", "hint": "Apfel"},
+    {"word": "Samsung", "hint": "Riese"},
+    {"word": "Coca-Cola", "hint": "Rezept"},
+    {"word": "Nike", "hint": "Sieg"},
+    {"word": "Google", "hint": "Suche"},
+    {"word": "Lego", "hint": "Baustein"},
+    {"word": "Ikea", "hint": "Anleitung"},
+    {"word": "Amazon", "hint": "Dschungel"},
+    {"word": "Sony", "hint": "Ton"},
+    {"word": "Microsoft", "hint": "Fenster"},
+    {"word": "BMW", "hint": "Bayerisch"},
+    {"word": "Audi", "hint": "Ringe"},
+    {"word": "Chanel", "hint": "Mode"},
+    {"word": "Gucci", "hint": "Luxus"},
+    {"word": "Rolex", "hint": "Zeit"},
+    {"word": "Starbucks", "hint": "Sirene"},
+    {"word": "Ferrari", "hint": "Pferd"},
+    {"word": "Tesla", "hint": "Strom"},
+    {"word": "Pepsi", "hint": "Blau"}
+  ],
+
+  "Extrem Spicy": [
+    {"word": "Analsex", "hint": "Route"},
+    {"word": "Blowjob", "hint": "Airstream"},
+    {"word": "Cunnilingus", "hint": "Down"},
+    {"word": "BDSM", "hint": "Ritual"},
+    {"word": "Pornos", "hint": "Szene"},
+    {"word": "Swinger", "hint": "Tausch"},
+    {"word": "Gangbang", "hint": "Gruppe"},
+    {"word": "Vibrator", "hint": "Rhythmus"},
+    {"word": "Fisting", "hint": "Hand"},
+    {"word": "Cuckolding", "hint": "Kontrolle"},
+    {"word": "Threesome", "hint": "Dreier"},
+    {"word": "Pegging", "hint": "Tausch"},
+    {"word": "Edging", "hint": "Grenze"},
+    {"word": "Cumshot", "hint": "Tropfen"},
+    {"word": "Gloryhole", "hint": "Durchbruch"},
+    {"word": "Bondage", "hint": "Fesseln"},
+    {"word": "Dominatrix", "hint": "Herrschaft"},
+    {"word": "Exhibitionismus", "hint": "Bühne"},
+    {"word": "Voyeurismus", "hint": "Blick"},
+    {"word": "Squirting", "hint": "Flüssig"},
+    {"word": "Cumplay", "hint": "Kunst"},
+    {"word": "Latexanzug", "hint": "Glanz"},
+    {"word": "Ölspiel", "hint": "Gleit"},
+    {"word": "Sexpuppe", "hint": "Begleiter"},
+    {"word": "Safe Sex", "hint": "Sicher"},
+    {"word": "Leather Fetish", "hint": "Leder"},
+    {"word": "Roleplay", "hint": "Rolle"},
+    {"word": "Erotikfilm", "hint": "Reiz"},
+    {"word": "SM-Spiel", "hint": "Regel"}
+  ],
+};
+        const wordGame_SetupScreen = document.getElementById('wordSetupScreen');
+        const wordGame_HandoverScreen = document.getElementById('wordHandoverScreen');
+        const wordGame_CardScreen = document.getElementById('wordCardScreen');
+        const wordGame_DiscussionScreen = document.getElementById('wordDiscussionScreen');
+        const wordGame_Screens = Array.from(wordImpostorGameContainer.querySelectorAll('.screen')); // Convert NodeList to Array
+
+        const wordPlayerCountSlider = document.getElementById('wordPlayerCountSlider');
+        const wordPlayerCountValueDisplay = document.getElementById('wordPlayerCountValueDisplay');
+        const wordNameInputsContainer = document.getElementById('wordNameInputsContainer');
+        const wordImpostorCountSlider = document.getElementById('wordImpostorCountSlider');
+        const wordImpostorCountValueDisplay = document.getElementById('wordImpostorCountValueDisplay');
+        const wordRandomImpostorCheckbox = document.getElementById('wordRandomImpostorCheckbox');
+        const wordRandomStartPlayerCheckbox = document.getElementById('wordRandomStartPlayerCheckbox');
+
+        const wordGame_NewCategoryNameInput = document.getElementById('wordNewCategoryName');
+        const wordGame_AddCategoryButton = document.getElementById('wordAddCategoryButton');
+        const wordGame_SelectCustomCategory = document.getElementById('wordSelectCustomCategory');
+        const wordGame_NewWordInput = document.getElementById('wordNewWord');
+        const wordGame_NewHintInput = document.getElementById('wordNewHint');
+        const wordGame_AddWordButton = document.getElementById('wordAddWordButton');
+        const wordGame_CustomContentMessage = document.getElementById('wordCustomContentMessage');
+        const wordGame_CategoryListDiv = document.getElementById('wordCategoryList');
+        const wordGame_EnableHintCheckbox = document.getElementById('wordEnableHintCheckbox');
+        const wordGame_EnableRankingCheckbox = document.getElementById('wordEnableRankingCheckbox');
+        const wordGame_RankingCheckboxLabel = document.getElementById('wordRankingCheckboxLabel');
+        const wordGame_StartGameButton = document.getElementById('wordStartGameButton');
+        const wordGame_SetupErrorDiv = document.getElementById('wordSetupError');
+
+        const wordGame_PlayerNameDisplay = document.getElementById('wordPlayerNameDisplay');
+        const wordGame_NextPlayerName = document.getElementById('wordNextPlayerName');
+        const wordGame_CurrentPlayerName = document.getElementById('wordCurrentPlayerName');
+        const wordGame_ReadyButton = document.getElementById('wordReadyButton');
+        const wordGame_Card = document.getElementById('wordCard');
+        const wordGame_CardWordDisplay = document.getElementById('wordCardWordDisplay');
+        const wordGame_CardHintDisplay = document.getElementById('wordCardHintDisplay');
+        const wordGame_NextPlayerButton = document.getElementById('wordNextPlayerButton');
+        const wordGame_RoundImpostorCount = document.getElementById('wordRoundImpostorCount');
+        const wordGame_RevealWord = document.getElementById('wordRevealWord');
+        const wordGame_RevealImpostors = document.getElementById('wordRevealImpostors');
+        const wordGame_RestartButton = document.getElementById('wordRestartButton');
+        const wordGame_RevealSolutionButton = document.getElementById('wordRevealSolutionButton');
+        const wordGame_SolutionRevealArea = document.getElementById('wordSolutionRevealArea');
+        const wordGame_GameOutcomeButtons = wordGame_DiscussionScreen.querySelector('#gameOutcomeButtons');
+        const wordGame_ImpostorWonButton = document.getElementById('wordImpostorWonButton');
+        const wordGame_CrewmatesWonButton = document.getElementById('wordCrewmatesWonButton');
+        const wordGame_RankingDisplayArea = wordGame_DiscussionScreen.querySelector('#rankingDisplayArea');
+        const wordGame_RankingList = document.getElementById('wordRankingList');
+
+        let wordGame_playerCount = 4;
+        let wordGame_playerNames = [];
+        let wordGame_impostorCount = 1;
+        let wordGame_randomizeImpostorCountSetting = false;
+        let wordGame_useHint = false;
+        let wordGame_selectedCategories = [];
+        let wordGame_currentWord = '';
+        let wordGame_currentHint = '';
+        let wordGame_impostorIndices = [];
+        let wordGame_currentPlayerIndex = 0;
+        let wordGame_wordPool = [];
+        let wordGame_rankingEnabledSetting = false;
+        let wordGame_playerScores = {};
+        let wordGame_randomStartPlayer = false;
+        let wordGame_startingPlayerIndex = 0; 
+        let wordGame_playersSeenCardCount = 0; 
+
+        // --- NUMBER IMPOSTOR GAME ---
+        const numberGame_questionList = [ { crewQ: "Auf einer Skala von 1–10: Wie sehr genießt du Sonnenaufgänge?", impostorQ: "Auf einer Skala von 1–10: Wie sehr faszinieren dich Polarlichter?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr inspirieren dich Bücher?", impostorQ: "Auf einer Skala von 1–10: Wie sehr inspirieren dich Filmzitate?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie gern kochst du?", impostorQ: "Auf einer Skala von 1–10: Wie gern kreierst du Cocktails?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie wichtig ist dir Pünktlichkeit?", impostorQ: "Auf einer Skala von 1–10: Wie wichtig ist dir Gelassenheit?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr liebst du Kaffee?", impostorQ: "Auf einer Skala von 1–10: Wie sehr liebst du heiße Schokolade?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie extrovertiert bist du?", impostorQ: "Auf einer Skala von 1–10: Wie introvertiert fühlst du dich?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie gerne planst du deine Woche?", impostorQ: "Auf einer Skala von 1–10: Wie sehr liebst du Spontaneität?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr liebst du Abenteuer?", impostorQ: "Auf einer Skala von 1–10: Wie sehr schätzt du Komfortzonen?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie technikaffin bist du?", impostorQ: "Auf einer Skala von 1–10: Wie naturverbunden fühlst du dich?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie routiniert bist du im Alltag?", impostorQ: "Auf einer Skala von 1–10: Wie sehr suchst du Abwechslung?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr liebst du Live‑Konzerte?", impostorQ: "Auf einer Skala von 1–10: Wie sehr genießt du Podcasts?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie gerne stehst du im Mittelpunkt?", impostorQ: "Auf einer Skala von 1–10: Wie gern bleibst du unauffällig?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr schätzt du Stille?", impostorQ: "Auf einer Skala von 1–10: Wie sehr schätzt du Hintergrundmusik?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie wichtig ist dir Karriere?", impostorQ: "Auf einer Skala von 1–10: Wie wichtig ist dir Work‑Life‑Balance?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie spontan gehst du Entscheidungen an?", impostorQ: "Auf einer Skala von 1–10: Wie analytisch triffst du Entscheidungen?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr liebst du Tiere?", impostorQ: "Auf einer Skala von 1–10: Wie sehr liebst du Pflanzen?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr magst du Süßes?", impostorQ: "Auf einer Skala von 1–10: Wie sehr magst du Herzhaftes?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie gerne reist du?", impostorQ: "Auf einer Skala von 1–10: Wie gerne bleibst du zuhause?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie gerne liest du Tagesnachrichten?", impostorQ: "Auf einer Skala von 1–10: Wie gerne scrollst du ohne Ziel durchs Netz?", unit: "1–10" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr liebst du Brettspiele?", impostorQ: "Auf einer Skala von 1–10: Wie sehr liebst du Videospiele?", unit: "1–10" }, { crewQ: "Wie viele Stunden schläfst du durchschnittlich pro Nacht?", impostorQ: "Wie viele Stunden verbringst du im Bett, bis du einschläfst?", unit: "Stunden" }, { crewQ: "Wie viele Tassen Kaffee trinkst du pro Tag?", impostorQ: "Wie viele Tassen Tee trinkst du pro Tag?", unit: "Tassen" }, { crewQ: "Wie viele Gläser Wasser trinkst du pro Tag?", impostorQ: "Wie viele Gläser Fruchtsaft trinkst du pro Tag?", unit: "Gläser" }, { crewQ: "Wie viele Stunden arbeitest du durchschnittlich pro Woche?", impostorQ: "Wie viele Stunden gönnst du dir Erholung pro Woche?", unit: "Stunden" }, { crewQ: "Wie viele Stunden verbringst du pro Woche mit Sport?", impostorQ: "Wie viele Stunden verbringst du pro Woche mit Lesen?", unit: "Stunden" }, { crewQ: "Wie viele Minuten meditierst du durchschnittlich pro Tag?", impostorQ: "Wie viele Minuten machst du Yoga pro Tag?", unit: "Minuten" }, { crewQ: "Wie viele Minuten verbringst du täglich auf Social Media?", impostorQ: "Wie viele Minuten verbringst du täglich mit Telefonaten?", unit: "Minuten" }, { crewQ: "Wie viele E‑Mails erhältst du durchschnittlich pro Tag?", impostorQ: "Wie viele Chatnachrichten erhältst du durchschnittlich pro Tag?", unit: "Anzahl" }, { crewQ: "Wie viele Dateien liegen auf deinem Desktop?", impostorQ: "Wie viele Tabs hast du in deinem Browser geöffnet?", unit: "Anzahl" }, { crewQ: "Wie viele Apps sind auf deinem Smartphone installiert?", impostorQ: "Wie viele Apps nutzt du regelmäßig?", unit: "Anzahl" }, { crewQ: "Wie viele Bücher liest du pro Jahr?", impostorQ: "Wie viele Podcasts hörst du pro Jahr?", unit: "Anzahl" }, { crewQ: "Wie viele Filme siehst du pro Monat?", impostorQ: "Wie viele Serienepisoden schaust du pro Monat?", unit: "Anzahl" }, { crewQ: "Wie viele Urlaubsreisen unternimmst du pro Jahr?", impostorQ: "Wie viele Wochenendtrips unternimmst du pro Jahr?", unit: "Anzahl" }, { crewQ: "Wie viele Länder hast du besucht?", impostorQ: "Wie viele Bundesländer deines Landes hast du bereist?", unit: "Anzahl" }, { crewQ: "Wie viele Tage verbringst du jährlich im Urlaub?", impostorQ: "Wie viele Tage arbeitest du jährlich im Homeoffice?", unit: "Tage" }, { crewQ: "Wie viele Tage im Monat isst du auswärts?", impostorQ: "Wie viele Tage im Monat kochst du zu Hause?", unit: "Tage" }, { crewQ: "Wie viele Mahlzeiten isst du täglich?", impostorQ: "Wie viele Snacks isst du täglich?", unit: "Anzahl" }, { crewQ: "Wie viele Minuten dauert dein Morgenspaziergang?", impostorQ: "Wie viele Minuten dauert dein Abendspaziergang?", unit: "Minuten" }, { crewQ: "Wie viele Züge nimmst du durchschnittlich pro Woche?", impostorQ: "Wie viele Busse nimmst du durchschnittlich pro Woche?", unit: "Anzahl" }, { crewQ: "Wie viele Schritte gehst du durchschnittlich pro Tag?", impostorQ: "Wie viele Treppenstufen steigst du durchschnittlich pro Tag?", unit: "Anzahl" }, { crewQ: "Wie viele Kilometer radelst du pro Woche?", impostorQ: "Wie viele Kilometer fährst du pro Woche mit dem Auto?", unit: "Kilometer" }, { crewQ: "Wie viele Stunden verbringst du pro Monat im Kino?", impostorQ: "Wie viele Stunden verbringst du pro Monat im Theater?", unit: "Stunden" }, { crewQ: "Wie viele Minuten verbringst du täglich mit Lesen?", impostorQ: "Wie viele Minuten verbringst du täglich mit Kochen?", unit: "Minuten" }, { crewQ: "Wie viele Kilometer fährst du pro Woche mit öffentlichen Verkehrsmitteln?", impostorQ: "Wie viele Kilometer gehst du pro Woche zu Fuß?", unit: "Kilometer" }, { crewQ: "Wie viele Social‑Media‑Profile pflegst du regelmäßig?", impostorQ: "Wie viele Online‑Foren besuchst du regelmäßig?", unit: "Anzahl" }, { crewQ: "Wie viele Fotos schießt du pro Tag mit deinem Handy?", impostorQ: "Wie viele Videos nimmst du pro Woche mit deinem Handy auf?", unit: "Anzahl" }, { crewQ: "Wie viele Minuten Musik hörst du pro Tag?", impostorQ: "Wie viele Minuten Podcasts hörst du pro Tag?", unit: "Minuten" }, { crewQ: "Wie viele Tage im Jahr verbringst du auf Festivals?", impostorQ: "Wie viele Tage im Jahr verbringst du auf Konferenzen?", unit: "Tage" }, { crewQ: "Wie viele Tickets kaufst du pro Jahr für Events?", impostorQ: "Wie viele Reisen buchst du pro Jahr?", unit: "Anzahl" }, { crewQ: "Wie viele Apps aktualisierst du pro Monat?", impostorQ: "Wie viele Geräte aktualisierst du pro Jahr?", unit: "Anzahl" }, { crewQ: "Wie viele Minuten verbringst du beim Zähneputzen?", impostorQ: "Wie viele Minuten verbringst du beim Duschen?", unit: "Minuten" }, { crewQ: "Wie viele Pflanzen pflegst du in deiner Wohnung?", impostorQ: "Wie viele Haustiere würdest du gerne haben?", unit: "Anzahl" }, { crewQ: "Wie viele Paar Schuhe besitzt du?", impostorQ: "Wie viele Paar Socken besitzt du?", unit: "Anzahl" }, { crewQ: "Wie viele Kissen liegen in deinem Bett?", impostorQ: "Wie viele Decken liegen in deinem Bett?", unit: "Anzahl" }, { crewQ: "Wie viele Fenster hat deine Wohnung?", impostorQ: "Wie viele Türen hat deine Wohnung?", unit: "Anzahl" }, { crewQ: "Wie viele Quadratmeter hat deine Wohnung?", impostorQ: "Wie viele Quadratmeter sollte dein Traumgarten haben?", unit: "Quadratmeter" }, { crewQ: "Wie viele Bücher stehen in deinem Regal?", impostorQ: "Wie viele DVDs oder Blu‑rays stehen in deinem Regal?", unit: "Anzahl" }, { crewQ: "Wie viele Tage im Monat gehst du schwimmen?", impostorQ: "Wie viele Tage im Monat gehst du laufen?", unit: "Tage" }, { crewQ: "Wie viele Stunden verbringst du pro Jahr auf Reisen?", impostorQ: "Wie viele Stunden verbringst du pro Jahr im Büro?", unit: "Stunden" }, { crewQ: "Wie viele Stunden verbringst du pro Woche mit Gaming?", impostorQ: "Wie viele Stunden verbringst du pro Woche mit Musikhören?", unit: "Stunden" }, { crewQ: "Wie viele Fehlermeldungen bekommst du pro Monat auf deinem Rechner?", impostorQ: "Wie viele Updates installierst du pro Monat?", unit: "Anzahl" }, { crewQ: "Wie viele Streaming‑Abos hast du aktiv?", impostorQ: "Wie viele Newsletter hast du abonniert?", unit: "Anzahl" }, { crewQ: "Wie viele Stunden verbringst du pro Tag am Schreibtisch?", impostorQ: "Wie viele Stunden stehst du am Tag (Steharbeitsplatz)?", unit: "Stunden" }, { crewQ: "Wie viele Stunden verbringst du pro Tag mit Kochen?", impostorQ: "Wie viele Stunden verbringst du pro Tag mit Essen?", unit: "Stunden" }, { crewQ: "Wie viele Minuten verbringst du täglich mit Zocken?", impostorQ: "Wie viele Minuten verbringst du täglich mit Newslesen?", unit: "Minuten" }, { crewQ: "Wie viele Nachrichten sendest du pro Tag?", impostorQ: "Wie viele Anrufe führst du pro Tag?", unit: "Anzahl" }, { crewQ: "Wie viele Tage im Jahr regnet es in deiner Stadt?", impostorQ: "Wie viele Tage im Jahr scheint die Sonne in deiner Stadt?", unit: "Tage" }, { crewQ: "Wie viele Tage pro Jahr besuchst du den Zahnarzt?", impostorQ: "Wie viele Tage pro Jahr gehst du zum Friseur?", unit: "Tage" }, { crewQ: "Wie viele Kilometer läufst du pro Monat?", impostorQ: "Wie viele Kilometer radelst du pro Monat?", unit: "Kilometer" }, { crewQ: "Wie viele Sprachen sprichst du fließend?", impostorQ: "Wie viele Programmiersprachen kennst du?", unit: "Anzahl" }, { crewQ: "Auf einer Skala von 1–10: Wie risikofreudig bist du?", impostorQ: "Auf einer Skala von 1–10: Wie sicherheitsbewusst bist du?", unit: "1–10" }, { crewQ: "Wie viele Minuten verbringst du täglich in der Natur?", impostorQ: "Wie viele Minuten verbringst du täglich vor dem Bildschirm?", unit: "Minuten" }, { crewQ: "Wie viele Tage pro Jahr bist du auf Geschäftsreise?", impostorQ: "Wie viele Tage pro Jahr arbeitest du im Homeoffice?", unit: "Tage" }, { crewQ: "Wie viele Follower hast du in sozialen Netzwerken?", impostorQ: "Wie viele Abonnenten hast du in deinem Newsletter?", unit: "Anzahl" }, { crewQ: "Wie viele Bundesländer deines Landes hast du bereist?", impostorQ: "Wie viele Nachbarländer deines Landes hast du besucht?", unit: "Anzahl" }, { crewQ: "Wie viele Kleidungsstücke besitzt du im Schrank?", impostorQ: "Wie viele Accessoires besitzt du (Taschen, Gürtel, etc.)?", unit: "Anzahl" }, { crewQ: "Wie viele Stunden verbringst du wöchentlich mit Ehrenamt?", impostorQ: "Wie viele Stunden verbringst du wöchentlich mit Weiterbildung?", unit: "Stunden" }, { crewQ: "Auf einer Skala von 1–10: Wie organisiert bist du?", impostorQ: "Auf einer Skala von 1–10: Wie entspannt fühlst du dich?", unit: "1–10" }, { crewQ: "Wie viele Zeitschriftenabonnements hast du?", impostorQ: "Wie viele digitale Abonnements (z. B. Apps, Streaming) hast du?", unit: "Anzahl" }, { crewQ: "Wie viele Fotos hast du in deinem Album?", impostorQ: "Wie viele Selfies hast du auf deinem Handy?", unit: "Anzahl" }, { crewQ: "Wie viele Minuten verbringst du pro Tag mit Podcasts?", impostorQ: "Wie viele Minuten verbringst du pro Tag mit Musik?", unit: "Minuten" }, { crewQ: "Wie viele Podcasts hast du abonniert?", impostorQ: "Wie viele Newsletter hast du abonniert?", unit: "Anzahl" }, { crewQ: "Wie viele Tage im Monat isst du gesund?", impostorQ: "Wie viele Tage im Monat gönnst du dir Fast Food?", unit: "Tage" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr liebst du sonnige Tage?", impostorQ: "Auf einer Skala von 1–10: Wie sehr liebst du Regentage?", unit: "1–10" }, { crewQ: "Wie viele Kilometer läufst du pro Jahr?", impostorQ: "Wie viele Kilometer schwimmst du pro Jahr?", unit: "Kilometer" }, { crewQ: "Wie viele Apps hast du im letzten Monat installiert?", impostorQ: "Wie viele Apps hast du im letzten Monat gelöscht?", unit: "Anzahl" }, { crewQ: "Auf einer Skala von 1–10: Wie sehr magst du Höhen?", impostorQ: "Auf einer Skala von 1–10: Wie sehr magst du Tiefen?", unit: "1–10" }, { crewQ: "Wie viele Stunden pro Woche verbringst du mit Handarbeit?", impostorQ: "Wie viele Stunden pro Woche verbringst du mit digitalen Spielen?", unit: "Stunden" }, { crewQ: "Wie viele Minuten verbringst du täglich mit Gärtnern?", impostorQ: "Wie viele Minuten verbringst du täglich mit Hausarbeit?", unit: "Minuten" }, { crewQ: "Wie viele Brettspielkarten besitzt du?", impostorQ: "Wie viele Spielzeugautos besitzt du?", unit: "Anzahl" }, { crewQ: "Wie viele Minuten verbringst du beim Pendeln?", impostorQ: "Wie viele Minuten verbringst du in Meetings?", unit: "Minuten" }, { crewQ: "Wie viele Stunden verbringst du pro Tag im Auto?", impostorQ: "Wie viele Stunden verbringst du pro Tag in öffentlichen Verkehrsmitteln?", unit: "Stunden" }, { crewQ: "Wie viele Workshops hast du im letzten Jahr besucht?", impostorQ: "Wie viele Webinare hast du im letzten Jahr besucht?", unit: "Anzahl" }, { crewQ: "Wie viele Minuten verbringst du täglich mit Small Talk im Büro?", impostorQ: "Wie viele Minuten verbringst du täglich fokussiert am Schreibtisch?", unit: "Minuten" }, { crewQ: "Wie viele Tage im Monat nutzt du Co‑Working Spaces?", impostorQ: "Wie viele Tage im Monat arbeitest du in Cafés?", unit: "Tage" }, { crewQ: "Wie viele Tassen Kakao trinkst du im Winter pro Tag?", impostorQ: "Wie viele Tassen Eistee trinkst du im Sommer pro Tag?", unit: "Tassen" }, { crewQ: "Wie viele Tropfen Zahnpasta nutzt du pro Putzvorgang?", impostorQ: "Wie viele Bürstenstriche benötigst du pro Putzvorgang?", unit: "Anzahl" }, { crewQ: "Wie viele Minuten schaust du täglich Tutorials auf YouTube?", impostorQ: "Wie viele Minuten verbringst du täglich auf TikTok?", unit: "Minuten" }, { crewQ: "Wie viele Apps checkst du direkt nach dem Aufwachen?", impostorQ: "Wie viele Dinge überprüfst du vor dem Schlafengehen?", unit: "Anzahl" } ];
+        const numberGame_SetupScreen = document.getElementById('numberSetupScreen');
+        const numberGame_HandoverScreen = document.getElementById('numberHandoverScreen');
+        const numberGame_QuestionInputScreen = document.getElementById('numberQuestionInputScreen');
+        const numberGame_AnswerRevealScreen = document.getElementById('numberAnswerRevealScreen');
+        const numberGame_DiscussionScreen = document.getElementById('numberDiscussionScreen');
+        const numberGame_Screens = Array.from(numberImpostorGameContainer.querySelectorAll('.screen')); // Convert NodeList to Array
+
+        const numberPlayerCountSlider = document.getElementById('numberPlayerCountSlider');
+        const numberPlayerCountValueDisplay = document.getElementById('numberPlayerCountValueDisplay');
+        const numberNameInputsContainer = document.getElementById('numberNameInputsContainer');
+        const numberImpostorCountSlider = document.getElementById('numberImpostorCountSlider');
+        const numberImpostorCountValueDisplay = document.getElementById('numberImpostorCountValueDisplay');
+        const numberRandomImpostorCheckbox = document.getElementById('numberRandomImpostorCheckbox');
+        const numberRandomStartPlayerCheckbox = document.getElementById('numberRandomStartPlayerCheckbox');
+
+        const numberGame_StartGameButton = document.getElementById('numberStartGameButton');
+        const numberGame_SetupErrorDiv = document.getElementById('numberSetupError');
+        const numberGame_PlayerNameDisplay = document.getElementById('numberPlayerNameDisplay');
+        const numberGame_NextPlayerName = document.getElementById('numberNextPlayerName');
+        const numberGame_CurrentPlayerName = document.getElementById('numberCurrentPlayerName');
+        const numberGame_ReadyButton = document.getElementById('numberReadyButton');
+        const numberGame_QuestionDisplay = document.getElementById('numberQuestionDisplay');
+        const numberGame_AnswerInput = document.getElementById('numberAnswerInput');
+        const numberGame_SubmitAnswerButton = document.getElementById('numberSubmitAnswerButton');
+        const numberGame_PlayerAnswersList = document.getElementById('playerAnswersList');
+        const numberGame_RevealedCrewQuestionDisplay = document.getElementById('revealedCrewQuestionDisplay');
+        const numberGame_RevealImpostorsButton = document.getElementById('numberRevealImpostorsButton');
+        const numberGame_RevealedImpostorQuestionDisplay = document.getElementById('revealedImpostorQuestionDisplay');
+        const numberGame_RevealImpostorsResult = document.getElementById('numberRevealImpostorsResult');
+        const numberGame_NewGameButton = document.getElementById('numberNewGameButton');
+
+        let numberGame_playerCount = 3;
+        let numberGame_playerNames = [];
+        let numberGame_impostorCount = 1;
+        let numberGame_randomizeImpostorCountSetting = false;
+        let numberGame_impostorIndices = [];
+        let numberGame_currentPlayerIndex = 0;
+        let numberGame_currentQuestionPair = null;
+        let numberGame_playerAnswers = {};
+        let numberGame_randomStartPlayer = false;
+
+        // --- SPICY QUESTIONS GAME ---
+        const spicyGame_SetupScreen = document.getElementById('spicySetupScreen');
+        const spicyGame_HandoverScreen = document.getElementById('spicyHandoverScreen');
+        const spicyGame_QuestionDisplayScreen = document.getElementById('spicyQuestionDisplayScreen');
+        const spicyGame_CoinFlipScreen = document.getElementById('spicyCoinFlipScreen');
+        const spicyGame_OutcomeScreen = document.getElementById('spicyOutcomeScreen');
+        const spicyGame_Screens = Array.from(spicyQuestionsGameContainer.querySelectorAll('.screen')); // Convert NodeList to Array
+
+        const spicyGame_PlayerCountInput = document.getElementById('spicyPlayerCount'); 
+        const spicyGame_NameInputsContainer = document.getElementById('spicyNameInputsContainer');
+        const spicyGame_CategoryListDiv = document.getElementById('spicyCategoryList');
+        const spicyGame_SelectCategoryForNewQuestion = document.getElementById('spicySelectCategoryForNewQuestion');
+        const spicyGame_NewQuestionTextInput = document.getElementById('spicyNewQuestionText');
+        const spicyGame_AddQuestionButton = document.getElementById('spicyAddQuestionButton');
+        const spicyGame_CustomQuestionMessage = document.getElementById('spicyCustomQuestionMessage');
+        const spicyGame_StartGameButton = document.getElementById('spicyStartGameButton');
+        const spicyGame_SetupErrorDiv = document.getElementById('spicySetupError');
+        const spicyGame_RandomStartPlayerCheckbox = document.getElementById('spicyRandomStartPlayerCheckbox');
+        const spicyGame_PlayerNameDisplay = document.getElementById('spicyPlayerNameDisplay');
+        const spicyGame_CurrentPlayerName = document.getElementById('spicyCurrentPlayerName');
+        const spicyGame_CurrentPlayerNameConfirm = document.getElementById('spicyCurrentPlayerNameConfirm');
+        const spicyGame_ReadyButton = document.getElementById('spicyReadyButton');
+        const spicyGame_QuestionForPlayerName = document.getElementById('spicyQuestionForPlayerName');
+        const spicyGame_QuestionText = document.getElementById('spicyQuestionText');
+        const spicyGame_PassToNeighborButton = document.getElementById('spicyPassToNeighborButton');
+        const spicyGame_CoinFlipTitle = document.getElementById('spicyCoinFlipTitle');
+        const spicyGame_CoinFlipForPlayerName = document.getElementById('spicyCoinFlipForPlayerName');
+        const spicyGame_CoinFlipOriginalPlayerName = document.getElementById('spicyCoinFlipOriginalPlayerName');
+        const spicyGame_CoinVisual = document.getElementById('spicyCoinVisual');
+        const spicyGame_FlipCoinButton = document.getElementById('spicyFlipCoinButton');
+        const spicyGame_CoinResultMessage = document.getElementById('spicyCoinResultMessage');
+        const spicyGame_ProceedToOutcomeButton = document.getElementById('spicyProceedToOutcomeButton');
+        const spicyGame_OutcomeForPlayerName = document.getElementById('spicyOutcomeForPlayerName');
+        const spicyGame_OutcomeMessage = document.getElementById('spicyOutcomeMessage');
+        const spicyGame_NextRoundButton = document.getElementById('spicyNextRoundButton');
+        const spicyGame_NextPlayerForRound = document.getElementById('spicyNextPlayerForRound');
+        const spicyGame_NewGameSetupButton = document.getElementById('spicyNewGameSetupButton');
+        let spicyGame_questions = { "Chill": ["Wer in der Runde würde am ehesten einen Karaoke-Abend gewinnen?", "Wer in der Runde vergisst am häufigsten, wo das Auto geparkt ist?", "Wer in der Runde könnte einen Tag lang nicht auf sein Handy verzichten?", "Wer in der Runde würde am ehesten eine Weltreise mit nur einem Rucksack machen?", "Wer in der Runde kocht am besten?", "Wer würde am ehesten im Supermarkt anfangen zu singen?", "Wer würde am ehesten bei einem spannenden Film als Erster einschlafen?", "Wer würde am ehesten einen komplett verrückten Tanz in der Öffentlichkeit aufführen?", "Wer würde am ehesten aus Versehen zwei verschiedene Socken anziehen und es erst spät bemerken?", "Wer würde am ehesten ein ganzes Glas Nutella auf einmal auslöffeln?", "Wer würde am ehesten mit seinem Haustier ausführliche Gespräche führen?", "Wer würde am ehesten einen Witz erzählen und die Pointe vergessen?", "Wer würde am ehesten eine Pflanze aus reiner Fürsorge totgießen?", "Wer würde am ehesten auf einer einsamen Insel einem Volleyball einen Namen geben?", "Wer würde am ehesten über seine eigenen Füße stolpern, obwohl nichts im Weg liegt?", "Wer würde am ehesten stundenlang über das Wetter philosophieren können?", "Wer würde am ehesten versuchen, ein IKEA-Möbelstück ohne Anleitung aufzubauen und dabei scheitern?", "Wer würde am ehesten mit vollem Mund reden und es nicht merken?", "Wer würde am ehesten einen auffälligen Hut zur Arbeit oder Uni tragen?", "Wer würde am ehesten beim Monopoly-Spielen richtig emotional werden?", "Wer würde am ehesten versuchen, mit wilden Tieren zu kommunizieren?", "Wer würde am ehesten beim Lachen ein komisches Geräusch machen?", "Wer würde am ehesten ein geheimes Süßigkeiten-Versteck haben?", "Wer würde am ehesten in eine hitzige Debatte über Pizza-Ananas geraten?", "Wer würde am ehesten eine Reality-TV-Show über sein eigenes Leben produzieren wollen?" ], "Spicy": ["Wer in der Runde hat die abenteuerlichsten Dating-Geschichten zu erzählen?", "Wer in der Runde würde am ehesten bei einer TV-Datingshow mitmachen, bei der es heiß hergeht?", "Wer in der Runde ist am ehesten für einen spontanen Kuss zu haben?", "Wer in der Runde hat schon mal ein peinliches intimes Erlebnis gehabt und würde (vielleicht) davon erzählen?", "Wer in der Runde besitzt die aufreizendste Unterwäsche?", "Wer in der Runde kann am besten flirten, ohne ein einziges Wort zu sagen?", "Wer in der Runde würde am ehesten einen handgeschriebenen Liebesbrief verfassen?", "Wer in der Runde hat die meisten heimlichen Verehrer/innen?", "Wer in der Runde würde am ehesten ein gewagtes, aber stilvolles Selfie posten?", "Wer in der Runde hat schon mal jemanden nur mit intensiven Blicken verführt?", "Wer in der Runde ist (relativ gesehen) am experimentierfreudigsten im Bett?", "Wer in der Runde würde am ehesten eine unglaublich schlechte, aber lustige Anmache versuchen?", "Wer in der Runde hat schon mal den Partner eines Freundes/einer Freundin attraktiv gefunden?", "Wer in der Runde kann am besten Geheimnisse über sein eigenes Liebesleben bewahren?", "Wer in der Runde würde am ehesten für einen Strip-Tanz auf einer Party sorgen?", "Wer in der Runde hat schon mal Dirty Talk ausprobiert und fand es gut/schlecht?", "Wer in der Runde würde in einer Beziehung am ehesten die Führung übernehmen?", "Wer in der Runde hat schon mal beim Online-Dating etwas an seinem Profil geschönt?", "Wer in der Runde hat die meisten Kuscheltiere, die mehr wissen, als sie zugeben würden?", "Wer in der Runde würde am ehesten ein sexy Outfit nur für den Partner/die Partnerin tragen?", "Wer in der Runde hat schon mal jemanden auf einer Party erfolgreich 'abgeschleppt'?", "Wer in der Runde würde am ehesten Sex an einem öffentlichen, aber gut versteckten Ort haben wollen?", "Wer in der Runde hat die romantischste oder verrückteste Knutsch-Geschichte?", "Wer in der Runde ist am eifersüchtigsten in Beziehungen?", "Wer in der Runde würde am ehesten eine harmlose Affäre mit einem Star haben wollen?" ], "Extrem Spicy": ["Wer in der Runde hatte schon mal Sex an einem ungewöhnlichen Ort?", "Wer in der Runde würde am ehesten mit jemandem aus dieser Gruppe schlafen?", "Wer in der Runde hat den höchsten Bodycount (Anzahl Sexpartner)?", "Wer in der Runde hat schon mal überlegt, einen OnlyFans-Account zu starten?", "Wer in der Runde hat die schmutzigsten Fantasien?", "Wer in der Runde hat schon mal einen Dreier in Betracht gezogen oder sogar gehabt?", "Wer in der Runde besitzt die größte Sammlung an Sexspielzeugen?", "Wer in der Runde hat schon mal darüber nachgedacht, eigene Pornos zu drehen (auch nur zum Spaß)?", "Wer in der Runde hat schon mal etwas Sexuelles gemacht, das als 'extremer Fetisch' gelten könnte?", "Wer in der Runde hat schon mal mit jemandem geschlafen, dessen Namen er/sie nicht kannte?", "Wer in der Runde ist am ehesten für leichte BDSM-Praktiken (Fesseln, Augenbinde) offen?", "Wer in der Runde hat schon mal beim Sex geweint (vor Lachen, Schmerz oder Freude)?", "Wer in der Runde würde am ehesten in einen Swingerclub gehen, nur um zu schauen?", "Wer in der Runde hatte schon mal eine sexuelle Fantasie, die eine anwesende Person involviert?", "Wer in der Runde hat schon mal versehentlich eine schlüpfrige Nachricht an die falsche Person (z.B. Eltern) geschickt?", "Wer in der Runde hat die höchste Anzahl an Orgasmen an einem einzigen Tag erreicht?", "Wer in der Runde würde am ehesten für sehr guten Sex bezahlen oder sich dafür bezahlen lassen (rein hypothetisch)?", "Wer in der Runde würde am ehesten einen professionellen Nacktputzdienst engagieren oder anbieten?", "Wer in der Runde hat schon mal heimlich erotische Fotos oder Videos von sich selbst gemacht?", "Wer in der Runde hatte schon mal Sex mit jemandem, der deutlich älter oder jünger war?", "Wer in der Runde hat die absolut peinlichste 'sexuelle Panne' erlebt?", "Wer in der Runde würde am ehesten Exhibitionismus in einer sicheren Umgebung ausprobieren?", "Wer in der Runde hatte schon mal einen sehr intensiven Sex-Traum von einer hier anwesenden Person?", "Wer in der Runde hat schon mal bewusst Drogen oder Alkohol eingesetzt, um den Sex zu 'verbessern'?", "Wer in der Runde hat schon mal Sex an einem Ort gehabt, wo man erwischt werden könnte (z.B. Flugzeugtoilette)?"] };
+        const spicyGame_fixedCategories = ["Chill", "Spicy", "Extrem Spicy"];
+        let spicyGame_playerCount = 3; 
+        let spicyGame_playerNames = [];
+        let spicyGame_selectedCategories = [];
+        let spicyGame_currentPlayerIndex = 0;
+        let spicyGame_currentQuestionText = "";
+        let spicyGame_coinResultIsHeads = false;
+        let spicyGame_coinFlipping = false;
+        let spicyGame_randomStartPlayer = false;
+
+
+        // --- GENERAL SCREEN & GAME SELECTION LOGIC ---
+        function showGameContainer(gameId) {
+            document.querySelectorAll('.accordion-content.active').forEach(content => {
+                content.classList.remove('active');
+                content.style.maxHeight = null;
+            });
+             document.querySelectorAll('.accordion-button.active').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            const containers = [
+                landingScreenContainer,
+                wordImpostorGameContainer,
+                numberImpostorGameContainer,
+                spicyQuestionsGameContainer
+            ];
+            containers.forEach(container => container.classList.remove('active'));
+
+            let targetContainer = null;
+            if (gameId === "wordImpostor") { 
+                activeGameContainerId = "wordImpostor"; 
+                targetContainer = wordImpostorGameContainer; 
+                showWordScreen('wordSetupScreen'); 
+            }
+            else if (gameId === "numberImpostor") { 
+                activeGameContainerId = "numberImpostor"; 
+                targetContainer = numberImpostorGameContainer; 
+                showNumberScreen('numberSetupScreen'); 
+            }
+            else if (gameId === "spicyQuestions") { 
+                activeGameContainerId = "spicyQuestions"; 
+                targetContainer = spicyQuestionsGameContainer; 
+                showSpicyScreen('spicySetupScreen'); 
+            }
+            else { /* Landing */
+                activeGameContainerId = null; 
+                targetContainer = landingScreenContainer; 
+                // Ensure only landingScreen is active if it's the target
+                 if (targetContainer) {
+                    Array.from(targetContainer.querySelectorAll('.screen')).forEach(s => s.classList.remove('active'));
+                    const landingMainScreen = document.getElementById('landingScreen');
+                    if(landingMainScreen) landingMainScreen.classList.add('active');
+                 }
+            }
+
+            if (targetContainer) {
+                targetContainer.classList.add('active');
+                setTimeout(() => { 
+                    if (targetContainer.querySelector('.screen.active')) {
+                        targetContainer.querySelector('.screen.active').scrollTop = 0;
+                    } else if (targetContainer.querySelector('.screen')) {
+                         targetContainer.querySelector('.screen').scrollTop = 0;
+                    }
+                    targetContainer.scrollTop = 0; 
+                }, 50); 
+            }
+        }
+        gameChoiceButtons.forEach(button => button.addEventListener('click', () => showGameContainer(button.dataset.game)));
+        backToMenuButtons.forEach(button => button.addEventListener('click', () => showGameContainer('landing')));
+
+
+        // --- WORD IMPOSTOR: UI & Game Logic Functions ---
+        function wordGame_showTemporaryMessage(element, message, isSuccess = true) { element.textContent = message; element.className = isSuccess ? 'success-message' : 'error-message'; element.style.display = 'block'; setTimeout(() => { element.style.display = 'none'; }, 2500); }
+        function wordGame_addCustomCategory() { const categoryName = wordGame_NewCategoryNameInput.value.trim(); if (!categoryName) { wordGame_showTemporaryMessage(wordGame_CustomContentMessage, "Kategoriename leer.", false); return; } if (wordGame_wordList[categoryName]) { wordGame_showTemporaryMessage(wordGame_CustomContentMessage, `"${categoryName}" existiert.`, false); return; } wordGame_wordList[categoryName] = []; wordGame_NewCategoryNameInput.value = ''; wordGame_populateCategoriesAndSelect(); wordGame_showTemporaryMessage(wordGame_CustomContentMessage, `"${categoryName}" hinzugefügt!`); }
+        function wordGame_addCustomWord() { const category = wordGame_SelectCustomCategory.value; const word = wordGame_NewWordInput.value.trim(); const hint = wordGame_NewHintInput.value.trim(); if (!category) { wordGame_showTemporaryMessage(wordGame_CustomContentMessage, "Kategorie wählen.", false); return; } if (!word) { wordGame_showTemporaryMessage(wordGame_CustomContentMessage, "Wort leer.", false); return; } if (!wordGame_wordList[category]) { wordGame_showTemporaryMessage(wordGame_CustomContentMessage, "Kat. nicht gefunden.", false); return; } wordGame_wordList[category].push({ word: word, hint: hint || "Kein Hinweis" }); wordGame_NewWordInput.value = ''; wordGame_NewHintInput.value = ''; wordGame_showTemporaryMessage(wordGame_CustomContentMessage, `"${word}" zu "${category}" hinzugefügt!`); }
+        function wordGame_populateCategoriesAndSelect() { wordGame_CategoryListDiv.innerHTML = ''; wordGame_SelectCustomCategory.innerHTML = ''; Object.keys(wordGame_wordList).forEach(category => { const div = document.createElement('div'); div.classList.add('category-item'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.id = `word-cat-${category.replace(/[\s&]+/g, '-')}`; checkbox.value = category; checkbox.checked = true; const label = document.createElement('label'); label.htmlFor = checkbox.id; label.textContent = category; div.appendChild(checkbox); div.appendChild(label); div.addEventListener('click', (e) => { if (e.target !== checkbox) checkbox.checked = !checkbox.checked; }); wordGame_CategoryListDiv.appendChild(div); const option = document.createElement('option'); option.value = category; option.textContent = category; wordGame_SelectCustomCategory.appendChild(option); }); }
+
+        function wordGame_generateNameInputs(count) {
+            wordNameInputsContainer.innerHTML = ''; 
+            const existingNames = [...wordGame_playerNames];
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement('div'); div.classList.add('form-group');
+                const label = document.createElement('label'); label.htmlFor = `wordPlayerName${i}`; label.textContent = `Name Spieler ${i + 1}:`;
+                const input = document.createElement('input'); input.type = 'text'; input.id = `wordPlayerName${i}`;
+                input.placeholder = `Spieler ${i + 1}`;
+                input.value = (existingNames[i] && !existingNames[i].startsWith("Spieler ")) ? existingNames[i] : '';
+                input.addEventListener('input', (e) => { wordGame_updatePlayerName(i, e.target.value); wordGame_checkRankingAvailability(); });
+                input.addEventListener('blur', (e) => { wordGame_updatePlayerName(i, e.target.value); wordGame_checkRankingAvailability(); });
+                div.appendChild(label); div.appendChild(input); wordNameInputsContainer.appendChild(div);
+            }
+            wordGame_playerNames = Array.from(wordNameInputsContainer.querySelectorAll('input[type="text"]')).map((input, i) => {
+                let name = input.value.trim();
+                return name === '' ? `Spieler ${i + 1}` : name;
+            });
+            wordGame_checkRankingAvailability(); 
+        }
+
+        function wordGame_updatePlayerName(index, value) {
+             let name = value.trim();
+             if (name === '') name = `Spieler ${index + 1}`;
+             while (wordGame_playerNames.length <= index) {
+                 wordGame_playerNames.push(`Spieler ${wordGame_playerNames.length + 1}`);
+             }
+             wordGame_playerNames[index] = name;
+         }
+
+        function wordGame_checkRankingAvailability() {
+            let allNamesCustomAndUnique = true;
+            let tempNamesForCheck = [];
+
+            if (wordGame_playerNames.length !== wordGame_playerCount) {
+                allNamesCustomAndUnique = false;
+            } else {
+                for (const name of wordGame_playerNames) {
+                    if (name.startsWith('Spieler ') || tempNamesForCheck.some(n => n.toLowerCase() === name.toLowerCase())) {
+                        allNamesCustomAndUnique = false; break;
+                    }
+                    tempNamesForCheck.push(name);
+                }
+            }
+
+            wordGame_EnableRankingCheckbox.disabled = !allNamesCustomAndUnique;
+            wordGame_RankingCheckboxLabel.classList.toggle('disabled', !allNamesCustomAndUnique);
+            if (!allNamesCustomAndUnique) {
+                wordGame_EnableRankingCheckbox.checked = false;
+                wordGame_rankingEnabledSetting = false; 
+            } else {
+                 wordGame_rankingEnabledSetting = wordGame_EnableRankingCheckbox.checked;
+            }
+        }
+
+        function wordGame_updateImpostorSliderMax() {
+            const currentPlayers = wordGame_playerCount; 
+            const maxImpostors = Math.max(1, currentPlayers > 1 ? currentPlayers - 1 : 1);
+            wordImpostorCountSlider.max = maxImpostors;
+            if (parseInt(wordImpostorCountSlider.value) > maxImpostors) {
+                wordImpostorCountSlider.value = maxImpostors;
+                wordImpostorCountValueDisplay.textContent = maxImpostors;
+                wordGame_impostorCount = maxImpostors; 
+            }
+             wordImpostorCountSlider.disabled = currentPlayers < 3 || wordGame_randomizeImpostorCountSetting; 
+        }
+
+        function wordGame_toggleImpostorSlider() {
+             wordImpostorCountSlider.disabled = wordGame_randomizeImpostorCountSetting || wordGame_playerCount < 3;
+         }
+
+        function showWordScreen(screenId) { 
+            wordGame_Screens.forEach(screen => { screen.classList.remove('active');}); 
+            const activeScreen = document.getElementById(screenId); 
+            if (activeScreen) { 
+                activeScreen.classList.add('active'); 
+                activeScreen.scrollTop = 0; 
+                if (wordImpostorGameContainer) wordImpostorGameContainer.scrollTop = 0;
+            } else { 
+                console.error("Word game screen not found:", screenId); 
+            } 
+        }
+        
+        function wordGame_validateSetup() {
+            wordGame_SetupErrorDiv.textContent = ''; wordGame_SetupErrorDiv.style.display = 'none';
+            wordGame_useHint = wordGame_EnableHintCheckbox.checked;
+            wordGame_randomStartPlayer = wordRandomStartPlayerCheckbox.checked;
+            wordGame_rankingEnabledSetting = wordGame_EnableRankingCheckbox.checked && !wordGame_EnableRankingCheckbox.disabled; 
+            wordGame_selectedCategories = Array.from(wordGame_CategoryListDiv.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+
+            let isValid = true; let errorMsg = "";
+            if (wordGame_playerCount < 3) { errorMsg = "Min. 3 Spieler."; isValid = false; }
+            else if (!wordGame_randomizeImpostorCountSetting && (wordGame_impostorCount < 1 || wordGame_impostorCount >= wordGame_playerCount)) { errorMsg = `Impostor-Anzahl: 1 bis ${wordGame_playerCount - 1}.`; isValid = false; }
+            else if (wordGame_selectedCategories.length === 0) { errorMsg = "Mind. eine Kategorie wählen."; isValid = false; }
+
+            let tempWordPool = [];
+            wordGame_selectedCategories.forEach(category => { if (wordGame_wordList[category] && wordGame_wordList[category].length > 0) tempWordPool.push(...wordGame_wordList[category]); });
+            if (isValid && tempWordPool.length === 0) { errorMsg = "Gewählte Kategorien ohne Wörter."; isValid = false; }
+
+            if (wordGame_rankingEnabledSetting) {
+                let namesAreCustomAndUnique = true;
+                let tempNamesForCheck = [];
+                if (wordGame_playerNames.length !== wordGame_playerCount) {
+                    namesAreCustomAndUnique = false;
+                } else {
+                    for(const name of wordGame_playerNames) {
+                        if(name.startsWith("Spieler ") || tempNamesForCheck.some(n => n.toLowerCase() === name.toLowerCase())) {
+                            namesAreCustomAndUnique = false; break;
+                        }
+                        tempNamesForCheck.push(name);
+                    }
+                }
+                if(!namesAreCustomAndUnique) {
+                    errorMsg = (errorMsg ? errorMsg + " " : "") + "Ranking: Eindeutige Namen nötig.";
+                    isValid = false;
+                    wordGame_EnableRankingCheckbox.checked = false; 
+                    wordGame_rankingEnabledSetting = false;
+                }
+            }
+
+            if (!isValid) { wordGame_SetupErrorDiv.textContent = errorMsg; wordGame_SetupErrorDiv.style.display = 'block'; }
+            else {
+                 while (wordGame_playerNames.length < wordGame_playerCount) {
+                     wordGame_playerNames.push(`Spieler ${wordGame_playerNames.length + 1}`);
+                 }
+                 wordGame_playerNames = wordGame_playerNames.slice(0, wordGame_playerCount); 
+                 if (wordGame_rankingEnabledSetting) { wordGame_playerNames.forEach(name => { if (!(name in wordGame_playerScores)) wordGame_playerScores[name] = 0; }); }
+            }
+            return isValid;
+        }
+
+        function wordGame_initializeGame() {
+            if (!wordGame_validateSetup()) return;
+            wordGame_startingPlayerIndex = wordGame_randomStartPlayer ? Math.floor(Math.random() * wordGame_playerCount) : 0;
+            wordGame_currentPlayerIndex = wordGame_startingPlayerIndex;
+            wordGame_playersSeenCardCount = 0; // Reset counter for new game
+            wordGame_impostorIndices = []; wordGame_wordPool = []; wordGame_currentHint = '';
+            if (wordGame_randomizeImpostorCountSetting) { const max = Math.max(1, wordGame_playerCount - 1); wordGame_impostorCount = Math.floor(Math.random() * max) + 1; }
+            wordGame_RoundImpostorCount.textContent = wordGame_impostorCount;
+            wordGame_selectedCategories.forEach(c => { if (wordGame_wordList[c]) wordGame_wordPool.push(...wordGame_wordList[c]); });
+            if (wordGame_wordPool.length === 0) { wordGame_SetupErrorDiv.textContent = "Keine Wörter."; wordGame_SetupErrorDiv.style.display = 'block'; return; }
+            const selObj = wordGame_wordPool[Math.floor(Math.random() * wordGame_wordPool.length)];
+            wordGame_currentWord = selObj.word; wordGame_currentHint = selObj.hint;
+            wordGame_assignImpostors();
+            wordGame_Card.classList.remove('is-flipped'); wordGame_NextPlayerButton.style.display = 'none';
+            wordGame_resetRevealState();
+            wordGame_startTurn(); // This will call showWordScreen('wordHandoverScreen')
+        }
+        function wordGame_assignImpostors() { wordGame_impostorIndices = []; while (wordGame_impostorIndices.length < wordGame_impostorCount) { const rIdx = Math.floor(Math.random() * wordGame_playerCount); if (!wordGame_impostorIndices.includes(rIdx)) wordGame_impostorIndices.push(rIdx); } wordGame_impostorIndices.sort((a, b) => a - b); }
+        function wordGame_startTurn() { const curName = wordGame_playerNames[wordGame_currentPlayerIndex]; const nxtIdx = (wordGame_currentPlayerIndex + 1) % wordGame_playerCount; const nxtName = wordGame_playerNames[nxtIdx]; wordGame_PlayerNameDisplay.textContent = `${curName}, du bist dran!`; wordGame_CurrentPlayerName.textContent = curName; wordGame_NextPlayerName.textContent = nxtName; showWordScreen('wordHandoverScreen'); }
+        function wordGame_showCard() { const isImp = wordGame_impostorIndices.includes(wordGame_currentPlayerIndex); if (isImp) { wordGame_CardWordDisplay.textContent = "IMPOSTOR"; wordGame_CardHintDisplay.style.display = (wordGame_useHint && wordGame_currentHint) ? 'block' : 'none'; wordGame_CardHintDisplay.textContent = (wordGame_useHint && wordGame_currentHint) ? `Hinweis: ${wordGame_currentHint}` : ''; } else { wordGame_CardWordDisplay.textContent = wordGame_currentWord; wordGame_CardHintDisplay.style.display = 'none'; wordGame_CardHintDisplay.textContent = ''; } wordGame_Card.classList.remove('is-flipped'); wordGame_NextPlayerButton.style.display = 'none'; showWordScreen('wordCardScreen'); }
+        function wordGame_handleCardClick() { if (!wordGame_Card.classList.contains('is-flipped')) { wordGame_Card.classList.add('is-flipped'); wordGame_NextPlayerButton.style.display = 'inline-block'; } else { wordGame_hideCard(); } }
+        
+        function wordGame_hideCard() { 
+            wordGame_Card.classList.remove('is-flipped'); 
+            wordGame_NextPlayerButton.style.display = 'none'; 
+            wordGame_playersSeenCardCount++;
+
+            setTimeout(() => { 
+                wordGame_currentPlayerIndex = (wordGame_currentPlayerIndex + 1) % wordGame_playerCount;
+                if (wordGame_playersSeenCardCount >= wordGame_playerCount) { 
+                     wordGame_resetRevealState(); 
+                     showWordScreen('wordDiscussionScreen');
+                 } else {
+                    wordGame_startTurn();
+                 } 
+            }, getTransitionDuration(wordGame_Card)); 
+        }
+
+        function wordGame_showSolutionAndOutcomeButtons() { wordGame_RevealWord.textContent = wordGame_currentWord; const impNames = wordGame_impostorIndices.map(i => wordGame_playerNames[i]).join(', '); wordGame_RevealImpostors.textContent = impNames || "Niemand"; wordGame_SolutionRevealArea.style.display = 'block'; wordGame_RevealSolutionButton.style.display = 'none'; if (wordGame_rankingEnabledSetting) { wordGame_GameOutcomeButtons.style.display = 'block'; wordGame_ImpostorWonButton.disabled = false; wordGame_CrewmatesWonButton.disabled = false; wordGame_updateRankingDisplay(); wordGame_RankingDisplayArea.style.display = 'block'; } }
+        function wordGame_handleGameOutcome(impostorWon) { if (!wordGame_rankingEnabledSetting) return; if (impostorWon) { wordGame_impostorIndices.forEach(i => { const n = wordGame_playerNames[i]; wordGame_playerScores[n] = (wordGame_playerScores[n] || 0) + 3; }); } else { for (let i = 0; i < wordGame_playerCount; i++) { if (!wordGame_impostorIndices.includes(i)) { const n = wordGame_playerNames[i]; wordGame_playerScores[n] = (wordGame_playerScores[n] || 0) + 1; } } } wordGame_updateRankingDisplay(); wordGame_ImpostorWonButton.disabled = true; wordGame_CrewmatesWonButton.disabled = true; }
+        function wordGame_updateRankingDisplay() { if (!wordGame_rankingEnabledSetting) { wordGame_RankingDisplayArea.style.display = 'none'; return; } wordGame_RankingList.innerHTML = ''; const sorted = Object.entries(wordGame_playerScores).sort(([,a],[,b]) => b-a); sorted.forEach(([name, score]) => { const li = document.createElement('li'); li.textContent = `${name}: ${score} P.`; wordGame_RankingList.appendChild(li); }); wordGame_RankingDisplayArea.style.display = 'block'; }
+        function wordGame_resetRevealState() { 
+            wordGame_SolutionRevealArea.style.display = 'none'; 
+            wordGame_RevealWord.textContent = ''; 
+            wordGame_RevealImpostors.textContent = ''; 
+            wordGame_RevealSolutionButton.style.display = 'inline-block'; 
+            wordGame_GameOutcomeButtons.style.display = 'none'; 
+            // wordGame_playersSeenCardCount is reset in initializeGame or when going back to setup
+            if (!wordGame_rankingEnabledSetting) { 
+                wordGame_RankingDisplayArea.style.display = 'none'; 
+            } else if (Object.keys(wordGame_playerScores).length > 0 && wordGame_playerNames.length > 0) { 
+                wordGame_updateRankingDisplay(); 
+                wordGame_RankingDisplayArea.style.display = 'block'; 
+            } else { 
+                wordGame_RankingDisplayArea.style.display = 'none'; 
+            } 
+        }
+        function getTransitionDuration(element) { if (!element) return 550; const duration = window.getComputedStyle(element).transitionDuration; if (duration && typeof duration === 'string') { const value = parseFloat(duration); const unit = duration.endsWith('ms') ? 1 : 1000; return value * unit + 50; } return 550; }
+
+
+        // --- NUMBER IMPOSTOR: UI & Game Logic ---
+        function showNumberScreen(screenId) { 
+            numberGame_Screens.forEach(screen => { screen.classList.remove('active'); }); 
+            const activeScreen = document.getElementById(screenId); 
+            if (activeScreen) { 
+                activeScreen.classList.add('active'); 
+                activeScreen.scrollTop = 0; 
+                if(numberImpostorGameContainer) numberImpostorGameContainer.scrollTop = 0;
+            } else { 
+                console.error("Number game screen not found:", screenId); 
+            } 
+        }
+        function numberGame_generateNameInputs(count) {
+            numberNameInputsContainer.innerHTML = ''; 
+            const existingNames = [...numberGame_playerNames];
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement('div'); div.classList.add('form-group');
+                const label = document.createElement('label'); label.htmlFor = `numPlayerName${i}`; label.textContent = `Name Spieler ${i + 1}:`;
+                const input = document.createElement('input'); input.type = 'text'; input.id = `numPlayerName${i}`;
+                input.placeholder = `Spieler ${i + 1}`;
+                input.value = (existingNames[i] && !existingNames[i].startsWith("Spieler ")) ? existingNames[i] : '';
+                 input.addEventListener('input', (e) => numberGame_updatePlayerName(i, e.target.value));
+                input.addEventListener('blur', (e) => numberGame_updatePlayerName(i, e.target.value));
+                div.appendChild(label); div.appendChild(input); numberNameInputsContainer.appendChild(div);
+            }
+            numberGame_playerNames = Array.from(numberNameInputsContainer.querySelectorAll('input[type="text"]')).map((input, i) => {
+                let name = input.value.trim();
+                return name === '' ? `Spieler ${i + 1}` : name;
+            });
+        }
+         function numberGame_updatePlayerName(index, value) {
+             let name = value.trim();
+             if (name === '') name = `Spieler ${index + 1}`;
+             while (numberGame_playerNames.length <= index) {
+                 numberGame_playerNames.push(`Spieler ${numberGame_playerNames.length + 1}`);
+             }
+             numberGame_playerNames[index] = name;
+         }
+        function numberGame_updateImpostorSliderMax() {
+            const currentPlayers = numberGame_playerCount;
+            const maxImpostors = Math.max(1, currentPlayers > 1 ? currentPlayers - 1 : 1);
+            numberImpostorCountSlider.max = maxImpostors;
+            if (parseInt(numberImpostorCountSlider.value) > maxImpostors) {
+                numberImpostorCountSlider.value = maxImpostors;
+                numberImpostorCountValueDisplay.textContent = maxImpostors;
+                numberGame_impostorCount = maxImpostors;
+            }
+             numberImpostorCountSlider.disabled = currentPlayers < 3 || numberGame_randomizeImpostorCountSetting;
+        }
+        function numberGame_toggleImpostorSlider() {
+             numberImpostorCountSlider.disabled = numberGame_randomizeImpostorCountSetting || numberGame_playerCount < 3;
+         }
+        function numberGame_validateSetup() {
+            numberGame_SetupErrorDiv.textContent = ''; numberGame_SetupErrorDiv.style.display = 'none';
+            numberGame_randomStartPlayer = numberRandomStartPlayerCheckbox.checked;
+
+            let isValid = true; let errorMsg = "";
+            if (numberGame_playerCount < 3) { errorMsg = "Min. 3 Spieler."; isValid = false; }
+            else if (!numberGame_randomizeImpostorCountSetting && (numberGame_impostorCount < 1 || numberGame_impostorCount >= numberGame_playerCount)) {
+                errorMsg = `Impostor-Anzahl: 1 bis ${numberGame_playerCount - 1}.`; isValid = false;
+            }
+            
+            // Ensure names array is up-to-date with input count before validation
+            if (numberGame_playerNames.length !== numberGame_playerCount) {
+                numberGame_generateNameInputs(numberGame_playerCount); // This updates numberGame_playerNames
+            }
+
+            const uniqueNames = new Set(numberGame_playerNames.map(name => name.toLowerCase()));
+             if (uniqueNames.size !== numberGame_playerNames.length && numberGame_playerNames.some(name => name.trim() !== '' && !name.startsWith("Spieler "))) {
+                let namesAreFine = true;
+                const filledNames = numberGame_playerNames.filter(n => n.trim() !== "" && !n.startsWith("Spieler "));
+                if (filledNames.length > 0){ 
+                    const uniqueFilledNames = new Set(filledNames.map(n => n.toLowerCase()));
+                    if (uniqueFilledNames.size !== filledNames.length) namesAreFine = false;
+                }
+                 if (!namesAreFine) {
+                    errorMsg = (errorMsg ? errorMsg + " " : "") + "Eigene Spielernamen müssen eindeutig sein.";
+                    isValid = false;
+                 }
+             }
+
+            if (!isValid) { numberGame_SetupErrorDiv.textContent = errorMsg; numberGame_SetupErrorDiv.style.display = 'block'; }
+             else {
+                 while (numberGame_playerNames.length < numberGame_playerCount) {
+                     numberGame_playerNames.push(`Spieler ${numberGame_playerNames.length + 1}`);
+                 }
+                 numberGame_playerNames = numberGame_playerNames.slice(0, numberGame_playerCount);
+             }
+            return isValid;
+        }
+        function numberGame_initializeGame() {
+            if (!numberGame_validateSetup()) return;
+            numberGame_currentPlayerIndex = numberGame_randomStartPlayer ? Math.floor(Math.random() * numberGame_playerCount) : 0;
+            numberGame_impostorIndices = []; numberGame_playerAnswers = {};
+            if (numberGame_randomizeImpostorCountSetting) { const max = Math.max(1, numberGame_playerCount - 1); numberGame_impostorCount = Math.floor(Math.random() * max) + 1; }
+            if (numberGame_questionList.length === 0) { numberGame_SetupErrorDiv.textContent = "Keine Fragen geladen!"; numberGame_SetupErrorDiv.style.display = 'block'; return; }
+            numberGame_currentQuestionPair = numberGame_questionList[Math.floor(Math.random() * numberGame_questionList.length)];
+            numberGame_assignImpostors();
+            numberGame_startTurn(); // This calls showNumberScreen('numberHandoverScreen')
+        }
+         function numberGame_assignImpostors() { numberGame_impostorIndices = []; while (numberGame_impostorIndices.length < numberGame_impostorCount) { const rIdx = Math.floor(Math.random() * numberGame_playerCount); if (!numberGame_impostorIndices.includes(rIdx)) numberGame_impostorIndices.push(rIdx); } numberGame_impostorIndices.sort((a, b) => a - b); }
+        function numberGame_startTurn() { const currentName = numberGame_playerNames[numberGame_currentPlayerIndex]; const nextIndex = (numberGame_currentPlayerIndex + 1) % numberGame_playerCount; const nextName = numberGame_playerNames[nextIndex]; numberGame_PlayerNameDisplay.textContent = `${currentName}, du bist dran!`; numberGame_CurrentPlayerName.textContent = currentName; numberGame_NextPlayerName.textContent = nextName; showNumberScreen('numberHandoverScreen'); }
+        function numberGame_showQuestion() { const isImpostor = numberGame_impostorIndices.includes(numberGame_currentPlayerIndex); const questionToShow = isImpostor ? numberGame_currentQuestionPair.impostorQ : numberGame_currentQuestionPair.crewQ; const unit = numberGame_currentQuestionPair.unit ? ` (${numberGame_currentQuestionPair.unit})` : ""; numberGame_QuestionDisplay.innerHTML = `Deine Frage: <strong>${questionToShow}</strong> ${unit}`; numberGame_AnswerInput.value = ""; numberGame_AnswerInput.focus(); showNumberScreen('numberQuestionInputScreen'); }
+        function numberGame_submitAnswer() { const answer = numberGame_AnswerInput.value; if (answer.trim() === "" || isNaN(parseInt(answer))) { alert("Bitte gib eine gültige Zahl ein."); return; } const playerName = numberGame_playerNames[numberGame_currentPlayerIndex]; numberGame_playerAnswers[playerName] = parseInt(answer); numberGame_currentPlayerIndex = (numberGame_currentPlayerIndex + 1) % numberGame_playerCount; 
+            if (Object.keys(numberGame_playerAnswers).length === numberGame_playerCount) {
+                numberGame_revealAllAnswersAndCrewQuestion();
+            } else {
+                numberGame_startTurn();
+            } }
+        function numberGame_revealAllAnswersAndCrewQuestion() { numberGame_PlayerAnswersList.innerHTML = ""; 
+             const orderedPlayerNames = numberGame_playerNames; 
+             orderedPlayerNames.forEach(name => {
+                 if (numberGame_playerAnswers[name] !== undefined) {
+                     const li = document.createElement('li');
+                     li.innerHTML = `<span class="player-name">${name}:</span> <span class="player-answer">${numberGame_playerAnswers[name]}</span>`;
+                     numberGame_PlayerAnswersList.appendChild(li);
+                 }
+             });
+            const unit = numberGame_currentQuestionPair.unit ? ` (${numberGame_currentQuestionPair.unit})` : ""; numberGame_RevealedCrewQuestionDisplay.innerHTML = `Die Frage für die Crew war: <strong>${numberGame_currentQuestionPair.crewQ}</strong> ${unit}`; showNumberScreen('numberAnswerRevealScreen'); }
+        function numberGame_revealImpostors() { const impostorNames = numberGame_impostorIndices.map(index => numberGame_playerNames[index]).join(', '); const impostorUnit = numberGame_currentQuestionPair.unit ? ` (${numberGame_currentQuestionPair.unit})` : ""; numberGame_RevealedImpostorQuestionDisplay.innerHTML = `<strong>${numberGame_currentQuestionPair.impostorQ}</strong> ${impostorUnit}`; numberGame_RevealImpostorsResult.textContent = impostorNames || "Niemand (Fehler?)"; showNumberScreen('numberDiscussionScreen'); }
+
+
+        // --- SPICY QUESTIONS: UI & Game Logic ---
+        function showSpicyScreen(screenId) { 
+            spicyGame_Screens.forEach(screen => { screen.classList.remove('active');}); 
+            const activeScreen = document.getElementById(screenId); 
+            if (activeScreen) { 
+                activeScreen.classList.add('active'); 
+                activeScreen.scrollTop = 0; 
+                if (spicyQuestionsGameContainer) spicyQuestionsGameContainer.scrollTop = 0; 
+            } else { 
+                console.error("Spicy Questions game screen not found:", screenId); 
+            } 
+        }
+        function spicyGame_showTemporaryMessage(element, message, isSuccess = true) { element.textContent = message; element.className = isSuccess ? 'success-message' : 'error-message'; element.style.display = 'block'; setTimeout(() => { element.style.display = 'none'; }, 2500); }
+        function spicyGame_populateSelectableCategories() { spicyGame_CategoryListDiv.innerHTML = ''; spicyGame_fixedCategories.forEach(categoryName => { const div = document.createElement('div'); div.classList.add('category-item'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.id = `spicy-cat-${categoryName.replace(/\s+/g, '-')}`; checkbox.value = categoryName; checkbox.checked = true; const label = document.createElement('label'); label.htmlFor = checkbox.id; label.textContent = categoryName; div.appendChild(checkbox); div.appendChild(label); div.addEventListener('click', (e) => { if (e.target !== checkbox) checkbox.checked = !checkbox.checked; }); spicyGame_CategoryListDiv.appendChild(div); }); }
+        function spicyGame_addCustomQuestion() { const category = spicyGame_SelectCategoryForNewQuestion.value; const question = spicyGame_NewQuestionTextInput.value.trim(); if (!category) { spicyGame_showTemporaryMessage(spicyGame_CustomQuestionMessage, "Bitte wähle eine Kategorie.", false); return; } if (!question) { spicyGame_showTemporaryMessage(spicyGame_CustomQuestionMessage, "Die Frage darf nicht leer sein.", false); return; } if (!spicyGame_questions[category]) { spicyGame_questions[category] = []; } spicyGame_questions[category].push(question); spicyGame_NewQuestionTextInput.value = ''; spicyGame_showTemporaryMessage(spicyGame_CustomQuestionMessage, `Frage zu "${category}" hinzugefügt!`); }
+        function spicyGame_generateNameInputs(count) { 
+            spicyGame_NameInputsContainer.innerHTML = '';
+            const existingNames = [...spicyGame_playerNames];
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement('div'); div.classList.add('form-group');
+                const label = document.createElement('label'); label.htmlFor = `spicyPlayerName${i}`; label.textContent = `Name Spieler ${i + 1}:`;
+                const input = document.createElement('input'); input.type = 'text'; input.id = `spicyPlayerName${i}`;
+                input.placeholder = `Spieler ${i + 1}`;
+                input.value = (existingNames[i] && !existingNames[i].startsWith("Spieler ")) ? existingNames[i] : '';
+                 input.addEventListener('input', (e) => spicyGame_updatePlayerName(i, e.target.value));
+                 input.addEventListener('blur', (e) => spicyGame_updatePlayerName(i, e.target.value));
+                div.appendChild(label); div.appendChild(input); spicyGame_NameInputsContainer.appendChild(div);
+            }
+             spicyGame_playerNames = Array.from(spicyGame_NameInputsContainer.querySelectorAll('input[type="text"]')).map((input, i) => {
+                 let name = input.value.trim();
+                 return name === '' ? `Spieler ${i + 1}` : name;
+             });
+        }
+        function spicyGame_updatePlayerName(index, value) {
+             let name = value.trim();
+             if (name === '') name = `Spieler ${index + 1}`;
+             while (spicyGame_playerNames.length <= index) {
+                 spicyGame_playerNames.push(`Spieler ${spicyGame_playerNames.length + 1}`);
+             }
+             spicyGame_playerNames[index] = name;
+         }
+        function spicyGame_validateSetup() {
+            spicyGame_SetupErrorDiv.textContent = ''; spicyGame_SetupErrorDiv.style.display = 'none';
+            spicyGame_playerCount = parseInt(spicyGame_PlayerCountInput.value); 
+            spicyGame_randomStartPlayer = spicyGame_RandomStartPlayerCheckbox.checked;
+
+            if (spicyGame_playerNames.length !== spicyGame_playerCount) {
+                spicyGame_generateNameInputs(spicyGame_playerCount); 
+            }
+
+            let tempPlayerNames = [...spicyGame_playerNames]; 
+
+            if (spicyGame_playerCount < 2) { spicyGame_SetupErrorDiv.textContent = "Min. 2 Spieler."; spicyGame_SetupErrorDiv.style.display = 'block'; return false; }
+
+            const filledNames = tempPlayerNames.filter(name => name.trim() !== '' && !name.startsWith("Spieler "));
+            if (filledNames.length > 0) {
+                const uniqueFilledNames = new Set(filledNames.map(name => name.toLowerCase()));
+                if (uniqueFilledNames.size !== filledNames.length) {
+                    spicyGame_SetupErrorDiv.textContent = `Eigene Spielernamen müssen eindeutig sein.`;
+                    spicyGame_SetupErrorDiv.style.display = 'block'; return false;
+                }
+            }
+
+
+            spicyGame_selectedCategories = Array.from(spicyGame_CategoryListDiv.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            if (spicyGame_selectedCategories.length === 0) { spicyGame_SetupErrorDiv.textContent = "Mind. eine Kategorie wählen."; spicyGame_SetupErrorDiv.style.display = 'block'; return false; }
+            let questionPoolSize = 0;
+            spicyGame_selectedCategories.forEach(cat => { if (spicyGame_questions[cat]) questionPoolSize += spicyGame_questions[cat].length; });
+            if (questionPoolSize === 0) { spicyGame_SetupErrorDiv.textContent = "Gewählte Kat. ohne Fragen."; spicyGame_SetupErrorDiv.style.display = 'block'; return false; }
+
+            spicyGame_playerNames = tempPlayerNames; 
+            return true;
+        }
+        function spicyGame_initializeGame() {
+            if (!spicyGame_validateSetup()) return;
+            spicyGame_currentPlayerIndex = spicyGame_randomStartPlayer ? Math.floor(Math.random() * spicyGame_playerCount) : 0;
+            spicyGame_startTurn(); // This calls showSpicyScreen('spicyHandoverScreen')
+        }
+         function spicyGame_startTurn() { const currentPlayerName = spicyGame_playerNames[spicyGame_currentPlayerIndex]; spicyGame_PlayerNameDisplay.textContent = `${currentPlayerName}, du bist dran!`; spicyGame_CurrentPlayerName.textContent = currentPlayerName; spicyGame_CurrentPlayerNameConfirm.textContent = currentPlayerName; showSpicyScreen('spicyHandoverScreen'); }
+        function spicyGame_showQuestionToPlayer() { const currentPlayerName = spicyGame_playerNames[spicyGame_currentPlayerIndex]; spicyGame_QuestionForPlayerName.textContent = currentPlayerName; let availableQuestions = []; spicyGame_selectedCategories.forEach(cat => { if (spicyGame_questions[cat]) availableQuestions.push(...spicyGame_questions[cat]); }); if (availableQuestions.length === 0) { spicyGame_QuestionText.innerHTML = "Keine Fragen verfügbar."; spicyGame_PassToNeighborButton.disabled = true; showSpicyScreen('spicyQuestionDisplayScreen'); return; } spicyGame_PassToNeighborButton.disabled = false; spicyGame_currentQuestionText = availableQuestions[Math.floor(Math.random() * availableQuestions.length)]; spicyGame_QuestionText.innerHTML = `"${spicyGame_currentQuestionText}"`; showSpicyScreen('spicyQuestionDisplayScreen'); }
+        function spicyGame_prepareCoinFlip() { const currentPlayerName = spicyGame_playerNames[spicyGame_currentPlayerIndex]; spicyGame_CoinFlipForPlayerName.textContent = currentPlayerName; spicyGame_CoinFlipOriginalPlayerName.textContent = currentPlayerName; spicyGame_CoinVisual.classList.remove('is-flipping'); spicyGame_CoinVisual.querySelector('span').textContent = '?'; spicyGame_CoinVisual.style.backgroundColor = 'gold'; spicyGame_CoinResultMessage.style.display = 'none'; spicyGame_FlipCoinButton.disabled = false; spicyGame_ProceedToOutcomeButton.style.display = 'none'; showSpicyScreen('spicyCoinFlipScreen'); }
+        function spicyGame_performCoinFlip() { if (spicyGame_coinFlipping) return; spicyGame_coinFlipping = true; spicyGame_FlipCoinButton.disabled = true; spicyGame_ProceedToOutcomeButton.style.display = 'none'; spicyGame_CoinResultMessage.style.display = 'none'; spicyGame_CoinVisual.classList.add('is-flipping'); spicyGame_CoinVisual.querySelector('span').textContent = ''; spicyGame_coinResultIsHeads = Math.random() < 0.5; setTimeout(() => { spicyGame_CoinVisual.classList.remove('is-flipping'); if (spicyGame_coinResultIsHeads) { spicyGame_CoinVisual.querySelector('span').textContent = 'KOPF'; spicyGame_CoinVisual.style.backgroundColor = '#c0c0c0'; spicyGame_CoinResultMessage.textContent = "Kopf!"; } else { spicyGame_CoinVisual.querySelector('span').textContent = 'ZAHL'; spicyGame_CoinVisual.style.backgroundColor = '#b87333'; spicyGame_CoinResultMessage.textContent = "Zahl!"; } spicyGame_CoinResultMessage.style.display = 'block'; spicyGame_ProceedToOutcomeButton.style.display = 'inline-block'; spicyGame_coinFlipping = false; }, 2000); }
+        function spicyGame_showOutcome() { const currentPlayerName = spicyGame_playerNames[spicyGame_currentPlayerIndex]; spicyGame_OutcomeForPlayerName.textContent = currentPlayerName; if (spicyGame_coinResultIsHeads) { spicyGame_OutcomeMessage.innerHTML = `Pech gehabt, <strong>${currentPlayerName}</strong>! Du musst die Frage laut vorlesen.<br><br>Die Frage war: <strong style="color: #ffc107;">"${spicyGame_currentQuestionText}"</strong>`; } else { spicyGame_OutcomeMessage.innerHTML = `Glück gehabt, <strong>${currentPlayerName}</strong>! Die Frage bleibt dein pikantes Geheimnis.`; } const nextPlayerIndex = (spicyGame_currentPlayerIndex + 1) % spicyGame_playerCount; spicyGame_NextPlayerForRound.textContent = spicyGame_playerNames[nextPlayerIndex]; showSpicyScreen('spicyOutcomeScreen'); }
+        function spicyGame_nextRound() { spicyGame_currentPlayerIndex = (spicyGame_currentPlayerIndex + 1) % spicyGame_playerCount; spicyGame_startTurn(); }
+
+
+        // --- Event Listeners for Accordions and Controls ---
+
+        wordPlayerCountSlider.addEventListener('input', (e) => {
+            const count = parseInt(e.target.value);
+            wordPlayerCountValueDisplay.textContent = count;
+            wordGame_playerCount = count; 
+            wordGame_generateNameInputs(count); 
+            wordGame_updateImpostorSliderMax();
+        });
+        wordImpostorCountSlider.addEventListener('input', (e) => {
+            const count = parseInt(e.target.value);
+            wordImpostorCountValueDisplay.textContent = count;
+            wordGame_impostorCount = count; 
+        });
+        wordRandomImpostorCheckbox.addEventListener('change', (e) => {
+             wordGame_randomizeImpostorCountSetting = e.target.checked; 
+             wordGame_toggleImpostorSlider();
+        });
+        wordRandomStartPlayerCheckbox.addEventListener('change', (e) => {
+            wordGame_randomStartPlayer = e.target.checked; 
+        });
+        wordGame_EnableRankingCheckbox.addEventListener('change', (e) => {
+            wordGame_rankingEnabledSetting = e.target.checked && !e.target.disabled; 
+        });
+
+
+         numberPlayerCountSlider.addEventListener('input', (e) => {
+            const count = parseInt(e.target.value);
+            numberPlayerCountValueDisplay.textContent = count;
+            numberGame_playerCount = count; 
+            numberGame_generateNameInputs(count);
+            numberGame_updateImpostorSliderMax();
+        });
+        numberImpostorCountSlider.addEventListener('input', (e) => {
+            const count = parseInt(e.target.value);
+            numberImpostorCountValueDisplay.textContent = count;
+            numberGame_impostorCount = count; 
+        });
+        numberRandomImpostorCheckbox.addEventListener('change', (e) => {
+             numberGame_randomizeImpostorCountSetting = e.target.checked; 
+             numberGame_toggleImpostorSlider();
+        });
+        numberRandomStartPlayerCheckbox.addEventListener('change', (e) => {
+            numberGame_randomStartPlayer = e.target.checked; 
+        });
+
+
+        spicyGame_PlayerCountInput.addEventListener('input', (e) => {
+            let count = parseInt(e.target.value);
+            if (isNaN(count) || count < 2) count = 2; 
+            if (count > 15) count = 15; 
+            spicyGame_PlayerCountInput.value = count; 
+             spicyGame_playerCount = count; 
+            spicyGame_generateNameInputs(count); 
+        });
+         spicyGame_RandomStartPlayerCheckbox.addEventListener('change', (e) => {
+            spicyGame_randomStartPlayer = e.target.checked; 
+        });
+
+
+        wordGame_AddCategoryButton.addEventListener('click', wordGame_addCustomCategory);
+        wordGame_AddWordButton.addEventListener('click', wordGame_addCustomWord);
+        wordGame_StartGameButton.addEventListener('click', wordGame_initializeGame);
+        wordGame_ReadyButton.addEventListener('click', wordGame_showCard);
+        wordGame_Card.addEventListener('click', wordGame_handleCardClick);
+        wordGame_NextPlayerButton.addEventListener('click', wordGame_hideCard);
+        wordGame_RevealSolutionButton.addEventListener('click', wordGame_showSolutionAndOutcomeButtons);
+        wordGame_RestartButton.addEventListener('click', () => { wordGame_resetRevealState(); wordGame_playersSeenCardCount = 0; showWordScreen('wordSetupScreen'); });
+        wordGame_ImpostorWonButton.addEventListener('click', () => wordGame_handleGameOutcome(true));
+        wordGame_CrewmatesWonButton.addEventListener('click', () => wordGame_handleGameOutcome(false));
+
+        numberGame_StartGameButton.addEventListener('click', numberGame_initializeGame);
+        numberGame_ReadyButton.addEventListener('click', numberGame_showQuestion);
+        numberGame_SubmitAnswerButton.addEventListener('click', numberGame_submitAnswer);
+        numberGame_RevealImpostorsButton.addEventListener('click', numberGame_revealImpostors);
+        numberGame_NewGameButton.addEventListener('click', () => showNumberScreen('numberSetupScreen'));
+
+        spicyGame_AddQuestionButton.addEventListener('click', spicyGame_addCustomQuestion);
+        spicyGame_StartGameButton.addEventListener('click', spicyGame_initializeGame);
+        spicyGame_ReadyButton.addEventListener('click', spicyGame_showQuestionToPlayer);
+        spicyGame_PassToNeighborButton.addEventListener('click', spicyGame_prepareCoinFlip);
+        spicyGame_FlipCoinButton.addEventListener('click', spicyGame_performCoinFlip);
+        spicyGame_ProceedToOutcomeButton.addEventListener('click', spicyGame_showOutcome);
+        spicyGame_NextRoundButton.addEventListener('click', spicyGame_nextRound);
+        spicyGame_NewGameSetupButton.addEventListener('click', () => showSpicyScreen('spicySetupScreen'));
+
+
+        // --- INITIAL PAGE LOAD ---
+        function initializePage() {
+            wordPlayerCountValueDisplay.textContent = wordPlayerCountSlider.value;
+            wordImpostorCountValueDisplay.textContent = wordImpostorCountSlider.value;
+             wordGame_playerCount = parseInt(wordPlayerCountSlider.value); 
+             wordGame_impostorCount = parseInt(wordImpostorCountSlider.value); 
+            wordGame_randomizeImpostorCountSetting = wordRandomImpostorCheckbox.checked;
+            wordGame_randomStartPlayer = wordRandomStartPlayerCheckbox.checked;
+            wordGame_generateNameInputs(wordGame_playerCount);
+            wordGame_updateImpostorSliderMax();
+            wordGame_toggleImpostorSlider();
+            wordGame_populateCategoriesAndSelect();
+            wordGame_checkRankingAvailability(); 
+
+            numberPlayerCountValueDisplay.textContent = numberPlayerCountSlider.value;
+            numberImpostorCountValueDisplay.textContent = numberImpostorCountSlider.value;
+             numberGame_playerCount = parseInt(numberPlayerCountSlider.value); 
+             numberGame_impostorCount = parseInt(numberImpostorCountSlider.value); 
+            numberGame_randomizeImpostorCountSetting = numberRandomImpostorCheckbox.checked;
+            numberGame_randomStartPlayer = numberRandomStartPlayerCheckbox.checked;
+            numberGame_generateNameInputs(numberGame_playerCount);
+            numberGame_updateImpostorSliderMax();
+            numberGame_toggleImpostorSlider();
+
+             spicyGame_playerCount = parseInt(spicyGame_PlayerCountInput.value); 
+            spicyGame_randomStartPlayer = spicyGame_RandomStartPlayerCheckbox.checked;
+            spicyGame_populateSelectableCategories();
+            spicyGame_generateNameInputs(spicyGame_playerCount);
+
+            showGameContainer('landing'); 
+        }
+
+        initializePage();
+
+    </script>
+</body>
+</html>
