@@ -719,15 +719,67 @@
       }
     }
 
-    @media (max-height: 650px) {
-      .pass-hint-text,
+    @media (max-height: 780px) {
       .welcome-card-desc {
+        display: none;
+      }
+    }
+
+    @media (max-height: 740px) {
+      .welcome-pill,
+      .welcome-badge {
+        display: none;
+      }
+    }
+
+    @media (max-height: 640px) {
+      .home-desc {
+        display: none;
+      }
+    }
+
+    @media (max-height: 700px) {
+      .quiz-res-icon {
+        display: none;
+      }
+    }
+
+    @media (max-height: 650px) {
+      .pass-hint-text {
         display: none;
       }
 
       .timeline-slider-viewport {
         height: 80px;
       }
+    }
+
+    /* ---------- Quiz ---------- */
+    .quiz-ans {
+      transition: background-color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease, transform 0.3s var(--ease-spring);
+    }
+
+    .quiz-ans[data-state="right"] {
+      background: rgba(16, 185, 129, 0.22) !important;
+      border-color: rgba(16, 185, 129, 0.65) !important;
+    }
+
+    .quiz-ans[data-state="wrong"] {
+      background: rgba(244, 63, 94, 0.22) !important;
+      border-color: rgba(244, 63, 94, 0.65) !important;
+    }
+
+    .quiz-ans[data-state="picked"] {
+      background: rgba(255, 255, 255, 0.14) !important;
+      border-color: var(--border-highlight) !important;
+    }
+
+    .quiz-ans[data-state="dim"] {
+      opacity: 0.45;
+    }
+
+    #quizTimeBar {
+      transition: width 0.1s linear, background-color 0.3s ease;
     }
 
     /* ---------- Diskussions-Ansicht: Handy & Tablet hochkant ---------- */
@@ -889,7 +941,7 @@
                 </div>
                 <div>
                   <div class="text-sm font-semibold text-white">Spielregeln</div>
-                  <div class="text-[11px] text-zinc-400">Kurzanleitung für beide Modi</div>
+                  <div class="text-[11px] text-zinc-400">Kurzanleitung für alle Spiele</div>
                 </div>
               </div>
               <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
@@ -936,22 +988,22 @@
     <main id="mainContent" class="flex-1 min-h-0 flex flex-col justify-center overflow-hidden">
 
       <!-- VIEW: WELCOME / FIRST-TIME ONBOARDING SHOWCASE -->
-      <section id="view-welcome" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-3xl mx-auto w-full gap-2.5 sm:gap-4">
+      <section id="view-welcome" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-4xl mx-auto w-full gap-2.5 sm:gap-4">
         <div class="surface-card rounded-3xl p-3 sm:p-6 text-center flex flex-col items-center justify-center shrink-0">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] font-semibold text-white mb-1.5">
+          <div class="welcome-pill inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] font-semibold text-white mb-1.5">
             <i class="fa-solid fa-champagne-glasses text-[10px]"></i>
             <span>Willkommen bei Partyspiele</span>
           </div>
           <h1 class="font-display text-lg sm:text-3xl font-extrabold text-white tracking-tight">
-            Zwei Bluff-Partyspiele. Ein Gerät.
+            Drei Partyspiele. Ein Gerät.
           </h1>
           <p class="welcome-hero-sub text-xs sm:text-sm text-zinc-400 max-w-lg mt-1 leading-relaxed">
-            Reicht das Smartphone reihum weiter, deckt geheim eure Karte auf und enttarnt in der Diskussion den Imposter.
+            Reicht das Smartphone reihum weiter, enttarnt den Imposter oder testet euer Wissen im Quiz.
           </p>
         </div>
 
         <!-- 2 Intro Showcase Cards with Direct Start -->
-        <div class="flex-1 min-h-0 grid grid-cols-1 grid-rows-2 sm:grid-rows-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
+        <div class="flex-1 min-h-0 grid grid-cols-1 grid-rows-3 sm:grid-rows-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
           <!-- Intro Game 1: Wort-Imposter -->
           <div class="surface-card rounded-3xl p-3.5 sm:p-6 flex flex-col justify-between gap-2 border border-white/10 min-h-0 overflow-hidden">
             <div class="space-y-2 sm:space-y-2.5 min-h-0">
@@ -959,7 +1011,7 @@
                 <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-white text-black flex items-center justify-center text-base sm:text-xl shadow-sm shrink-0">
                   <i class="fa-solid fa-fingerprint"></i>
                 </div>
-                <span class="font-mono-num text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl bg-white/10 text-zinc-200 truncate">
+                <span class="welcome-badge font-mono-num text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl bg-white/10 text-zinc-200 truncate">
                   750 Wörter • 15 Welten
                 </span>
               </div>
@@ -986,7 +1038,7 @@
                 <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-white text-black flex items-center justify-center text-base sm:text-xl shadow-sm shrink-0">
                   <i class="fa-solid fa-sliders"></i>
                 </div>
-                <span class="font-mono-num text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl bg-white/10 text-zinc-200 truncate">
+                <span class="welcome-badge font-mono-num text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl bg-white/10 text-zinc-200 truncate">
                   290 Duelle • Zeitstrahl
                 </span>
               </div>
@@ -1005,6 +1057,33 @@
               <i class="fa-solid fa-play text-[10px]"></i>
             </button>
           </div>
+
+          <!-- Intro Game 3: Quiz -->
+          <div class="surface-card rounded-3xl p-3.5 sm:p-6 flex flex-col justify-between gap-2 border border-white/10 min-h-0 overflow-hidden">
+            <div class="space-y-2 sm:space-y-2.5 min-h-0">
+              <div class="flex items-center justify-between gap-2">
+                <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-white text-black flex items-center justify-center text-base sm:text-xl shadow-sm shrink-0">
+                  <i class="fa-solid fa-circle-question"></i>
+                </div>
+                <span class="welcome-badge font-mono-num text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl bg-white/10 text-zinc-200 truncate">
+                  500 Fragen • 10 Welten
+                </span>
+              </div>
+              <div>
+                <h2 class="font-display text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+                  3. Quiz
+                </h2>
+                <p class="welcome-card-desc text-xs text-zinc-400 leading-relaxed mt-1">
+                  Das Handy geht reihum, jeder beantwortet <strong class="text-white">dieselbe Quizfrage</strong> gegen die Uhr. Es gewinnt, wer die meisten richtig hat – und bei Gleichstand der Schnellere!
+                </p>
+              </div>
+            </div>
+
+            <button onclick="app.startFromWelcome('quiz')" class="w-full py-2.5 sm:py-3.5 px-4 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2 shrink-0">
+              <span>Quiz starten</span>
+              <i class="fa-solid fa-play text-[10px]"></i>
+            </button>
+          </div>
         </div>
 
         <button onclick="app.completeWelcomeIntro()" class="w-full py-2.5 sm:py-3.5 rounded-2xl pill-button text-xs sm:text-sm font-semibold text-zinc-200 flex items-center justify-center gap-2 shrink-0">
@@ -1014,10 +1093,10 @@
       </section>
 
       <!-- VIEW: HOME (Full-height balanced cards without top or bottom dead space) -->
-      <section id="view-home" class="view-section view-enter h-full flex-1 min-h-0 flex flex-col justify-center max-w-3xl mx-auto w-full">
-        <div class="flex-1 min-h-0 grid grid-cols-1 grid-rows-2 sm:grid-rows-1 sm:grid-cols-2 gap-3 sm:gap-5 w-full">
+      <section id="view-home" class="view-section view-enter h-full flex-1 min-h-0 flex flex-col justify-center max-w-4xl mx-auto w-full">
+        <div class="flex-1 min-h-0 grid grid-cols-1 grid-rows-3 sm:grid-rows-1 sm:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-5 w-full">
           <!-- Game 1: Wort-Imposter -->
-          <div onclick="app.selectGameMode('word')" class="surface-card surface-interactive rounded-3xl p-5 sm:p-8 cursor-pointer flex flex-col justify-between group relative overflow-hidden h-full min-h-0">
+          <div onclick="app.selectGameMode('word')" class="surface-card surface-interactive rounded-3xl p-4 sm:p-5 lg:p-8 cursor-pointer flex flex-col justify-between group relative overflow-hidden h-full min-h-0">
             <div class="flex items-center justify-between gap-2">
               <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:scale-105 group-hover:bg-white group-hover:text-black transition-all duration-300 shrink-0">
                 <i class="fa-solid fa-fingerprint text-xl sm:text-2xl"></i>
@@ -1027,16 +1106,16 @@
               </span>
             </div>
 
-            <div class="my-auto py-2 space-y-1.5">
-              <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <div class="my-auto py-1 sm:py-2 space-y-1 sm:space-y-1.5 min-w-0">
+              <h2 class="font-display text-2xl sm:text-xl lg:text-3xl font-extrabold text-white tracking-tight break-words">
                 Wort-Imposter
               </h2>
-              <p class="text-zinc-400 text-xs sm:text-sm leading-relaxed">
+              <p class="home-desc text-zinc-400 text-xs sm:text-sm leading-relaxed">
                 Geheimes Wort & subtiler Ein-Wort-Hinweis
               </p>
             </div>
 
-            <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-white">
+            <div class="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-white">
               <span>Spiel konfigurieren</span>
               <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black flex items-center justify-center transition-all">
                 <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
@@ -1045,7 +1124,7 @@
           </div>
 
           <!-- Game 2: Fragen-Imposter -->
-          <div onclick="app.selectGameMode('question')" class="surface-card surface-interactive rounded-3xl p-5 sm:p-8 cursor-pointer flex flex-col justify-between group relative overflow-hidden h-full min-h-0">
+          <div onclick="app.selectGameMode('question')" class="surface-card surface-interactive rounded-3xl p-4 sm:p-5 lg:p-8 cursor-pointer flex flex-col justify-between group relative overflow-hidden h-full min-h-0">
             <div class="flex items-center justify-between gap-2">
               <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:scale-105 group-hover:bg-white group-hover:text-black transition-all duration-300 shrink-0">
                 <i class="fa-solid fa-sliders text-xl sm:text-2xl"></i>
@@ -1055,16 +1134,44 @@
               </span>
             </div>
 
-            <div class="my-auto py-2 space-y-1.5">
-              <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <div class="my-auto py-1 sm:py-2 space-y-1 sm:space-y-1.5 min-w-0">
+              <h2 class="font-display text-2xl sm:text-xl lg:text-3xl font-extrabold text-white tracking-tight break-words">
                 Fragen-Imposter
               </h2>
-              <p class="text-zinc-400 text-xs sm:text-sm leading-relaxed">
+              <p class="home-desc text-zinc-400 text-xs sm:text-sm leading-relaxed">
                 Fragen-Duelle & interaktiver Circa-Zeitstrahl
               </p>
             </div>
 
-            <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-white">
+            <div class="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-white">
+              <span>Spiel konfigurieren</span>
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black flex items-center justify-center transition-all">
+                <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game 3: Quiz -->
+          <div onclick="app.selectGameMode('quiz')" class="surface-card surface-interactive rounded-3xl p-4 sm:p-5 lg:p-8 cursor-pointer flex flex-col justify-between group relative overflow-hidden h-full min-h-0">
+            <div class="flex items-center justify-between gap-2">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:scale-105 group-hover:bg-white group-hover:text-black transition-all duration-300 shrink-0">
+                <i class="fa-solid fa-circle-question text-xl sm:text-2xl"></i>
+              </div>
+              <span class="font-mono-num text-[11px] font-semibold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300">
+                500 Fragen
+              </span>
+            </div>
+
+            <div class="my-auto py-1 sm:py-2 space-y-1 sm:space-y-1.5 min-w-0">
+              <h2 class="font-display text-2xl sm:text-xl lg:text-3xl font-extrabold text-white tracking-tight break-words">
+                Quiz
+              </h2>
+              <p class="home-desc text-zinc-400 text-xs sm:text-sm leading-relaxed">
+                Reihum raten – Treffer & Tempo zählen
+              </p>
+            </div>
+
+            <div class="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-white">
               <span>Spiel konfigurieren</span>
               <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black flex items-center justify-center transition-all">
                 <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
@@ -1321,6 +1428,128 @@
         </div>
       </section>
 
+      <!-- VIEW: QUIZ HANDOFF (Handy weitergeben) -->
+      <section id="view-quiz-pass" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-md mx-auto w-full gap-2.5 sm:gap-3">
+        <div class="surface-card rounded-2xl px-3.5 py-2 sm:px-4 sm:py-3 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-black flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-circle-question text-sm"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] text-zinc-400 font-medium">Quiz</div>
+              <div id="quizPassRound" class="font-display font-bold text-sm sm:text-base text-white truncate">Runde 1 von 3</div>
+            </div>
+          </div>
+          <div id="quizPassProgress" class="font-mono-num px-3 py-1 rounded-lg bg-white/5 text-xs font-semibold text-zinc-300 border border-white/5 shrink-0">
+            1 / 5
+          </div>
+        </div>
+
+        <div class="surface-card rounded-3xl flex-1 min-h-0 p-5 sm:p-7 flex flex-col items-center justify-between text-center">
+          <div class="w-full flex items-center justify-between text-[11px] font-mono-num text-zinc-500 uppercase tracking-widest gap-2">
+            <span>Verdeckte Frage</span>
+            <span id="quizPassTimeInfo" class="truncate">15 Sek.</span>
+          </div>
+
+          <div class="my-auto space-y-4 sm:space-y-5 w-full min-w-0">
+            <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+              <div class="absolute inset-0 rounded-full border border-white/15 pulse-slow"></div>
+              <div class="w-20 h-20 rounded-3xl bg-white/5 border border-white/15 flex items-center justify-center text-white">
+                <i class="fa-solid fa-circle-question text-3xl"></i>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="text-xs font-medium text-zinc-400">Gib das Handy an</div>
+              <h2 id="quizPassPlayerName" class="font-display text-3xl font-extrabold text-white tracking-tight break-words">Spieler 1</h2>
+              <p class="pass-hint-text text-xs text-zinc-400 max-w-[250px] mx-auto leading-relaxed">
+                Sobald du „Frage starten“ tippst, läuft die Zeit. Alle anderen bitte wegschauen!
+              </p>
+            </div>
+          </div>
+
+          <button onclick="app.startQuizQuestion()" class="w-full py-3.5 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2 shrink-0">
+            <span>Frage starten</span>
+            <i class="fa-solid fa-play text-[10px]"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- VIEW: QUIZ FRAGE -->
+      <section id="view-quiz-play" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-md mx-auto w-full gap-2.5 sm:gap-3">
+        <div class="surface-card rounded-2xl px-3.5 py-2 sm:px-4 sm:py-3 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="quizPlayAvatar" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-black flex items-center justify-center font-mono-num font-bold text-xs sm:text-sm shrink-0">1</div>
+            <div class="min-w-0">
+              <div class="text-[11px] text-zinc-400 font-medium">Am Zug</div>
+              <div id="quizPlayName" class="font-display font-bold text-sm sm:text-base text-white truncate">Spieler 1</div>
+            </div>
+          </div>
+          <div id="quizPlayRound" class="font-mono-num px-3 py-1 rounded-lg bg-white/5 text-xs font-semibold text-zinc-300 border border-white/5 shrink-0">
+            Runde 1 / 3
+          </div>
+        </div>
+
+        <div class="surface-card rounded-3xl flex-1 min-h-0 p-3 sm:p-5 flex flex-col gap-2 sm:gap-3">
+          <div class="flex items-center justify-between gap-2 text-[11px] font-mono-num text-zinc-400 uppercase tracking-widest shrink-0">
+            <span id="quizPlayCat" class="truncate min-w-0">Kategorie</span>
+            <span id="quizPlayTimeText" class="shrink-0 text-white font-bold">15,0 s</span>
+          </div>
+          <div class="h-1.5 rounded-full bg-white/10 overflow-hidden shrink-0">
+            <div id="quizTimeBar" class="h-full rounded-full" style="width:100%; background: var(--accent);"></div>
+          </div>
+
+          <div class="flex-[1_1_0] min-h-0 rounded-2xl bg-white/5 border border-white/10 p-3 flex items-center justify-center text-center overflow-hidden">
+            <h2 id="quizQuestionText" class="font-display font-bold text-white leading-snug break-words max-w-full" style="font-size: 20px;"></h2>
+          </div>
+
+          <div id="quizAnswers" class="flex-[1.8_1_0] min-h-0 grid grid-cols-1 grid-rows-4 gap-1.5 sm:gap-2"></div>
+
+          <div class="shrink-0 h-11 sm:h-12 flex items-center gap-2">
+            <div id="quizFeedbackText" class="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-zinc-400 truncate">Tippe auf deine Antwort</div>
+            <button id="quizNextBtn" onclick="app.nextQuizStep()" class="hidden py-2.5 px-4 rounded-xl btn-primary text-xs items-center gap-2 shrink-0">
+              <span id="quizNextBtnText">Weiter</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: QUIZ ERGEBNIS -->
+      <section id="view-quiz-result" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-xl mx-auto w-full gap-2.5 sm:gap-3">
+        <div class="surface-card rounded-3xl p-3.5 sm:p-6 flex-1 min-h-0 flex flex-col gap-2.5 sm:gap-4">
+          <div class="text-center shrink-0 space-y-1">
+            <div class="quiz-res-icon w-11 h-11 mx-auto rounded-2xl bg-white text-black flex items-center justify-center">
+              <i class="fa-solid fa-trophy text-lg"></i>
+            </div>
+            <div class="text-[11px] font-mono-num uppercase tracking-widest text-zinc-400">Quiz beendet – Sieger</div>
+            <h2 id="quizWinnerText" class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight break-words">–</h2>
+            <div id="quizWinnerSub" class="text-xs text-zinc-400">–</div>
+          </div>
+
+          <div id="quizRankList" class="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1"></div>
+
+          <div class="grid grid-cols-2 gap-2 shrink-0">
+            <button onclick="app.openQuizReview()" class="py-2.5 px-3 rounded-2xl pill-button text-xs font-semibold text-white flex items-center justify-center gap-2">
+              <i class="fa-solid fa-list-check text-[11px]"></i>
+              <span>Rückblick</span>
+            </button>
+            <button id="quizAwardBtn" onclick="app.awardQuizPoint()" class="py-2.5 px-3 rounded-2xl pill-button text-xs font-semibold text-white flex items-center justify-center gap-2">
+              <i class="fa-solid fa-trophy text-[11px]"></i>
+              <span id="quizAwardBtnText">+1 Punkt Sieger</span>
+            </button>
+            <button onclick="app.startRound()" class="py-3 px-3 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2">
+              <i class="fa-solid fa-rotate-right"></i>
+              <span>Nochmal</span>
+            </button>
+            <button onclick="app.openSetup()" class="py-3 px-3 rounded-2xl pill-button font-semibold text-xs sm:text-sm text-zinc-200 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-sliders"></i>
+              <span>Setup</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -1396,7 +1625,7 @@
 
       <div class="space-y-2.5 sm:space-y-3.5">
         <!-- Imposter Counter + Random Toggle -->
-        <div class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+        <div id="optImposterBox" class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
           <div class="min-w-0">
             <div class="font-semibold text-sm text-white">Anzahl Imposter</div>
             <div id="imposterModeSubtext" class="text-xs text-zinc-400">Feste Anzahl in der Runde</div>
@@ -1419,7 +1648,7 @@
         </div>
 
         <!-- Starter Player Option -->
-        <div class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+        <div id="optStarterBox" class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
           <div class="min-w-0">
             <div class="font-semibold text-sm text-white">Startspieler</div>
             <div class="text-xs text-zinc-400">Wer beginnt die Diskussionsrunde?</div>
@@ -1485,7 +1714,7 @@
         </div>
 
         <!-- Discussion Timer Setting -->
-        <div class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+        <div id="optTimerBox" class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
           <div class="min-w-0">
             <div class="font-semibold text-sm text-white">Diskussions-Timer</div>
             <div class="text-xs text-zinc-400">Zeitlimit für die Runde</div>
@@ -1494,6 +1723,47 @@
             <i class="fa-regular fa-clock text-zinc-400"></i>
             <span id="timerDurationBtnLabel">3 Minuten</span>
             <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+          </button>
+        </div>
+
+        <!-- Quiz: Anzahl Runden -->
+        <div id="quizRoundsBox" class="hidden p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="font-semibold text-sm text-white">Anzahl Runden</div>
+            <div class="text-xs text-zinc-400">Pro Runde 1 Frage für alle Spieler</div>
+          </div>
+          <div class="flex items-center gap-1 bg-black/40 rounded-xl p-1 border border-white/10 shrink-0">
+            <button onclick="app.changeQuizRounds(-1)" class="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-white">
+              <i class="fa-solid fa-minus text-[10px]"></i>
+            </button>
+            <span id="quizRoundsLabel" class="font-mono-num font-bold text-sm w-6 text-center text-white">3</span>
+            <button onclick="app.changeQuizRounds(1)" class="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-white">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quiz: Zeit pro Frage -->
+        <div id="quizSecondsBox" class="hidden p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="font-semibold text-sm text-white">Zeit pro Frage</div>
+            <div class="text-xs text-zinc-400">Schneller richtig = besser</div>
+          </div>
+          <button type="button" onclick="app.openQuizSecondsPopup()" class="pill-button px-3.5 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-2 shrink-0">
+            <i class="fa-regular fa-clock text-zinc-400"></i>
+            <span id="quizSecondsBtnLabel">15 Sek.</span>
+            <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+          </button>
+        </div>
+
+        <!-- Quiz: Sofort-Feedback -->
+        <div id="quizFeedbackBox" class="hidden p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="pr-3 min-w-0">
+            <div class="font-semibold text-sm text-white">Sofort-Feedback</div>
+            <div class="text-xs text-zinc-400">Richtig/Falsch direkt nach der Antwort zeigen</div>
+          </div>
+          <button id="toggleQuizFeedbackBtn" onclick="app.toggleQuizFeedback()" class="w-12 h-7 rounded-full bg-white p-1 transition-all flex items-center justify-end shrink-0">
+            <span class="w-5 h-5 rounded-full bg-black shadow-sm transition-transform"></span>
           </button>
         </div>
       </div>
@@ -1525,11 +1795,11 @@
 
       <div class="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-white/10 shrink-0">
         <div class="flex flex-wrap items-center gap-1.5">
-          <button onclick="app.openCustomCategoryModal()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-black hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm">
+          <button id="catCustomBtn" onclick="app.openCustomCategoryModal()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-black hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm">
             <i class="fa-solid fa-folder-plus text-[10px]"></i>
             <span>+ Eigene Kategorie</span>
           </button>
-          <button onclick="app.requestOpenVault('words')" class="pill-button px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+          <button id="catVaultBtn" onclick="app.requestOpenVault('words')" class="pill-button px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
             <i class="fa-solid fa-vault text-[10px] text-zinc-400"></i>
             <span>Tresor</span>
           </button>
@@ -1794,6 +2064,13 @@
             Jeder Spieler liest geheim seine Frage und gibt seine Antwort ein (oder nutzt bei <strong>Circa-Schätzfragen</strong> den interaktiven Slider). Der Imposter hat jedoch eine leicht abweichende Frage erhalten, die zu einem verblüffend ähnlichen Wert führt! Danach wird die Hauptfrage der Gruppe aufgedeckt und jeder muss seine Antwort plausibel verteidigen.
           </p>
         </div>
+
+        <div class="p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
+          <div class="font-display font-bold text-white text-base">3. Quiz</div>
+          <p class="text-zinc-400">
+            Das Handy geht reihum. In jeder Runde bekommen alle <strong>dieselbe Quizfrage</strong> mit vier Antworten (Reihenfolge je Spieler gemischt) und müssen sie gegen die Uhr beantworten. Am Ende gewinnt, wer die meisten Fragen richtig hat – bei Gleichstand entscheidet, wer <strong>schneller</strong> war.
+          </p>
+        </div>
       </div>
 
       <button onclick="app.closeModal('rulesModal')" class="w-full py-3.5 rounded-2xl btn-primary text-xs sm:text-sm">
@@ -1901,6 +2178,27 @@
       </div>
 
       <div id="customSelectOptionsList" class="space-y-2 flex-1 min-h-0 overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: QUIZ RÜCKBLICK -->
+  <div id="quizReviewModal" onclick="if(event.target===this) app.closeModal('quizReviewModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-lg w-full p-6 space-y-3 sm:space-y-4 flex flex-col view-enter">
+      <div class="flex items-center justify-between gap-2 shrink-0">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Fragen-Rückblick</h3>
+          <p class="text-xs text-zinc-400">Richtige Antworten & wer wie schnell war</p>
+        </div>
+        <button onclick="app.closeModal('quizReviewModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="quizReviewList" class="space-y-2 flex-1 min-h-0 overflow-y-auto pr-1"></div>
+
+      <button onclick="app.closeModal('quizReviewModal')" class="w-full py-3 rounded-2xl btn-primary text-xs sm:text-sm shrink-0">
+        Schließen
+      </button>
     </div>
   </div>
 
@@ -3899,6 +4197,580 @@
       }
     ];
 
+    // Quiz-Spiel: Format pro Frage = [Frage, richtige Antwort, falsch 1, falsch 2, falsch 3]
+    const QUIZ_CATEGORIES = [
+      {
+        id: "z_geo",
+        name: "Geografie & Länder",
+        icon: "fa-earth-europe",
+        qs: [
+          ["Wie heißt die Hauptstadt von Australien?", "Canberra", "Sydney", "Melbourne", "Perth"],
+          ["Welcher ist der längste Fluss Afrikas?", "Nil", "Kongo", "Niger", "Sambesi"],
+          ["Wie viele Bundesländer hat Deutschland?", "16", "14", "15", "17"],
+          ["Welches Land ist nach Fläche das größte der Erde?", "Russland", "Kanada", "China", "USA"],
+          ["Wie heißt die Hauptstadt von Kanada?", "Ottawa", "Toronto", "Montreal", "Vancouver"],
+          ["Wie heißt der höchste Berg der Erde?", "Mount Everest", "K2", "Kangchendzönga", "Mont Blanc"],
+          ["Welches Land hat aktuell die meisten Einwohner?", "Indien", "China", "USA", "Indonesien"],
+          ["Wie heißt die Hauptstadt von Brasilien?", "Brasília", "Rio de Janeiro", "São Paulo", "Salvador"],
+          ["Welcher Ozean ist der größte?", "Pazifik", "Atlantik", "Indischer Ozean", "Arktischer Ozean"],
+          ["Wie heißt die Hauptstadt der Türkei?", "Ankara", "Istanbul", "Izmir", "Antalya"],
+          ["Durch welche Stadt fließt die Seine?", "Paris", "London", "Rom", "Madrid"],
+          ["Welche ist die größte Insel der Erde?", "Grönland", "Neuguinea", "Borneo", "Madagaskar"],
+          ["Wie heißt die Hauptstadt der Schweiz?", "Bern", "Zürich", "Genf", "Basel"],
+          ["In welchem Land liegt die Stadt Timbuktu?", "Mali", "Niger", "Tschad", "Senegal"],
+          ["Welches Land hat die Form eines Stiefels?", "Italien", "Griechenland", "Spanien", "Portugal"],
+          ["Welcher ist der längste Fluss Europas?", "Wolga", "Donau", "Rhein", "Elbe"],
+          ["Wie heißt die Hauptstadt von Norwegen?", "Oslo", "Bergen", "Stockholm", "Kopenhagen"],
+          ["Wie heißt die größte heiße Wüste der Erde?", "Sahara", "Gobi", "Kalahari", "Namib"],
+          ["Wie heißt die Hauptstadt von Japan?", "Tokio", "Kyoto", "Osaka", "Seoul"],
+          ["Welcher Kontinent hat die meisten Länder?", "Afrika", "Asien", "Europa", "Südamerika"],
+          ["Welches Meer liegt zwischen Europa und Afrika?", "Mittelmeer", "Rotes Meer", "Schwarzes Meer", "Ostsee"],
+          ["Wie heißt die Hauptstadt von Argentinien?", "Buenos Aires", "Santiago", "Lima", "Montevideo"],
+          ["Welcher See ist der tiefste der Erde?", "Baikalsee", "Tanganjikasee", "Titicacasee", "Bodensee"],
+          ["Wie heißt die Hauptstadt von Portugal?", "Lissabon", "Porto", "Madrid", "Faro"],
+          ["Auf welchem Kontinent liegt Ägypten?", "Afrika", "Asien", "Europa", "Südamerika"],
+          ["Welcher Fluss fließt durch Wien?", "Donau", "Rhein", "Elbe", "Inn"],
+          ["Wie heißt die Hauptstadt von Polen?", "Warschau", "Krakau", "Danzig", "Prag"],
+          ["Wie heißt der höchste Berg Deutschlands?", "Zugspitze", "Watzmann", "Feldberg", "Brocken"],
+          ["Welches ist das größte Land Südamerikas?", "Brasilien", "Argentinien", "Peru", "Kolumbien"],
+          ["Wie heißt die Hauptstadt von Schweden?", "Stockholm", "Göteborg", "Malmö", "Helsinki"],
+          ["Welche Stadt nennt man die „Ewige Stadt“?", "Rom", "Athen", "Paris", "Jerusalem"],
+          ["Auf welcher Insel liegt Honolulu?", "Oahu", "Maui", "Kauai", "Big Island"],
+          ["Welches Land grenzt an Frankreich und Portugal?", "Spanien", "Italien", "Belgien", "Marokko"],
+          ["Wie heißt die Hauptstadt von Griechenland?", "Athen", "Thessaloniki", "Sparta", "Korinth"],
+          ["In welchem Land steht der Taj Mahal?", "Indien", "Pakistan", "Iran", "Nepal"],
+          ["Welcher Fluss fließt durch Köln?", "Rhein", "Main", "Mosel", "Weser"],
+          ["Welches Meer liegt im Nordosten Deutschlands?", "Ostsee", "Nordsee", "Mittelmeer", "Adria"],
+          ["Wie heißt die Hauptstadt von Neuseeland?", "Wellington", "Auckland", "Christchurch", "Canberra"],
+          ["Welcher ist der kleinste Staat der Erde?", "Vatikanstadt", "Monaco", "San Marino", "Liechtenstein"],
+          ["Wie heißt die Hauptstadt von Österreich?", "Wien", "Salzburg", "Graz", "Linz"],
+          ["Welches Gebirge gilt als Grenze zwischen Europa und Asien?", "Ural", "Alpen", "Karpaten", "Pyrenäen"],
+          ["Wie heißt die Hauptstadt von Südkorea?", "Seoul", "Busan", "Pjöngjang", "Tokio"],
+          ["Welche Stadt hat die meisten Einwohner in den USA?", "New York City", "Los Angeles", "Chicago", "Houston"],
+          ["Welcher Kontinent hat keine ständige Bevölkerung?", "Antarktis", "Australien", "Südamerika", "Europa"],
+          ["Wie heißt die Hauptstadt von Mexiko?", "Mexiko-Stadt", "Guadalajara", "Cancún", "Acapulco"],
+          ["Welcher Fluss fließt durch Budapest?", "Donau", "Moldau", "Theiß", "Weichsel"],
+          ["Wie heißt die Hauptstadt von Ägypten?", "Kairo", "Alexandria", "Luxor", "Gizeh"],
+          ["Welche Inselgruppe gehört zu Spanien und liegt vor Afrika?", "Kanarische Inseln", "Azoren", "Madeira", "Kapverden"],
+          ["Wie heißt die Hauptstadt von Dänemark?", "Kopenhagen", "Aarhus", "Odense", "Oslo"],
+          ["Welcher Fluss ist innerhalb Deutschlands am längsten?", "Rhein", "Elbe", "Donau", "Main"]
+        ]
+      },
+      {
+        id: "z_hist",
+        name: "Geschichte",
+        icon: "fa-landmark",
+        qs: [
+          ["In welchem Jahr fiel die Berliner Mauer?", "1989", "1961", "1987", "1991"],
+          ["Wer war der erste Bundeskanzler der Bundesrepublik?", "Konrad Adenauer", "Willy Brandt", "Ludwig Erhard", "Helmut Schmidt"],
+          ["In welchem Jahr begann der Zweite Weltkrieg?", "1939", "1914", "1933", "1941"],
+          ["Wer erreichte 1492 im Auftrag Spaniens Amerika?", "Christoph Kolumbus", "Vasco da Gama", "Marco Polo", "Ferdinand Magellan"],
+          ["Welches Volk baute die Pyramiden von Gizeh?", "Alte Ägypter", "Römer", "Griechen", "Babylonier"],
+          ["Wer betrat als erster Mensch den Mond?", "Neil Armstrong", "Buzz Aldrin", "Juri Gagarin", "John Glenn"],
+          ["In welchem Jahr war die erste Mondlandung?", "1969", "1965", "1972", "1961"],
+          ["Wer wurde 1933 zum Reichskanzler ernannt?", "Adolf Hitler", "Paul von Hindenburg", "Gustav Stresemann", "Franz von Papen"],
+          ["Welches Schiff sank 1912 nach der Kollision mit einem Eisberg?", "Titanic", "Lusitania", "Bismarck", "Queen Mary"],
+          ["In welchem Jahr begann die Französische Revolution?", "1789", "1776", "1804", "1815"],
+          ["Wie hieß die Hauptstadt des Römischen Reiches?", "Rom", "Athen", "Karthago", "Alexandria"],
+          ["Welche britische Monarchin regierte bis 2022 über 70 Jahre?", "Elisabeth II.", "Victoria", "Elisabeth I.", "Maria I."],
+          ["In welchem Jahr wurde Deutschland wiedervereinigt?", "1990", "1989", "1991", "1992"],
+          ["Wer erfand den Buchdruck mit beweglichen Lettern in Europa?", "Johannes Gutenberg", "Martin Luther", "Albrecht Dürer", "Leonardo da Vinci"],
+          ["Wer veröffentlichte 1517 seine 95 Thesen?", "Martin Luther", "Johannes Calvin", "Ulrich Zwingli", "Thomas Müntzer"],
+          ["Welcher römische Kaiser soll der Legende nach Rom angezündet haben?", "Nero", "Augustus", "Caligula", "Trajan"],
+          ["Wer war der erste Präsident der USA?", "George Washington", "Thomas Jefferson", "Abraham Lincoln", "John Adams"],
+          ["In welchem Jahr erklärten sich die USA für unabhängig?", "1776", "1789", "1783", "1812"],
+          ["Wer war der berühmte Anführer der Hunnen?", "Attila", "Dschingis Khan", "Hannibal", "Alarich"],
+          ["Welches Ereignis löste 1914 den Ersten Weltkrieg aus?", "Das Attentat von Sarajevo", "Der Überfall auf Polen", "Der Fall Konstantinopels", "Die Oktoberrevolution"],
+          ["Welcher französische Kaiser verlor die Schlacht bei Waterloo?", "Napoleon Bonaparte", "Ludwig XVI.", "Karl der Große", "Charles de Gaulle"],
+          ["Wie nennt man die Epoche der „Wiedergeburt“ von Kunst und Wissenschaft?", "Renaissance", "Barock", "Romantik", "Aufklärung"],
+          ["Wer gründete das Mongolische Weltreich?", "Dschingis Khan", "Alexander der Große", "Hannibal", "Kleopatra"],
+          ["Welcher Pharao ist für seine goldene Totenmaske berühmt?", "Tutanchamun", "Ramses II.", "Cheops", "Echnaton"],
+          ["Welche Stadt wurde 79 n. Chr. vom Vesuv verschüttet?", "Pompeji", "Athen", "Karthago", "Syrakus"],
+          ["Wer war Bundeskanzler zur Zeit der Wiedervereinigung?", "Helmut Kohl", "Helmut Schmidt", "Willy Brandt", "Gerhard Schröder"],
+          ["Welcher Krieg dauerte von 1618 bis 1648?", "Dreißigjähriger Krieg", "Siebenjähriger Krieg", "Hundertjähriger Krieg", "Erster Weltkrieg"],
+          ["Wer flog 1961 als erster Mensch ins Weltall?", "Juri Gagarin", "Alan Shepard", "Neil Armstrong", "Walentina Tereschkowa"],
+          ["Welches Land schenkte den USA die Freiheitsstatue?", "Frankreich", "England", "Deutschland", "Italien"],
+          ["In welchem Jahr endete der Zweite Weltkrieg in Europa?", "1945", "1944", "1946", "1943"],
+          ["Wer war der erste Bundespräsident Deutschlands?", "Theodor Heuss", "Konrad Adenauer", "Heinrich Lübke", "Richard von Weizsäcker"],
+          ["Welches antike Weltwunder stand in Alexandria?", "Der Leuchtturm von Pharos", "Der Koloss von Rhodos", "Die Hängenden Gärten", "Die Zeus-Statue"],
+          ["Von wem stammt der Ausspruch „Veni, vidi, vici“?", "Julius Caesar", "Augustus", "Nero", "Mark Anton"],
+          ["In welchem Jahr wurde die Berliner Mauer gebaut?", "1961", "1953", "1949", "1968"],
+          ["Was war die Hanse im Mittelalter?", "Ein Städtebund von Kaufleuten", "Ein Ritterorden", "Eine Königsdynastie", "Ein Kriegsschiff"],
+          ["Welche Stadt war die Hauptstadt der DDR?", "Ost-Berlin", "Leipzig", "Dresden", "Bonn"],
+          ["Wessen Expedition umsegelte erstmals die Erde?", "Ferdinand Magellan", "Christoph Kolumbus", "James Cook", "Francis Drake"],
+          ["Seit wann gibt es den Euro als Bargeld?", "2002", "1999", "2000", "2004"],
+          ["Wie hieß das Schiff der Pilgerväter 1620?", "Mayflower", "Santa Maria", "Victory", "Endeavour"],
+          ["Welches Land trat 2020 aus der EU aus?", "Vereinigtes Königreich", "Irland", "Dänemark", "Schweden"],
+          ["Wer war von 2005 bis 2021 Bundeskanzlerin?", "Angela Merkel", "Gerhard Schröder", "Ursula von der Leyen", "Annegret Kramp-Karrenbauer"],
+          ["Welches Reich wurde von Karl dem Großen geführt?", "Das Fränkische Reich", "Das Römische Reich", "Das Osmanische Reich", "Das Byzantinische Reich"],
+          ["Welche ägyptische Königin war mit Caesar und Marcus Antonius verbunden?", "Kleopatra", "Nofretete", "Hatschepsut", "Isis"],
+          ["In welchem Jahr eroberten die Osmanen Konstantinopel?", "1453", "1204", "1492", "1389"],
+          ["Welcher antike Philosoph sagte „Ich weiß, dass ich nichts weiß“?", "Sokrates", "Platon", "Aristoteles", "Epikur"],
+          ["Welche japanische Stadt wurde 1945 als erste durch eine Atombombe getroffen?", "Hiroshima", "Nagasaki", "Tokio", "Osaka"],
+          ["Wer war US-Präsident während der Mondlandung 1969?", "Richard Nixon", "John F. Kennedy", "Lyndon B. Johnson", "Gerald Ford"],
+          ["Wo fanden die antiken Olympischen Spiele statt?", "Olympia", "Delphi", "Athen", "Sparta"],
+          ["Welche Kaiserin ging als „Sissi“ in die Geschichte ein?", "Elisabeth von Österreich-Ungarn", "Maria Theresia", "Victoria von England", "Katharina die Große"],
+          ["Wer war der erste römische Kaiser?", "Augustus", "Julius Caesar", "Nero", "Konstantin"]
+        ]
+      },
+      {
+        id: "z_wiss",
+        name: "Wissenschaft & Natur",
+        icon: "fa-flask",
+        qs: [
+          ["Wie lautet das chemische Symbol für Gold?", "Au", "Ag", "Go", "Gd"],
+          ["Welcher Planet liegt der Sonne am nächsten?", "Merkur", "Venus", "Mars", "Erde"],
+          ["Wie viele Planeten hat unser Sonnensystem?", "8", "7", "9", "10"],
+          ["Wofür steht die Formel H₂O?", "Wasser", "Wasserstoffperoxid", "Sauerstoff", "Salzsäure"],
+          ["Wie viele Knochen hat ein erwachsener Mensch?", "206", "180", "212", "300"],
+          ["Welches ist das größte Organ des Menschen?", "Die Haut", "Die Leber", "Die Lunge", "Der Darm"],
+          ["Welches Gas nehmen Pflanzen bei der Photosynthese auf?", "Kohlenstoffdioxid", "Sauerstoff", "Stickstoff", "Helium"],
+          ["Wie schnell ist das Licht ungefähr?", "300.000 km pro Sekunde", "30.000 km pro Sekunde", "3.000.000 km pro Sekunde", "150.000 km pro Sekunde"],
+          ["Welches ist das härteste natürliche Material?", "Diamant", "Quarz", "Stahl", "Granit"],
+          ["Wer entwickelte die Relativitätstheorie?", "Albert Einstein", "Isaac Newton", "Max Planck", "Niels Bohr"],
+          ["Wie lautet das chemische Symbol für Sauerstoff?", "O", "Ox", "S", "Os"],
+          ["Wie heißt unsere Galaxie?", "Milchstraße", "Andromeda", "Sombrero", "Whirlpool"],
+          ["Welcher Planet hat die auffälligsten Ringe?", "Saturn", "Jupiter", "Mars", "Merkur"],
+          ["Was misst ein Thermometer?", "Temperatur", "Luftdruck", "Luftfeuchtigkeit", "Windstärke"],
+          ["Welche Blutgruppe gilt als Universalspender?", "0 negativ", "AB positiv", "A negativ", "B positiv"],
+          ["Welches Gas macht den größten Teil der Luft aus?", "Stickstoff", "Sauerstoff", "Kohlendioxid", "Argon"],
+          ["Wie viele Chromosomen hat der Mensch in einer Körperzelle?", "46", "23", "44", "48"],
+          ["Wie lautet das chemische Symbol für Eisen?", "Fe", "Ei", "Ir", "Fi"],
+          ["Wie viele natürliche Monde hat die Erde?", "1", "2", "0", "4"],
+          ["Welcher Planet wird „Roter Planet“ genannt?", "Mars", "Venus", "Jupiter", "Merkur"],
+          ["Bei wie viel Grad Celsius siedet Wasser auf Meereshöhe?", "100 °C", "90 °C", "110 °C", "212 °C"],
+          ["Wer formulierte das Gravitationsgesetz (Legende: Apfel)?", "Isaac Newton", "Galileo Galilei", "Johannes Kepler", "Albert Einstein"],
+          ["Was ist die Einheit der Kraft?", "Newton", "Joule", "Watt", "Pascal"],
+          ["Welcher Stoff färbt die Blätter grün?", "Chlorophyll", "Hämoglobin", "Keratin", "Melanin"],
+          ["Welcher ist der größte Planet im Sonnensystem?", "Jupiter", "Saturn", "Neptun", "Erde"],
+          ["Wie viele Herzkammern hat das menschliche Herz?", "4", "2", "3", "6"],
+          ["Woraus besteht die Sonne hauptsächlich?", "Wasserstoff", "Sauerstoff", "Eisen", "Kohlenstoff"],
+          ["Welches Vitamin bildet der Körper bei Sonnenlicht?", "Vitamin D", "Vitamin C", "Vitamin A", "Vitamin B12"],
+          ["Wie nennt man Tiere, die ausschließlich Pflanzen fressen?", "Herbivoren", "Karnivoren", "Omnivoren", "Insektivoren"],
+          ["Wie lautet das chemische Symbol für Natrium?", "Na", "N", "Nt", "Ni"],
+          ["Was untersucht die Geologie?", "Die Erde und ihre Gesteine", "Die Sterne", "Die Lebewesen", "Das Wetter"],
+          ["Welcher Planet dreht sich „auf der Seite“ um die Sonne?", "Uranus", "Neptun", "Saturn", "Merkur"],
+          ["Welches Organ produziert Insulin?", "Die Bauchspeicheldrüse", "Die Leber", "Die Niere", "Die Milz"],
+          ["Wie heißt die kleinste Einheit eines chemischen Elements?", "Atom", "Molekül", "Zelle", "Proton"],
+          ["Welche Farbe liegt im Regenbogen ganz oben (außen)?", "Rot", "Violett", "Gelb", "Blau"],
+          ["Wie viele Farben zählt man traditionell im Regenbogen?", "7", "5", "6", "8"],
+          ["Welcher Teil des Auges bestimmt die Augenfarbe?", "Die Iris", "Die Pupille", "Die Netzhaut", "Die Linse"],
+          ["Wie heißt die Wissenschaft von den Tieren?", "Zoologie", "Botanik", "Ökologie", "Geologie"],
+          ["Welcher Temperatur entspricht der absolute Nullpunkt ungefähr?", "−273 °C", "−100 °C", "−373 °C", "0 °C"],
+          ["Welches Metall ist bei Raumtemperatur flüssig?", "Quecksilber", "Blei", "Zinn", "Zink"],
+          ["Welcher Himmelskörper wurde 2006 zum Zwergplaneten „herabgestuft“?", "Pluto", "Neptun", "Uranus", "Mars"],
+          ["Wie nennt man den Übergang von flüssig zu gasförmig?", "Verdampfen", "Gefrieren", "Schmelzen", "Erstarren"],
+          ["Welches Organ pumpt das Blut durch den Körper?", "Das Herz", "Die Lunge", "Die Leber", "Der Magen"],
+          ["Wer entdeckte das Penicillin?", "Alexander Fleming", "Louis Pasteur", "Robert Koch", "Marie Curie"],
+          ["Welche Forscherin erhielt zwei Nobelpreise für Physik und Chemie?", "Marie Curie", "Lise Meitner", "Rosalind Franklin", "Ada Lovelace"],
+          ["Wie heißt der der Erde nächste Stern nach der Sonne?", "Proxima Centauri", "Sirius", "Polarstern", "Wega"],
+          ["Wie viele Zähne hat ein Erwachsener mit Weisheitszähnen?", "32", "28", "30", "36"],
+          ["Woraus besteht Stahl hauptsächlich?", "Eisen", "Kupfer", "Aluminium", "Zinn"],
+          ["Wie heißt die äußerste feste Schicht der Erde?", "Erdkruste", "Erdmantel", "Erdkern", "Atmosphäre"],
+          ["Welches ist das leichteste chemische Element?", "Wasserstoff", "Helium", "Lithium", "Sauerstoff"]
+        ]
+      },
+      {
+        id: "z_sport",
+        name: "Sport",
+        icon: "fa-futbol",
+        qs: [
+          ["Wie viele Spieler stehen pro Team beim Fußball auf dem Feld?", "11", "9", "10", "12"],
+          ["Wo fanden die Olympischen Sommerspiele 2016 statt?", "Rio de Janeiro", "London", "Tokio", "Peking"],
+          ["Wie oft wurde Deutschland bis 2022 Fußball-Weltmeister der Männer?", "4", "3", "5", "2"],
+          ["In welcher Sportart gibt es „Birdie“ und „Eagle“?", "Golf", "Tennis", "Baseball", "Curling"],
+          ["Wie viele Ringe hat das Olympia-Logo?", "5", "4", "6", "7"],
+          ["Wie viele Punkte bringt ein Touchdown im American Football?", "6", "3", "7", "5"],
+          ["Wo fanden die ersten Olympischen Spiele der Neuzeit 1896 statt?", "Athen", "Paris", "London", "Rom"],
+          ["Wie lange dauert ein reguläres Fußballspiel?", "90 Minuten", "80 Minuten", "100 Minuten", "120 Minuten"],
+          ["In welcher Sportart gibt es den „Slam Dunk“?", "Basketball", "Volleyball", "Handball", "Tennis"],
+          ["Wer ist Rekordtorschütze bei Fußball-Weltmeisterschaften (16 Tore)?", "Miroslav Klose", "Gerd Müller", "Ronaldo", "Pelé"],
+          ["Wie viele Spieler hat ein Volleyballteam gleichzeitig auf dem Feld?", "6", "5", "7", "8"],
+          ["Welche Sportart verbindet man mit „Jab“ und „Haken“?", "Boxen", "Ringen", "Fechten", "Judo"],
+          ["Wer wurde 2014 Fußball-Weltmeister?", "Deutschland", "Argentinien", "Brasilien", "Niederlande"],
+          ["Wie lang ist ein Marathon?", "42,195 km", "40 km", "21,1 km", "50 km"],
+          ["Wie viele Grand-Slam-Turniere gibt es im Tennis pro Jahr?", "4", "3", "5", "6"],
+          ["Welche Farbe hat das Trikot des Gesamtführenden bei der Tour de France?", "Gelb", "Grün", "Rot", "Weiß"],
+          ["Wie viele Spieler hat ein Basketballteam gleichzeitig auf dem Feld?", "5", "6", "7", "4"],
+          ["Welche Sportart wird auf Eis mit Besen und Steinen gespielt?", "Curling", "Eishockey", "Bandy", "Eisschnelllauf"],
+          ["Wie viele Weltmeistertitel in der Formel 1 holte Michael Schumacher?", "7", "5", "6", "8"],
+          ["Welches Land hat die meisten Fußball-WM-Titel der Männer?", "Brasilien", "Deutschland", "Italien", "Argentinien"],
+          ["Wie hoch hängt ein Basketballkorb?", "3,05 m", "2,50 m", "3,50 m", "2,80 m"],
+          ["Wie viele Punkte gibt es in der Fußball-Liga für einen Sieg?", "3", "2", "1", "4"],
+          ["In welcher Sportart gibt es die Abseitsregel?", "Fußball", "Tennis", "Golf", "Schwimmen"],
+          ["Wer hat die meisten Grand-Slam-Titel bei den Männern (24)?", "Novak Djokovic", "Roger Federer", "Rafael Nadal", "Pete Sampras"],
+          ["In welcher Stadt findet das Tennisturnier von Wimbledon statt?", "London", "Paris", "New York", "Melbourne"],
+          ["Welche Sportart spielt man mit Federball?", "Badminton", "Squash", "Tischtennis", "Tennis"],
+          ["Wer ist Rekordmeister der Fußball-Bundesliga?", "FC Bayern München", "Borussia Dortmund", "Werder Bremen", "1. FC Köln"],
+          ["Wie viele Löcher hat ein Standard-Golfplatz?", "18", "9", "12", "20"],
+          ["Bei welcher Sportart gibt es das Pauschenpferd?", "Turnen", "Reiten", "Fechten", "Judo"],
+          ["Wer hält den 100-Meter-Weltrekord (9,58 s)?", "Usain Bolt", "Carl Lewis", "Justin Gatlin", "Yohan Blake"],
+          ["Welches Land richtete die Fußball-WM 2006 aus?", "Deutschland", "Frankreich", "Südafrika", "Brasilien"],
+          ["Welcher Verein trägt den Spitznamen „Die Roten Teufel“?", "1. FC Kaiserslautern", "VfB Stuttgart", "Hertha BSC", "Eintracht Frankfurt"],
+          ["Wie viele Gewinnsätze braucht man bei Grand-Slam-Matches der Männer?", "3", "2", "4", "5"],
+          ["Aus wie vielen Disziplinen besteht der Zehnkampf?", "10", "8", "12", "7"],
+          ["Wie viele Felder hat ein Schachbrett?", "64", "48", "72", "100"],
+          ["Welche Schachfigur darf nur diagonal ziehen?", "Der Läufer", "Der Turm", "Der Springer", "Der Bauer"],
+          ["Welche Form hat ein Rugbyball?", "Oval", "Rund", "Eckig", "Dreieckig"],
+          ["Welche Kampfsportart gilt als Nationalsport Japans?", "Sumo", "Judo", "Karate", "Kendo"],
+          ["Bei welcher Sportart gibt es ein „Hole in One“?", "Golf", "Darts", "Billard", "Bowling"],
+          ["Was ist das höchste Finish im Darts?", "170", "180", "160", "150"],
+          ["Wie viele Punkte sind in einem Bowling-Spiel maximal möglich?", "300", "200", "250", "360"],
+          ["In welchem Land ist Baseball der Nationalsport?", "USA", "Kanada", "Kuba", "Japan"],
+          ["Wie lange dauert ein reguläres Handballspiel?", "60 Minuten", "90 Minuten", "40 Minuten", "80 Minuten"],
+          ["Wo fanden die Olympischen Sommerspiele 2012 statt?", "London", "Peking", "Athen", "Paris"],
+          ["Wie viele Spieler (inkl. Torwart) hat ein Eishockeyteam gleichzeitig auf dem Eis?", "6", "5", "7", "11"],
+          ["Wie weit ist der Elfmeterpunkt vom Tor entfernt?", "11 Meter", "9 Meter", "7 Meter", "16 Meter"],
+          ["Mit welchem Land wurde Lionel Messi 2022 Weltmeister?", "Argentinien", "Brasilien", "Spanien", "Portugal"],
+          ["Welche Sportart betreibt Serena Williams?", "Tennis", "Golf", "Leichtathletik", "Basketball"],
+          ["Welche Flagge wird im Motorsport am Zielstrich geschwenkt?", "Die karierte Flagge", "Die rote Flagge", "Die gelbe Flagge", "Die weiße Flagge"],
+          ["Mit welchem Spielgerät spielt man Eishockey?", "Puck", "Ball", "Stein", "Federball"]
+        ]
+      },
+      {
+        id: "z_film",
+        name: "Film, Serien & TV",
+        icon: "fa-clapperboard",
+        qs: [
+          ["Wer führte bei „Titanic“ (1997) Regie?", "James Cameron", "Steven Spielberg", "Ridley Scott", "Christopher Nolan"],
+          ["Wie heißt der Zauberlehrling mit der Blitznarbe?", "Harry Potter", "Percy Jackson", "Eragon", "Merlin"],
+          ["In welcher Filmreihe sagt man „Ich bin dein Vater“?", "Star Wars", "Matrix", "Herr der Ringe", "Superman"],
+          ["Wer spielt Captain Jack Sparrow?", "Johnny Depp", "Orlando Bloom", "Brad Pitt", "Tom Cruise"],
+          ["In welchem Disney-Film kommt der Löwe Simba vor?", "Der König der Löwen", "Bambi", "Tarzan", "Das Dschungelbuch"],
+          ["Wie heißt der grüne Oger aus dem Kinofilm?", "Shrek", "Gru", "Hulk", "Grinch"],
+          ["Welche Serie spielt unter anderem in Westeros?", "Game of Thrones", "The Witcher", "Vikings", "Rome"],
+          ["Wer erschuf die Figur Micky Maus?", "Walt Disney", "Walter Lantz", "Max Fleischer", "William Hanna"],
+          ["Wie heißt der Ringträger in „Der Herr der Ringe“?", "Frodo", "Bilbo", "Gandalf", "Aragorn"],
+          ["Wer spielt Iron Man im Marvel-Universum?", "Robert Downey Jr.", "Chris Evans", "Chris Hemsworth", "Mark Ruffalo"],
+          ["Wie heißt der Doktorfisch mit Gedächtnisproblemen in „Findet Nemo“?", "Dorie", "Marlin", "Bruce", "Gill"],
+          ["Wie lautet der Nachname von Agent 007?", "Bond", "Smith", "Ryan", "Bourne"],
+          ["Welches Studio produzierte „Toy Story“?", "Pixar", "DreamWorks", "Illumination", "Studio Ghibli"],
+          ["In welcher Stadt spielt die Serie „Friends“?", "New York", "Los Angeles", "Chicago", "Boston"],
+          ["Wie heißt Elsas Schwester in „Die Eiskönigin“?", "Anna", "Rapunzel", "Ariel", "Jasmin"],
+          ["Wer spielt Forrest Gump?", "Tom Hanks", "Tom Cruise", "Kevin Costner", "Bill Murray"],
+          ["In welcher Serie kocht Walter White Chemie-Produkte?", "Breaking Bad", "Better Call Saul", "Ozark", "Dexter"],
+          ["Wie heißt der graue Zauberer in „Der Herr der Ringe“?", "Gandalf", "Dumbledore", "Merlin", "Rincewind"],
+          ["In welchem Film gibt es einen Freizeitpark mit geklonten Dinosauriern?", "Jurassic Park", "King Kong", "Godzilla", "Avatar"],
+          ["Wie heißt der Hund von Micky Maus?", "Pluto", "Goofy", "Odie", "Snoopy"],
+          ["Wer spielte 2019 den Joker im gleichnamigen Film?", "Joaquin Phoenix", "Heath Ledger", "Jared Leto", "Jack Nicholson"],
+          ["Wie heißt der Vater in der Familie Simpson?", "Homer", "Bart", "Ned", "Moe"],
+          ["Welche Pille nimmt Neo in „Matrix“, um die Wahrheit zu sehen?", "Die rote", "Die blaue", "Die grüne", "Die gelbe"],
+          ["Aus welcher Filmreihe stammt der Satz „Möge die Macht mit dir sein“?", "Star Wars", "Star Trek", "Dune", "Avatar"],
+          ["Wer führte bei „Inception“ und „Oppenheimer“ Regie?", "Christopher Nolan", "Denis Villeneuve", "Quentin Tarantino", "David Fincher"],
+          ["Wer spielte den „Terminator“?", "Arnold Schwarzenegger", "Sylvester Stallone", "Bruce Willis", "Jean-Claude Van Damme"],
+          ["Wie heißt die bekannteste deutsche Sonntagabend-Krimireihe?", "Tatort", "Polizeiruf 110", "SOKO", "Der Alte"],
+          ["Wie heißt die Prinzessin in „Shrek“?", "Fiona", "Aurora", "Belle", "Tiana"],
+          ["Wie heißt der Löwe in „Die Chroniken von Narnia“?", "Aslan", "Simba", "Mufasa", "Alex"],
+          ["Wer lebt in einer Ananas unter dem Meer?", "SpongeBob Schwammkopf", "Patrick Star", "Thaddäus Tentakel", "Mr. Krabs"],
+          ["Wer spielt Neo in „Matrix“?", "Keanu Reeves", "Brad Pitt", "Johnny Depp", "Hugo Weaving"],
+          ["Wie heißt die Heimat der Hobbits?", "Das Auenland", "Mordor", "Gondor", "Rohan"],
+          ["Welche Schule besucht Harry Potter?", "Hogwarts", "Beauxbatons", "Durmstrang", "Ilvermorny"],
+          ["Wer spielte Don Corleone in „Der Pate“ (1972)?", "Marlon Brando", "Al Pacino", "Robert De Niro", "James Caan"],
+          ["Welcher nicht-englischsprachige Film gewann 2020 den Oscar als bester Film?", "Parasite", "Joker", "1917", "Roma"],
+          ["Welcher war der erste abendfüllende Pixar-Film?", "Toy Story", "Findet Nemo", "Das große Krabbeln", "Die Monster AG"],
+          ["Wie heißt der Roboter, in den sich Wall-E verliebt?", "EVE", "AVA", "EDI", "ALMA"],
+          ["Wie heißt das Mädchen mit den Kräften in „Stranger Things“?", "Eleven", "Max", "Joyce", "Nancy"],
+          ["Welcher Schauspieler spielte Maximus in „Gladiator“?", "Russell Crowe", "Mel Gibson", "Brad Pitt", "Joaquin Phoenix"],
+          ["Wie heißt der Schneemann in „Die Eiskönigin“?", "Olaf", "Sven", "Hans", "Kristoff"],
+          ["In welcher Stadt spielt „Kevin – Allein zu Haus“ hauptsächlich?", "Chicago", "New York", "Boston", "Seattle"],
+          ["In welcher Serie wohnt der Physiker Sheldon Cooper?", "The Big Bang Theory", "How I Met Your Mother", "Friends", "Two and a Half Men"],
+          ["Wer spielt Rose in „Titanic“?", "Kate Winslet", "Cate Blanchett", "Emma Watson", "Natalie Portman"],
+          ["In welchem Zeichentrickfilm kommt der Bär Balu vor?", "Das Dschungelbuch", "Bambi", "Aristocats", "Pinocchio"],
+          ["Zu welcher Filmreihe gehört der Droide C-3PO?", "Star Wars", "Alien", "Matrix", "Star Trek"],
+          ["Aus welchem Land stammt die Serie „Squid Game“?", "Südkorea", "Japan", "China", "Thailand"],
+          ["Wie heißt der Bösewicht in „Harry Potter“?", "Lord Voldemort", "Sauron", "Darth Vader", "Loki"],
+          ["Wie heißt der fliegende Elefant von Disney?", "Dumbo", "Babar", "Benjamin Blümchen", "Elmar"],
+          ["Welcher Marvel-Held schwingt einen Hammer?", "Thor", "Hulk", "Hawkeye", "Loki"],
+          ["In welchem Film sagt ein Junge: „Ich sehe tote Menschen“?", "Sixth Sense", "Shining", "Ring", "Scream"]
+        ]
+      },
+      {
+        id: "z_musik",
+        name: "Musik & Kultur",
+        icon: "fa-music",
+        qs: [
+          ["Wie viele Saiten hat eine Geige?", "4", "5", "6", "3"],
+          ["Welche Band sang „Bohemian Rhapsody“?", "Queen", "The Beatles", "Led Zeppelin", "Pink Floyd"],
+          ["Wer komponierte die Oper „Die Zauberflöte“?", "Wolfgang Amadeus Mozart", "Ludwig van Beethoven", "Johann Sebastian Bach", "Joseph Haydn"],
+          ["Wie viele Tasten hat ein Standard-Klavier?", "88", "76", "92", "100"],
+          ["Welcher berühmte Komponist wurde im Laufe seines Lebens taub?", "Ludwig van Beethoven", "Mozart", "Bach", "Richard Wagner"],
+          ["Wer schrieb das Drama „Faust“?", "Johann Wolfgang von Goethe", "Friedrich Schiller", "Gotthold Ephraim Lessing", "Franz Kafka"],
+          ["Wie heißt das berühmte Gemälde von Leonardo da Vinci mit dem rätselhaften Lächeln?", "Mona Lisa", "Das Mädchen mit dem Perlenohrring", "Die Sternennacht", "Der Schrei"],
+          ["Wer malte „Die Sternennacht“?", "Vincent van Gogh", "Claude Monet", "Pablo Picasso", "Edvard Munch"],
+          ["Welche Sängerin nennt man die „Queen of Pop“?", "Madonna", "Beyoncé", "Rihanna", "Adele"],
+          ["Welche Band hat Mick Jagger als Sänger?", "The Rolling Stones", "The Who", "Queen", "AC/DC"],
+          ["Wer schrieb den Text der „Ode an die Freude“?", "Friedrich Schiller", "Goethe", "Heinrich Heine", "Bertolt Brecht"],
+          ["Wie viele Musiker spielen in einem Quartett?", "4", "3", "5", "2"],
+          ["Welches Instrument spielt man klassisch mit einem Bogen?", "Cello", "Gitarre", "Klavier", "Trompete"],
+          ["Wer sang „Thriller“?", "Michael Jackson", "Prince", "Elvis Presley", "Stevie Wonder"],
+          ["Wer sang „99 Luftballons“?", "Nena", "Alphaville", "Falco", "Ideal"],
+          ["Wer wird als „King of Rock 'n' Roll“ bezeichnet?", "Elvis Presley", "Chuck Berry", "Little Richard", "Buddy Holly"],
+          ["In welcher Stadt steht das berühmte Opernhaus „Scala“?", "Mailand", "Rom", "Venedig", "Florenz"],
+          ["Wer schrieb „Romeo und Julia“?", "William Shakespeare", "Christopher Marlowe", "Charles Dickens", "Molière"],
+          ["Wer schrieb die „Harry Potter“-Bücher?", "J. K. Rowling", "Suzanne Collins", "Stephenie Meyer", "Cornelia Funke"],
+          ["Wer schrieb „Die Verwandlung“?", "Franz Kafka", "Thomas Mann", "Hermann Hesse", "Bertolt Brecht"],
+          ["Welches Instrument gibt es als „Flügel“?", "Klavier", "Harfe", "Orgel", "Akkordeon"],
+          ["Wie nennt man die tiefe männliche Singstimme?", "Bass", "Tenor", "Alt", "Sopran"],
+          ["Wer malte „Der Schrei“?", "Edvard Munch", "Gustav Klimt", "Salvador Dalí", "Egon Schiele"],
+          ["Wer schrieb „Der kleine Prinz“?", "Antoine de Saint-Exupéry", "Jules Verne", "Victor Hugo", "Albert Camus"],
+          ["Welche Band veröffentlichte „Wonderwall“?", "Oasis", "Blur", "Coldplay", "Radiohead"],
+          ["Wer sang „Rolling in the Deep“?", "Adele", "Amy Winehouse", "Duffy", "Lana Del Rey"],
+          ["Wer stiftete den Nobelpreis?", "Alfred Nobel", "Albert Einstein", "Marie Curie", "Thomas Edison"],
+          ["Welcher Maler ist für „zerfließende Uhren“ bekannt?", "Salvador Dalí", "Pablo Picasso", "René Magritte", "Joan Miró"],
+          ["Aus welchem Land stammt der Tango?", "Argentinien", "Spanien", "Kuba", "Brasilien"],
+          ["Welcher Tanz ist mit Wien verbunden?", "Der Walzer", "Samba", "Polka", "Tango"],
+          ["Wer komponierte „Die vier Jahreszeiten“?", "Antonio Vivaldi", "Johann Sebastian Bach", "Georg Friedrich Händel", "Frédéric Chopin"],
+          ["Wie viele Sinfonien schrieb Beethoven?", "9", "5", "12", "41"],
+          ["Wer schrieb „Die Blechtrommel“?", "Günter Grass", "Heinrich Böll", "Erich Kästner", "Siegfried Lenz"],
+          ["Wer schrieb „Die Physiker“?", "Friedrich Dürrenmatt", "Max Frisch", "Bertolt Brecht", "Friedrich Schiller"],
+          ["Welcher Rapper heißt mit bürgerlichem Namen Marshall Mathers?", "Eminem", "Dr. Dre", "50 Cent", "Snoop Dogg"],
+          ["Wer sang „Shake It Off“?", "Taylor Swift", "Katy Perry", "Selena Gomez", "Ariana Grande"],
+          ["Aus welcher Stadt stammen die Beatles?", "Liverpool", "London", "Manchester", "Birmingham"],
+          ["Welcher Künstler ist für seine Campbell-Suppendosen bekannt?", "Andy Warhol", "Roy Lichtenstein", "Keith Haring", "Jeff Koons"],
+          ["In welcher Stadt steht das Museum Louvre?", "Paris", "London", "Madrid", "Rom"],
+          ["Was ist ein Haiku?", "Ein japanisches Kurzgedicht", "Eine italienische Oper", "Ein Tanz", "Eine Skulptur"],
+          ["Wer sang „Waka Waka“ zur Fußball-WM 2010?", "Shakira", "Jennifer Lopez", "Beyoncé", "Rihanna"],
+          ["Zu welcher Instrumentenfamilie zählt das Saxophon?", "Holzblasinstrumente", "Blechblasinstrumente", "Streichinstrumente", "Schlaginstrumente"],
+          ["In welcher Stadt fand der Eurovision Song Contest 2023 statt?", "Liverpool", "Turin", "Malmö", "Stockholm"],
+          ["Aus welchem Land stammt die Band ABBA?", "Schweden", "Norwegen", "Dänemark", "Finnland"],
+          ["Welche Band veröffentlichte „Back in Black“?", "AC/DC", "Metallica", "Iron Maiden", "KISS"],
+          ["Wer ist Sänger der Band U2?", "Bono", "The Edge", "Sting", "Bruce Springsteen"],
+          ["Welches Musical handelt von Katzen?", "Cats", "Evita", "Hair", "Grease"],
+          ["In welchem Musical spielen Sandy und Danny?", "Grease", "Hairspray", "Fame", "Chicago"],
+          ["Wer schrieb „Der Zauberer von Oz“?", "L. Frank Baum", "Lewis Carroll", "C. S. Lewis", "J. M. Barrie"],
+          ["Wie heißt Beethovens bekanntes Klavierstück mit einem Frauennamen?", "Für Elise", "Mondscheinsonate", "Ode an die Freude", "Eroica"]
+        ]
+      },
+      {
+        id: "z_essen",
+        name: "Essen & Trinken",
+        icon: "fa-utensils",
+        qs: [
+          ["Was ist die Hauptzutat von Guacamole?", "Avocado", "Gurke", "Tomate", "Zucchini"],
+          ["Aus welchem Land stammt die Pizza?", "Italien", "Griechenland", "Spanien", "Frankreich"],
+          ["Aus welchem Land stammt Sushi?", "Japan", "China", "Korea", "Thailand"],
+          ["Woraus wird Wein gemacht?", "Trauben", "Gerste", "Kartoffeln", "Äpfeln"],
+          ["Woraus besteht Hummus hauptsächlich?", "Kichererbsen", "Linsen", "Bohnen", "Erbsen"],
+          ["Welche Nuss ist die Basis von Marzipan?", "Mandel", "Haselnuss", "Walnuss", "Cashew"],
+          ["Welches Gewürz gehört zu den teuersten der Welt?", "Safran", "Zimt", "Muskat", "Kurkuma"],
+          ["Wie heißt das italienische Wort für Eis?", "Gelato", "Dolce", "Panna", "Torta"],
+          ["Aus Gerste und Hopfen wird welches Getränk gebraut?", "Bier", "Wein", "Cidre", "Met"],
+          ["Woraus wird Tofu hergestellt?", "Aus Sojabohnen", "Aus Reismehl", "Aus Milch", "Aus Fisch"],
+          ["Aus welchem Land stammt die Paella?", "Spanien", "Portugal", "Mexiko", "Italien"],
+          ["Woraus besteht Sauerkraut?", "Weißkohl", "Rotkohl", "Spitzkohl", "Wirsing"],
+          ["Aus welchem Land stammen Spaghetti Carbonara?", "Italien", "Frankreich", "Griechenland", "Deutschland"],
+          ["Was ist Wasabi?", "Japanischer Meerrettich", "Ingwer", "Senf", "Chili"],
+          ["Aus welchem Land stammt das Baguette?", "Frankreich", "Italien", "Belgien", "Spanien"],
+          ["Woraus besteht ein Cappuccino klassisch?", "Espresso und Milchschaum", "Tee und Milch", "Kakao und Sahne", "Filterkaffee und Wasser"],
+          ["Welcher Käse ist für seine Löcher bekannt?", "Emmentaler", "Gouda", "Camembert", "Parmesan"],
+          ["Welcher Weichkäse kommt aus Frankreich?", "Camembert", "Cheddar", "Edamer", "Feta"],
+          ["Welche Frucht ist botanisch gesehen eine Beere?", "Banane", "Erdbeere", "Himbeere", "Brombeere"],
+          ["Welches Gemüse bringt beim Schneiden oft zum Weinen?", "Zwiebel", "Kartoffel", "Gurke", "Paprika"],
+          ["Woraus wird Ketchup hauptsächlich gemacht?", "Tomaten", "Paprika", "Roter Bete", "Äpfeln"],
+          ["Aus welchem Land stammt Coca-Cola?", "USA", "Deutschland", "England", "Mexiko"],
+          ["Was ist Prosecco?", "Ein Schaumwein", "Ein Bier", "Ein Likör", "Ein Weinbrand"],
+          ["Aus welchem Land stammt der Döner Kebab ursprünglich?", "Türkei", "Griechenland", "Libanon", "Iran"],
+          ["Aus welchem Land kommt die Toblerone?", "Schweiz", "Belgien", "Österreich", "Deutschland"],
+          ["Aus welchem Fleisch wird ein klassisches Wiener Schnitzel gemacht?", "Kalb", "Schwein", "Huhn", "Rind"],
+          ["Wie heißt der koreanische fermentierte Kohl?", "Kimchi", "Sauerkraut", "Natto", "Miso"],
+          ["Welcher Käse ist die Basis von Tiramisu?", "Mascarpone", "Ricotta", "Mozzarella", "Parmesan"],
+          ["Welcher Alkohol ist die Basis eines Mojito?", "Rum", "Wodka", "Tequila", "Gin"],
+          ["Welcher Alkohol ist die Basis eines Margarita?", "Tequila", "Rum", "Wodka", "Whisky"],
+          ["Aus welcher Frucht wird Calvados gebrannt?", "Äpfeln", "Birnen", "Trauben", "Kirschen"],
+          ["Welche Farbe hat eine Aubergine meistens?", "Violett", "Orange", "Grün", "Gelb"],
+          ["Welcher Süßwarenhersteller aus Bonn macht Goldbären?", "Haribo", "Katjes", "Storck", "Ritter Sport"],
+          ["Welche Schokolade ist für ihre quadratische Form bekannt?", "Ritter Sport", "Milka", "Lindt", "Kinder"],
+          ["Wie nennt man mit Reis gefüllte, in Algen gerollte Sushi-Stücke?", "Maki", "Nigiri", "Sashimi", "Tempura"],
+          ["Welche Frucht trägt ihre Kerne außen?", "Erdbeere", "Himbeere", "Kirsche", "Apfel"],
+          ["Welches Vitamin steckt besonders viel in Orangen?", "Vitamin C", "Vitamin A", "Vitamin D", "Vitamin K"],
+          ["Woraus werden Pommes frites gemacht?", "Kartoffeln", "Maniok", "Mais", "Karotten"],
+          ["Woraus wird Popcorn gemacht?", "Mais", "Weizen", "Reis", "Hafer"],
+          ["Welche „Nuss“ gehört botanisch zu den Hülsenfrüchten?", "Erdnuss", "Walnuss", "Haselnuss", "Mandel"],
+          ["Welches Getränk ist die Basis von Glühwein?", "Rotwein", "Weißwein", "Bier", "Apfelsaft"],
+          ["Aus welchem Fleisch wird traditionell Weißwurst hergestellt?", "Kalbfleisch", "Rindfleisch", "Lammfleisch", "Putenfleisch"],
+          ["In welcher Stadt wurde die Currywurst angeblich erfunden?", "Berlin", "Hamburg", "Köln", "München"],
+          ["Welches Käsegericht taucht man Brotstücke in geschmolzenen Käse?", "Fondue", "Raclette", "Gratin", "Quiche"],
+          ["Aus welchem Gemüse gewinnt man in Deutschland Zucker?", "Zuckerrübe", "Karotte", "Pastinake", "Mais"],
+          ["Welcher Alkohol steckt in einem Irish Coffee?", "Whiskey", "Rum", "Wodka", "Gin"],
+          ["Wie heißt das indische Joghurtgetränk?", "Lassi", "Chai", "Raita", "Ayran"],
+          ["Welcher Stoff macht Chili scharf?", "Capsaicin", "Koffein", "Theobromin", "Menthol"],
+          ["Welche Zutat lässt Brotteig aufgehen?", "Hefe", "Zucker", "Salz", "Butter"],
+          ["Aus welchem Land stammen Crêpes?", "Frankreich", "Belgien", "Schweiz", "Italien"]
+        ]
+      },
+      {
+        id: "z_tiere",
+        name: "Tiere & Pflanzen",
+        icon: "fa-paw",
+        qs: [
+          ["Welches ist das größte Landtier?", "Afrikanischer Elefant", "Nashorn", "Giraffe", "Nilpferd"],
+          ["Welches ist das schnellste Landtier?", "Gepard", "Löwe", "Antilope", "Pferd"],
+          ["Wie viele Beine hat eine Spinne?", "8", "6", "10", "4"],
+          ["Welches ist das größte Tier der Welt?", "Blauwal", "Pottwal", "Walhai", "Elefant"],
+          ["Welches dieser Tiere ist ein Säugetier?", "Delfin", "Hai", "Thunfisch", "Forelle"],
+          ["Welches Tier schläft kopfüber hängend?", "Fledermaus", "Eule", "Igel", "Maulwurf"],
+          ["Wie heißt das Jungtier einer Kuh?", "Kalb", "Fohlen", "Lamm", "Ferkel"],
+          ["Wie heißt das Jungtier eines Pferdes?", "Fohlen", "Kalb", "Welpe", "Küken"],
+          ["Welcher ist der größte lebende Vogel?", "Strauß", "Pinguin", "Albatros", "Kondor"],
+          ["Welches Säugetier legt Eier?", "Schnabeltier", "Känguru", "Koala", "Fledermaus"],
+          ["Welche Pflanze fängt und verdaut Insekten?", "Venusfliegenfalle", "Sonnenblume", "Kaktus", "Farn"],
+          ["Welche Blume ist das Symbol der Niederlande?", "Tulpe", "Rose", "Lilie", "Nelke"],
+          ["Welcher Baum trägt Eicheln?", "Eiche", "Buche", "Kastanie", "Birke"],
+          ["Welches Blatt ziert die Flagge Kanadas?", "Ahornblatt", "Eichenblatt", "Birkenblatt", "Lindenblatt"],
+          ["Welches Tier ist das Wappentier von Berlin?", "Bär", "Adler", "Löwe", "Wolf"],
+          ["Wie viele Herzen hat ein Oktopus?", "3", "1", "2", "4"],
+          ["Welches Tier hat ein schwarz-weiß gestreiftes Fell und lebt in Afrika?", "Zebra", "Okapi", "Tapir", "Gnu"],
+          ["Von welchem Tier stammt Wolle hauptsächlich?", "Schaf", "Kuh", "Schwein", "Pferd"],
+          ["Welche Raubkatze nennt man „König der Tiere“?", "Löwe", "Tiger", "Leopard", "Gepard"],
+          ["Wie nennt man ein weibliches Schwein?", "Sau", "Bache", "Ricke", "Stute"],
+          ["Welcher Vogel bringt der Legende nach die Babys?", "Storch", "Schwan", "Kranich", "Adler"],
+          ["Welches Insekt produziert Honig?", "Biene", "Wespe", "Hummel", "Ameise"],
+          ["Welcher Fisch wandert zum Laichen die Flüsse hinauf?", "Lachs", "Thunfisch", "Hai", "Kabeljau"],
+          ["Welches Reptil ist für seinen Farbwechsel bekannt?", "Chamäleon", "Gecko", "Leguan", "Salamander"],
+          ["Wie nennt man die männliche Biene?", "Drohne", "Königin", "Arbeiterin", "Larve"],
+          ["Wovon ernährt sich der Große Panda hauptsächlich?", "Bambus", "Eukalyptus", "Gras", "Fisch"],
+          ["Wovon ernährt sich der Koala hauptsächlich?", "Eukalyptusblättern", "Bambus", "Gras", "Beeren"],
+          ["Zu welcher Gruppe gehört der Hai?", "Knorpelfische", "Knochenfische", "Säugetiere", "Krebse"],
+          ["Wie viele Beine hat ein Insekt?", "6", "4", "8", "10"],
+          ["Welche Schlange erdrückt ihre Beute?", "Boa constrictor", "Kobra", "Viper", "Klapperschlange"],
+          ["Welcher Nadelbaum verliert im Herbst seine Nadeln?", "Lärche", "Fichte", "Tanne", "Kiefer"],
+          ["Welche Blume dreht sich dem Sonnenlicht nach?", "Sonnenblume", "Tulpe", "Rose", "Lavendel"],
+          ["Welche Frucht wächst an der Dattelpalme?", "Dattel", "Mango", "Birne", "Feige"],
+          ["Welcher Vogel hat die größte Flügelspannweite?", "Wanderalbatros", "Steinadler", "Seeadler", "Pelikan"],
+          ["Wie viele Mägen (Abschnitte) hat eine Kuh?", "4", "1", "2", "3"],
+          ["Welches Tier ist ein Beuteltier?", "Känguru", "Faultier", "Gürteltier", "Erdmännchen"],
+          ["Wie nennt man das Horngebilde eines Hirsches?", "Geweih", "Horn", "Stoßzahn", "Mähne"],
+          ["Welches Tier baut Dämme?", "Biber", "Otter", "Dachs", "Rentier"],
+          ["Welches Tier ist das Symbol der Medizin (Äskulapstab)?", "Schlange", "Adler", "Löwe", "Bär"],
+          ["Welches Gas nehmen Fische aus dem Wasser auf?", "Sauerstoff", "Stickstoff", "Kohlendioxid", "Wasserstoff"],
+          ["Welches Tier ist das Wappentier der USA?", "Weißkopfseeadler", "Truthahn", "Kolibri", "Falke"],
+          ["Welches Tier ist als Wappentier Australiens bekannt?", "Känguru", "Koala", "Emu", "Wombat"],
+          ["Wie heißt der giftige rote Pilz mit weißen Punkten?", "Fliegenpilz", "Steinpilz", "Pfifferling", "Champignon"],
+          ["Was wird aus einer Raupe?", "Ein Schmetterling", "Ein Käfer", "Eine Libelle", "Eine Biene"],
+          ["Welches Tier hält Winterschlaf?", "Igel", "Hase", "Fuchs", "Reh"],
+          ["Wie nennt man das Zuhause der Honigbienen?", "Bienenstock", "Bau", "Nest", "Horst"],
+          ["Wie heißt das Nest eines Adlers?", "Horst", "Bau", "Kobel", "Höhle"],
+          ["Wie heißt das Nest eines Eichhörnchens?", "Kobel", "Horst", "Bau", "Stock"],
+          ["Welche Farbe hat das Blut von Tintenfischen?", "Blau", "Rot", "Grün", "Gelb"],
+          ["Wie viele Beine hat ein Zehnfußkrebs?", "10", "8", "6", "12"]
+        ]
+      },
+      {
+        id: "z_tech",
+        name: "Technik & Internet",
+        icon: "fa-microchip",
+        qs: [
+          ["Wofür steht „WWW“?", "World Wide Web", "World Wide Wait", "Web World Wide", "Wide World Web"],
+          ["Wer gründete Apple mit?", "Steve Jobs", "Bill Gates", "Mark Zuckerberg", "Elon Musk"],
+          ["Wofür steht „USB“?", "Universal Serial Bus", "United System Bus", "Universal Storage Box", "Unified Serial Board"],
+          ["Welche Firma entwickelt das Betriebssystem Android?", "Google", "Apple", "Microsoft", "Nokia"],
+          ["Wer gründete Facebook?", "Mark Zuckerberg", "Jack Dorsey", "Larry Page", "Jeff Bezos"],
+          ["Wofür steht „HTML“?", "HyperText Markup Language", "High Tech Modern Language", "Hyper Transfer Mark Link", "Home Tool Markup Language"],
+          ["Wofür steht „GPS“?", "Global Positioning System", "General Position Signal", "Global Phone Service", "Ground Pilot System"],
+          ["Welche Firma stellt das iPhone her?", "Apple", "Samsung", "Nokia", "Sony"],
+          ["Wie heißt das Betriebssystem von Microsoft?", "Windows", "Linux", "macOS", "Android"],
+          ["Welche Speichereinheit ist größer als ein Megabyte?", "Gigabyte", "Kilobyte", "Byte", "Bit"],
+          ["Wie viele Bit hat ein Byte?", "8", "4", "16", "10"],
+          ["Wofür steht die Abkürzung „KI“?", "Künstliche Intelligenz", "Kleine Information", "Kabellose Internetverbindung", "Kontrollierte Integration"],
+          ["Welche App hat ein Geist als Logo?", "Snapchat", "Instagram", "TikTok", "WhatsApp"],
+          ["Welche Firma verkauft den E-Reader Kindle?", "Amazon", "Apple", "Google", "Sony"],
+          ["Welcher Streamingdienst hat ein rotes „N“ als Logo?", "Netflix", "Spotify", "Disney+", "Twitch"],
+          ["Wie nennt man unerwünschte Massen-E-Mails?", "Spam", "Cache", "Bug", "Patch"],
+          ["Wofür steht „PDF“?", "Portable Document Format", "Printable Digital File", "Personal Data Form", "Public Document File"],
+          ["Welche Firma baut die PlayStation?", "Sony", "Nintendo", "Microsoft", "Sega"],
+          ["In welchem Spiel rettet ein Klempner eine Prinzessin?", "Super Mario", "Sonic", "Zelda", "Pac-Man"],
+          ["Welche Programmiersprache trägt den Namen einer Schlange?", "Python", "Java", "Rust", "Kotlin"],
+          ["Nach wem ist die Funktechnik Bluetooth benannt?", "Nach einem Wikingerkönig", "Nach ihrem Erfinder", "Nach einem Zahnarzt", "Nach einer Blaubeere"],
+          ["Wofür steht „WLAN“?", "Wireless Local Area Network", "World Link Access Net", "Wide Local Area Network", "Wireless Long Access Node"],
+          ["Wer ist (2024) Chef des Autobauers Tesla?", "Elon Musk", "Jeff Bezos", "Bill Gates", "Tim Cook"],
+          ["Welche Firma entwickelte den Browser Chrome?", "Google", "Mozilla", "Apple", "Microsoft"],
+          ["Welche Organisation entwickelt den Browser Firefox?", "Mozilla", "Google", "Opera", "Brave"],
+          ["Wie heißt der Sprachassistent von Amazon?", "Alexa", "Siri", "Cortana", "Bixby"],
+          ["Wie heißt der Sprachassistent von Apple?", "Siri", "Alexa", "Cortana", "Bixby"],
+          ["Welche Firma stellt die Konsole „Switch“ her?", "Nintendo", "Sony", "Sega", "Microsoft"],
+          ["Welche Zahl ist die Basis des Binärsystems?", "2", "1", "8", "10"],
+          ["Wie nennt man kleine Textdateien, die Webseiten im Browser speichern?", "Cookies", "Pixel", "Tags", "Fonts"],
+          ["Wer erfand das World Wide Web?", "Tim Berners-Lee", "Bill Gates", "Steve Jobs", "Vint Cerf"],
+          ["In welchem Spiel baut man aus Blöcken eine Welt?", "Minecraft", "Roblox", "Fortnite", "Terraria"],
+          ["Wer gründete Amazon?", "Jeff Bezos", "Elon Musk", "Larry Ellison", "Steve Ballmer"],
+          ["Welchem Unternehmen gehört TikTok?", "ByteDance", "Meta", "Tencent", "Alibaba"],
+          ["Wofür steht „SMS“?", "Short Message Service", "Smart Mobile Signal", "Send My Smile", "Secure Mail System"],
+          ["Wie nennt man die kleinen Bildzeichen in Chats?", "Emojis", "Avatare", "Icons", "Memes"],
+          ["Welche Videoplattform hat ein rotes Play-Symbol als Logo?", "YouTube", "Vimeo", "Twitch", "Dailymotion"],
+          ["Wer gründete zusammen mit Paul Allen Microsoft?", "Bill Gates", "Steve Jobs", "Steve Wozniak", "Larry Page"],
+          ["Aus wie vielen Zahlenblöcken besteht eine IPv4-Adresse?", "4", "3", "6", "8"],
+          ["Was ist „Phishing“?", "Betrug mit gefälschten Nachrichten", "Ein Virenschutz", "Eine Backup-Methode", "Eine Datenkompression"],
+          ["Wie heißt die Hauptplatine eines Computers?", "Mainboard", "Netzteil", "Gehäuse", "Grafikkarte"],
+          ["Wofür steht „CPU“?", "Central Processing Unit", "Computer Power Unit", "Central Program Utility", "Core Process Unit"],
+          ["Welcher Messenger hat ein grünes Sprechblasen-Telefon als Logo?", "WhatsApp", "Telegram", "Signal", "Threema"],
+          ["Wie heißt die Suchmaschine von Microsoft?", "Bing", "Yahoo", "DuckDuckGo", "Ecosia"],
+          ["Welche Firma entwickelt macOS?", "Apple", "Google", "IBM", "Samsung"],
+          ["Welches Spiel- und Serien-Franchise hat das Maskottchen Pikachu?", "Pokémon", "Digimon", "Yu-Gi-Oh!", "Zelda"],
+          ["Was bedeutet „offline“?", "Ohne Internetverbindung", "Ausgeschaltet", "Gesperrt", "Im Hintergrund"],
+          ["Wie nennt man einen Fehler in einem Programm?", "Bug", "Patch", "Virus", "Update"],
+          ["Wie nennt man eine künstliche Online-Figur oder Identität?", "Avatar", "Admin", "Domain", "Hacker"],
+          ["Wofür steht „QR“ im QR-Code?", "Quick Response", "Quality Reader", "Quantum Record", "Question Result"]
+        ]
+      },
+      {
+        id: "z_allg",
+        name: "Allgemeinwissen & Sprache",
+        icon: "fa-lightbulb",
+        qs: [
+          ["Wie viele Tage hat ein Schaltjahr?", "366", "365", "367", "364"],
+          ["Wie viele Sekunden hat eine Stunde?", "3600", "360", "6000", "1440"],
+          ["Welche Farbe entsteht aus Blau und Gelb?", "Grün", "Orange", "Violett", "Braun"],
+          ["Wie viele Kontinente zählt man üblicherweise?", "7", "5", "6", "8"],
+          ["Wie lautet der Plural von „Antibiotikum“?", "Antibiotika", "Antibiotiken", "Antibiotikums", "Antibiotikas"],
+          ["Wie viele Monate im Jahr haben mindestens 28 Tage?", "Alle 12", "Nur 1", "Nur 2", "Nur 6"],
+          ["Wie nennt man die Angst vor Spinnen?", "Arachnophobie", "Klaustrophobie", "Agoraphobie", "Akrophobie"],
+          ["Welche Währung gilt in Japan?", "Yen", "Won", "Yuan", "Rupie"],
+          ["Welche Währung gilt in Großbritannien?", "Pfund Sterling", "Euro", "Dollar", "Krone"],
+          ["Welche Währung gilt in der Schweiz?", "Franken", "Euro", "Mark", "Krone"],
+          ["Wie nennt man das Zeichen „@“ umgangssprachlich?", "Klammeraffe", "Rautezeichen", "Tilde", "Kaufmännisches Und"],
+          ["Was bedeutet das lateinische „Carpe diem“?", "Nutze den Tag", "Ich denke, also bin ich", "Zeit ist Geld", "Ende gut, alles gut"],
+          ["Wie viele Buchstaben hat das deutsche Grundalphabet ohne Umlaute?", "26", "24", "28", "30"],
+          ["Wie nennt man die Angst vor engen Räumen?", "Klaustrophobie", "Arachnophobie", "Hydrophobie", "Akrophobie"],
+          ["Wie viele Seiten hat ein klassischer Spielwürfel?", "6", "4", "8", "12"],
+          ["Wie viele Augen sind insgesamt auf einem Würfel?", "21", "18", "20", "24"],
+          ["Wie viele Karten hat ein Skatblatt?", "32", "52", "36", "48"],
+          ["Wie viele Karten hat ein klassisches Pokerblatt ohne Joker?", "52", "32", "48", "54"],
+          ["Welcher Monat hat in einem normalen Jahr 28 Tage?", "Februar", "April", "Juni", "September"],
+          ["Wie viele Sternzeichen gibt es?", "12", "10", "13", "14"],
+          ["Was bedeutet „Déjà-vu“ wörtlich?", "Schon gesehen", "Nie gesehen", "Zukunft", "Traum"],
+          ["Welche Sprache hat die meisten Muttersprachler?", "Mandarin-Chinesisch", "Englisch", "Spanisch", "Hindi"],
+          ["Wie nennt man Wörter mit gleicher Bedeutung?", "Synonyme", "Antonyme", "Homonyme", "Akronyme"],
+          ["Wie nennt man Wörter mit gegensätzlicher Bedeutung?", "Antonyme", "Synonyme", "Pseudonyme", "Homonyme"],
+          ["Was ist ein Palindrom?", "Ein Wort, das rückwärts gleich bleibt", "Ein Wort mit zwei Bedeutungen", "Ein Fremdwort", "Ein Kurzwort"],
+          ["Welcher Name ist ein Palindrom?", "Anna", "Peter", "Lena", "Marie"],
+          ["Wie nennt man die Hochzeit nach 25 Ehejahren?", "Silberhochzeit", "Goldhochzeit", "Perlenhochzeit", "Rubinhochzeit"],
+          ["Nach wie vielen Jahren feiert man Goldene Hochzeit?", "50", "25", "40", "60"],
+          ["Wie nennt man den 24. Dezember?", "Heiligabend", "Silvester", "Nikolaus", "Advent"],
+          ["Wann ist der Tag der Deutschen Einheit?", "3. Oktober", "9. November", "1. Mai", "17. Juni"],
+          ["Welche Farbe leuchtet bei einer Ampel zwischen Rot und Grün?", "Gelb", "Blau", "Weiß", "Lila"],
+          ["Welche Zahl steht für das römische „X“?", "10", "5", "50", "100"],
+          ["Welche Zahl steht für das römische „C“?", "100", "10", "50", "500"],
+          ["Welche Zahl steht für das römische „M“?", "1000", "100", "500", "10000"],
+          ["Wie viele Sekunden hat eine Minute?", "60", "100", "30", "90"],
+          ["Wann beginnt auf der Nordhalbkugel astronomisch der Sommer?", "Um den 21. Juni", "Um den 21. März", "Um den 21. September", "Um den 21. Dezember"],
+          ["Wie viele Zähne hat ein Milchgebiss?", "20", "24", "28", "32"],
+          ["Wie viel ist 12 mal 12?", "144", "124", "132", "156"],
+          ["Wie viel sind 15 % von 200?", "30", "15", "25", "35"],
+          ["Was ist die Wurzel aus 81?", "9", "8", "7", "11"],
+          ["Welcher Wochentag kommt nach Mittwoch?", "Donnerstag", "Dienstag", "Freitag", "Montag"],
+          ["Wie viele Ecken hat ein Würfel?", "8", "6", "12", "4"],
+          ["Wie viele Kanten hat ein Würfel?", "12", "8", "6", "10"],
+          ["Wie groß ist ein rechter Winkel?", "90 Grad", "60 Grad", "100 Grad", "180 Grad"],
+          ["Wie groß ist die Winkelsumme in einem Dreieck?", "180 Grad", "90 Grad", "270 Grad", "360 Grad"],
+          ["Wie lautet die Zahl Pi auf zwei Nachkommastellen gerundet?", "3,14", "2,71", "1,62", "3,41"],
+          ["Wie nennt man ein Vieleck mit sechs Ecken?", "Sechseck", "Fünfeck", "Siebeneck", "Achteck"],
+          ["Wie viele Wochen hat ein Jahr ungefähr?", "52", "48", "50", "54"],
+          ["Wie viele Stück sind ein Dutzend?", "12", "10", "20", "24"],
+          ["Wie viele Stück sind ein Gros?", "144", "100", "120", "1000"]
+        ]
+      }
+    ];
+
     // Universal Progressive Slider Values:
     // Starts in 1-unit steps (0..100) and grows logically up to 1,000,000,000
     const UNIVERSAL_SLIDER_VALUES = (() => {
@@ -4065,7 +4937,7 @@
 
     const app = {
       state: {
-        mode: "word", // 'word' | 'question'
+        mode: "word", // 'word' | 'question' | 'quiz'
         questionSubmode: "all", // 'all' | 'slider' | 'classic'
         theme: "obsidian", // 'obsidian' | 'emerald' | 'nordic' | 'amber' | 'mono'
         colorMode: "system", // 'system' | 'dark' | 'light' (defaults to device setting)
@@ -4086,8 +4958,14 @@
         timerMinutes: 3, // 0 = Kein Timer
         activeWordCats: new Set(WORD_CATEGORIES.map(c => c.id)),
         activeQuestionCats: new Set(QUESTION_CATEGORIES.map(c => c.id)),
+        activeQuizCats: new Set(QUIZ_CATEGORIES.map(c => c.id)),
         usedWords: new Set(),
         usedQuestions: new Set(),
+        usedQuiz: new Set(),
+        quizRounds: 3,
+        quizSeconds: 15,
+        quizInstantFeedback: true,
+        quiz: null,
         currentRound: null,
         roundActiveLocked: false, // Prevents opening Vault during an active round
         passIndex: 0,
@@ -4128,16 +5006,12 @@
         this.updateSetupOptionLabels();
         initAmbientCanvas();
 
+        let startView = "view-welcome";
         try {
-          const introSeen = localStorage.getItem("partyspiele_intro_seen_v1");
-          if (!introSeen) {
-            this.switchView("view-welcome");
-          } else {
-            this.switchView("view-home");
-          }
-        } catch (e) {
-          this.switchView("view-welcome");
-        }
+          startView = localStorage.getItem("partyspiele_intro_seen_v1") ? "view-home" : "view-welcome";
+        } catch (e) {}
+        this.initHistory(startView);
+        this.switchView(startView, { fromPop: true });
 
         // Close logo menu when clicking outside
         document.addEventListener("click", (e) => {
@@ -4161,6 +5035,437 @@
         window.addEventListener("resize", onViewportChange);
         window.addEventListener("orientationchange", onViewportChange);
         if (window.visualViewport) window.visualViewport.addEventListener("resize", onViewportChange);
+      },
+
+      // ===== Zurück-Wischen / Browser-Zurück-Taste (History API) =====
+      nav: {
+        levels: {
+          "view-welcome": 0,
+          "view-home": 0,
+          "view-setup": 1,
+          "view-pass": 2,
+          "view-discussion": 2,
+          "view-quiz-pass": 2,
+          "view-quiz-play": 2,
+          "view-quiz-result": 2
+        },
+        cur: "view-home",
+        ready: false,
+        pending: null
+      },
+
+      initHistory(startView) {
+        this.nav.cur = startView;
+        try {
+          // Erster Eintrag = Wächter: Zurück darauf verlässt die Seite erst, wenn nichts mehr zu schließen ist
+          history.replaceState({ guard: true }, "");
+          history.pushState({ view: startView }, "");
+          this.nav.ready = true;
+          window.addEventListener("popstate", (e) => this.onPopState(e));
+        } catch (e) {
+          this.nav.ready = false;
+        }
+      },
+
+      syncHistory(viewId) {
+        if (!this.nav.ready) return;
+        const lv = this.nav.levels;
+        const nl = lv[viewId] ?? 0;
+        const cl = lv[this.nav.cur] ?? 0;
+        try {
+          if (nl > cl) {
+            history.pushState({ view: viewId }, "");
+          } else if (nl === cl) {
+            history.replaceState({ view: viewId }, "");
+          } else {
+            this.nav.pending = viewId;
+            history.go(-(cl - nl));
+          }
+        } catch (e) {}
+      },
+
+      closeTopOverlay() {
+        const order = [
+          "customSelectModal", "customCategoryModal", "editVaultItemModal", "vaultAuthModal",
+          "quizReviewModal", "dbModal", "starterModal", "timerModal", "themeModal", "rulesModal",
+          "scoreModal", "categoriesSetupModal", "optionsSetupModal", "playersSetupModal"
+        ];
+        for (const id of order) {
+          const el = document.getElementById(id);
+          if (el && !el.classList.contains("hidden") && !el.classList.contains("modal-backdrop-animate-out")) {
+            if (id === "dbModal") this.closeVaultModal();
+            else this.closeModal(id);
+            return true;
+          }
+        }
+        if (this.state.logoMenuOpen) {
+          this.closeLogoMenu();
+          return true;
+        }
+        return false;
+      },
+
+      onPopState(e) {
+        const st = (e && e.state) || {};
+        if (this.nav.pending) {
+          const t = this.nav.pending;
+          this.nav.pending = null;
+          try { history.replaceState({ view: t }, ""); } catch (err) {}
+          if (this.nav.cur !== t) this.applyViewFromNav(t);
+          return;
+        }
+        if (this.closeTopOverlay()) {
+          try { history.pushState({ view: this.nav.cur }, ""); } catch (err) {}
+          return;
+        }
+        if (st.guard) {
+          // Nichts mehr zu schließen: normales Verlassen der Seite erlauben
+          this.nav.ready = false;
+          history.back();
+          return;
+        }
+        if (st.view) this.applyViewFromNav(st.view);
+      },
+
+      applyViewFromNav(target) {
+        let t = target;
+        if ((this.nav.levels[t] ?? 0) >= 2) {
+          t = "view-setup";
+          try { history.replaceState({ view: t }, ""); } catch (err) {}
+        }
+        this.stopTimer();
+        this.stopQuizTimer();
+        this.state.roundActiveLocked = false;
+        this.updateVaultMenuLockUI();
+        if (t === "view-setup") this.prepareSetupUI();
+        this.switchView(t, { fromPop: true });
+      },
+
+      // ===== Hilfsfunktionen =====
+      escapeHTML(str) {
+        return String(str).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      },
+
+      shuffleArray(arr) {
+        const out = arr.slice();
+        for (let i = out.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [out[i], out[j]] = [out[j], out[i]];
+        }
+        return out;
+      },
+
+      getActiveCatSet() {
+        if (this.state.mode === "quiz") return this.state.activeQuizCats;
+        return this.state.mode === "word" ? this.state.activeWordCats : this.state.activeQuestionCats;
+      },
+
+      // ===== QUIZ =====
+      changeQuizRounds(delta) {
+        sfx.click();
+        this.state.quizRounds = Math.min(10, Math.max(1, this.state.quizRounds + delta));
+        this.updateSetupOptionLabels();
+        this.savePersistentState();
+      },
+
+      openQuizSecondsPopup() {
+        const opts = [10, 15, 20, 30, 45, 60];
+        this.openCustomSelectPopup({
+          title: "Zeit pro Frage",
+          subtitle: "Wie lange darf jeder Spieler pro Frage überlegen?",
+          selectedValue: this.state.quizSeconds,
+          options: opts.map(v => ({
+            value: v,
+            label: `${v} Sekunden`,
+            sub: v <= 10 ? "Blitzquiz" : v === 15 ? "Standard" : v >= 45 ? "Entspannt" : "Ausgewogen",
+            icon: "fa-clock"
+          })),
+          onSelect: (val) => {
+            this.state.quizSeconds = val;
+            this.updateSetupOptionLabels();
+            this.savePersistentState();
+          }
+        });
+      },
+
+      toggleQuizFeedback() {
+        sfx.click();
+        this.state.quizInstantFeedback = !this.state.quizInstantFeedback;
+        this.updateSetupOptionLabels();
+        this.savePersistentState();
+      },
+
+      buildQuizPool() {
+        const pool = [];
+        QUIZ_CATEGORIES.forEach(cat => {
+          if (!this.state.activeQuizCats.has(cat.id)) return;
+          cat.qs.forEach(q => {
+            if (this.state.usedQuiz.has(q[0])) return;
+            pool.push({ cat: cat.name, icon: cat.icon, q: q[0], right: q[1], wrong: q.slice(2) });
+          });
+        });
+        return pool;
+      },
+
+      startQuiz() {
+        const n = this.state.quizRounds;
+        let pool = this.buildQuizPool();
+        if (pool.length < n) {
+          this.state.usedQuiz.clear();
+          pool = this.buildQuizPool();
+        }
+        if (pool.length === 0) {
+          this.showToast("Keine Quizfragen in den gewählten Kategorien!", "fa-circle-exclamation");
+          return;
+        }
+        const picked = this.shuffleArray(pool).slice(0, n);
+        picked.forEach(p => this.state.usedQuiz.add(p.q));
+        this.stopTimer();
+        this.stopQuizTimer();
+        this.state.roundActiveLocked = false;
+        this.state.quiz = {
+          qs: picked,
+          round: 0,
+          turn: 0,
+          results: this.state.players.map(() => []),
+          opts: [],
+          t0: 0,
+          locked: true,
+          timer: null,
+          stats: [],
+          awarded: false
+        };
+        this.showQuizHandoff();
+      },
+
+      showQuizHandoff() {
+        const qz = this.state.quiz;
+        const player = this.state.players[qz.turn];
+        document.getElementById("quizPassRound").textContent = `Runde ${qz.round + 1} von ${qz.qs.length}`;
+        document.getElementById("quizPassProgress").textContent = `${qz.turn + 1} / ${this.state.playerCount}`;
+        document.getElementById("quizPassPlayerName").textContent = player.name;
+        document.getElementById("quizPassTimeInfo").textContent = `${this.state.quizSeconds} Sek.`;
+        this.switchView("view-quiz-pass");
+      },
+
+      startQuizQuestion() {
+        const qz = this.state.quiz;
+        if (!qz) return;
+        sfx.click();
+        const q = qz.qs[qz.round];
+        const player = this.state.players[qz.turn];
+        qz.opts = this.shuffleArray([{ t: q.right, ok: true }, ...q.wrong.map(t => ({ t, ok: false }))]);
+
+        document.getElementById("quizPlayAvatar").textContent = qz.turn + 1;
+        document.getElementById("quizPlayName").textContent = player.name;
+        document.getElementById("quizPlayRound").textContent = `Runde ${qz.round + 1} / ${qz.qs.length}`;
+        document.getElementById("quizPlayCat").textContent = q.cat;
+
+        const qEl = document.getElementById("quizQuestionText");
+        qEl.textContent = q.q;
+        const len = q.q.length;
+        qEl.style.fontSize = (len <= 45 ? 22 : len <= 75 ? 19 : len <= 105 ? 17 : 15) + "px";
+
+        const letters = ["A", "B", "C", "D"];
+        const box = document.getElementById("quizAnswers");
+        box.innerHTML = "";
+        qz.opts.forEach((o, i) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "quiz-ans pill-button w-full h-full min-h-0 px-2.5 sm:px-3 rounded-xl text-left flex items-center gap-2.5";
+          btn.onclick = () => this.answerQuiz(i);
+          btn.innerHTML = `
+            <span class="w-6 h-6 rounded-lg bg-white/10 text-[11px] font-mono-num font-bold text-zinc-200 flex items-center justify-center shrink-0">${letters[i]}</span>
+            <span class="text-xs sm:text-sm font-semibold text-white leading-snug min-w-0 break-words">${this.escapeHTML(o.t)}</span>
+          `;
+          box.appendChild(btn);
+        });
+
+        document.getElementById("quizFeedbackText").textContent = "Tippe auf deine Antwort";
+        document.getElementById("quizFeedbackText").className = "flex-1 min-w-0 text-xs sm:text-sm font-semibold text-zinc-400 truncate";
+        document.getElementById("quizNextBtn").classList.add("hidden");
+
+        const bar = document.getElementById("quizTimeBar");
+        bar.style.width = "100%";
+        bar.style.background = "var(--accent)";
+        document.getElementById("quizPlayTimeText").textContent = this.formatQuizSeconds(this.state.quizSeconds * 1000);
+
+        this.switchView("view-quiz-play");
+        qz.locked = false;
+        qz.t0 = performance.now();
+        this.stopQuizTimer();
+        const limit = this.state.quizSeconds * 1000;
+        qz.timer = setInterval(() => {
+          const elapsed = performance.now() - qz.t0;
+          const left = Math.max(0, limit - elapsed);
+          bar.style.width = (left / limit * 100) + "%";
+          if (left <= 3000) bar.style.background = "#f43f5e";
+          document.getElementById("quizPlayTimeText").textContent = this.formatQuizSeconds(left);
+          if (left <= 0) this.answerQuiz(-1);
+        }, 80);
+      },
+
+      formatQuizSeconds(ms) {
+        return (ms / 1000).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " s";
+      },
+
+      stopQuizTimer() {
+        const qz = this.state.quiz;
+        if (qz && qz.timer) {
+          clearInterval(qz.timer);
+          qz.timer = null;
+        }
+      },
+
+      answerQuiz(i) {
+        const qz = this.state.quiz;
+        if (!qz || qz.locked) return;
+        qz.locked = true;
+        this.stopQuizTimer();
+
+        const limit = this.state.quizSeconds * 1000;
+        const elapsed = Math.min(limit, performance.now() - qz.t0);
+        const opt = i >= 0 ? qz.opts[i] : null;
+        const correct = Boolean(opt && opt.ok);
+        qz.results[qz.turn].push({ correct, ms: elapsed, timeout: i < 0, pick: opt ? opt.t : null });
+
+        const btns = document.querySelectorAll("#quizAnswers .quiz-ans");
+        const fb = document.getElementById("quizFeedbackText");
+        btns.forEach((b, idx) => {
+          b.disabled = true;
+          if (this.state.quizInstantFeedback) {
+            if (qz.opts[idx].ok) b.dataset.state = "right";
+            else if (idx === i) b.dataset.state = "wrong";
+            else b.dataset.state = "dim";
+          } else {
+            b.dataset.state = idx === i ? "picked" : "dim";
+          }
+        });
+
+        if (this.state.quizInstantFeedback) {
+          if (correct) {
+            sfx.success();
+            fb.textContent = `Richtig! ${this.formatQuizSeconds(elapsed)}`;
+            fb.className = "flex-1 min-w-0 text-xs sm:text-sm font-bold text-emerald-400 truncate";
+          } else {
+            sfx.imposterReveal();
+            fb.textContent = i < 0 ? "Zeit abgelaufen!" : "Leider falsch";
+            fb.className = "flex-1 min-w-0 text-xs sm:text-sm font-bold text-rose-400 truncate";
+          }
+        } else {
+          sfx.click();
+          fb.textContent = i < 0 ? "Zeit abgelaufen" : "Antwort gespeichert";
+          fb.className = "flex-1 min-w-0 text-xs sm:text-sm font-semibold text-zinc-300 truncate";
+        }
+
+        const isLast = qz.turn >= this.state.playerCount - 1 && qz.round >= qz.qs.length - 1;
+        document.getElementById("quizNextBtnText").textContent = isLast ? "Zum Ergebnis" : "Weiter";
+        document.getElementById("quizNextBtn").classList.remove("hidden");
+      },
+
+      nextQuizStep() {
+        const qz = this.state.quiz;
+        if (!qz) return;
+        sfx.click();
+        qz.turn++;
+        if (qz.turn >= this.state.playerCount) {
+          qz.turn = 0;
+          qz.round++;
+        }
+        if (qz.round >= qz.qs.length) this.showQuizResult();
+        else this.showQuizHandoff();
+      },
+
+      showQuizResult() {
+        const qz = this.state.quiz;
+        const total = qz.qs.length;
+        const stats = this.state.players.map((p, i) => {
+          const rs = qz.results[i];
+          const correct = rs.filter(r => r.correct).length;
+          const timeCorrect = rs.filter(r => r.correct).reduce((a, r) => a + r.ms, 0);
+          return { idx: i, name: p.name, correct, timeCorrect };
+        });
+        stats.sort((a, b) => b.correct - a.correct || a.timeCorrect - b.timeCorrect);
+        qz.stats = stats;
+        qz.awarded = false;
+
+        const top = stats[0];
+        const second = stats[1];
+        const tie = second && second.correct === top.correct && second.timeCorrect === top.timeCorrect;
+        const decidedBySpeed = second && second.correct === top.correct && !tie;
+
+        document.getElementById("quizWinnerText").textContent = tie ? `${top.name} & ${second.name}` : top.name;
+        document.getElementById("quizWinnerSub").textContent = tie
+          ? "Gleichstand bei Treffern und Tempo!"
+          : `${top.correct} von ${total} richtig${top.correct > 0 ? " • " + this.formatQuizSeconds(top.timeCorrect) : ""}${decidedBySpeed ? " • schneller als " + second.name : ""}`;
+
+        const list = document.getElementById("quizRankList");
+        list.innerHTML = "";
+        stats.forEach((st, rank) => {
+          const medalColor = rank === 0 ? "text-amber-400" : rank === 1 ? "text-zinc-300" : rank === 2 ? "text-orange-400" : "text-zinc-500";
+          const row = document.createElement("div");
+          row.className = `flex items-center gap-2.5 p-2 sm:p-3 rounded-2xl border ${rank === 0 ? "bg-white/10 border-white/30" : "bg-black/25 border-white/10"}`;
+          row.innerHTML = `
+            <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center font-mono-num text-xs font-bold ${medalColor} shrink-0">${rank < 3 ? '<i class="fa-solid fa-medal"></i>' : rank + 1}</div>
+            <div class="min-w-0 flex-1">
+              <div class="font-semibold text-sm text-white truncate">${this.escapeHTML(st.name)}</div>
+              <div class="text-[11px] text-zinc-400">${st.correct} von ${total} richtig</div>
+            </div>
+            <div class="font-mono-num text-xs font-bold text-white shrink-0">${st.correct > 0 ? this.formatQuizSeconds(st.timeCorrect) : "–"}</div>
+          `;
+          list.appendChild(row);
+        });
+
+        document.getElementById("quizAwardBtnText").textContent = "+1 Punkt Sieger";
+        sfx.success();
+        this.switchView("view-quiz-result");
+      },
+
+      awardQuizPoint() {
+        const qz = this.state.quiz;
+        if (!qz || !qz.stats.length) return;
+        if (qz.awarded) {
+          this.showToast("Punkt wurde schon verbucht", "fa-circle-info");
+          return;
+        }
+        const top = qz.stats[0];
+        const second = qz.stats[1];
+        const winners = [top];
+        if (second && second.correct === top.correct && second.timeCorrect === top.timeCorrect) winners.push(second);
+        winners.forEach(w => { this.state.players[w.idx].score += 1; });
+        qz.awarded = true;
+        sfx.success();
+        this.renderScoreboard();
+        this.savePersistentState();
+        document.getElementById("quizAwardBtnText").textContent = "Punkt gebucht";
+        this.showToast(`+1 Punkt für ${winners.map(w => w.name).join(" & ")}`, "fa-trophy");
+      },
+
+      openQuizReview() {
+        const qz = this.state.quiz;
+        if (!qz) return;
+        sfx.click();
+        const list = document.getElementById("quizReviewList");
+        list.innerHTML = "";
+        qz.qs.forEach((q, r) => {
+          const chips = this.state.players.map((p, i) => {
+            const res = qz.results[i][r];
+            if (!res) return "";
+            return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold ${res.correct ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-rose-500/15 text-rose-300 border border-rose-500/30"}">
+              <i class="fa-solid ${res.correct ? "fa-check" : "fa-xmark"}"></i>${this.escapeHTML(p.name)}${res.correct ? " · " + this.formatQuizSeconds(res.ms) : ""}
+            </span>`;
+          }).join("");
+          const card = document.createElement("div");
+          card.className = "p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1.5";
+          card.innerHTML = `
+            <div class="text-[10px] font-mono-num uppercase tracking-widest text-zinc-400">Runde ${r + 1} • ${this.escapeHTML(q.cat)}</div>
+            <div class="text-xs font-semibold text-white leading-snug">${this.escapeHTML(q.q)}</div>
+            <div class="text-xs text-emerald-300 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>${this.escapeHTML(q.right)}</div>
+            <div class="flex flex-wrap gap-1">${chips}</div>
+          `;
+          list.appendChild(card);
+        });
+        this.animateOpenModal("quizReviewModal");
       },
 
       openWelcomeScreen() {
@@ -4231,7 +5536,11 @@
             timerMinutes: this.state.timerMinutes,
             activeWordCats: Array.from(this.state.activeWordCats),
             activeQuestionCats: Array.from(this.state.activeQuestionCats),
-            soundEnabled: sfx.enabled
+            soundEnabled: sfx.enabled,
+            quizRounds: this.state.quizRounds,
+            quizSeconds: this.state.quizSeconds,
+            quizInstantFeedback: this.state.quizInstantFeedback,
+            activeQuizCats: Array.from(this.state.activeQuizCats)
           };
           localStorage.setItem("imposter_app_settings_v3", JSON.stringify(settingsPayload));
 
@@ -4305,6 +5614,14 @@
             if (typeof s.collectWrittenAnswers === "boolean") this.state.collectWrittenAnswers = s.collectWrittenAnswers;
             if (typeof s.timerMinutes === "number") this.state.timerMinutes = s.timerMinutes;
             if (typeof s.soundEnabled === "boolean") sfx.enabled = s.soundEnabled;
+            if (typeof s.quizRounds === "number") this.state.quizRounds = Math.min(10, Math.max(1, s.quizRounds));
+            if (typeof s.quizSeconds === "number") this.state.quizSeconds = Math.min(120, Math.max(5, s.quizSeconds));
+            if (typeof s.quizInstantFeedback === "boolean") this.state.quizInstantFeedback = s.quizInstantFeedback;
+            if (Array.isArray(s.activeQuizCats)) {
+              const validQuizIds = new Set(QUIZ_CATEGORIES.map(c => c.id));
+              const filteredZ = s.activeQuizCats.filter(id => validQuizIds.has(id));
+              if (filteredZ.length > 0) this.state.activeQuizCats = new Set(filteredZ);
+            }
 
             const validWordIds = new Set(WORD_CATEGORIES.map(c => c.id));
             if (Array.isArray(s.activeWordCats)) {
@@ -4443,7 +5760,7 @@
         }, 2600);
       },
 
-      switchView(viewId) {
+      switchView(viewId, opts = {}) {
         document.querySelectorAll(".view-section").forEach(sec => {
           sec.classList.add("hidden");
           sec.classList.remove("view-enter");
@@ -4458,6 +5775,9 @@
         if (quickHome) {
           quickHome.classList.toggle("hidden", viewId === "view-home" || viewId === "view-welcome");
         }
+        if (viewId !== "view-quiz-play") this.stopQuizTimer();
+        if (!opts.fromPop) this.syncHistory(viewId);
+        this.nav.cur = viewId;
       },
 
       goHome() {
@@ -4470,7 +5790,7 @@
 
       selectGameMode(mode) {
         sfx.click();
-        this.state.mode = mode === "question" ? "question" : "word";
+        this.state.mode = mode === "question" ? "question" : mode === "quiz" ? "quiz" : "word";
         this.savePersistentState();
         this.openSetup();
       },
@@ -4480,22 +5800,40 @@
         this.stopTimer();
         this.state.roundActiveLocked = false;
         this.updateVaultMenuLockUI();
+        this.prepareSetupUI();
+        this.switchView("view-setup");
+      },
 
-        const isWord = this.state.mode === "word";
+      prepareSetupUI() {
+        const mode = this.state.mode;
+        const isWord = mode === "word";
+        const isQuiz = mode === "quiz";
+        const isQuestion = mode === "question";
         const badge = document.getElementById("setupModeBadge");
         if (badge) {
-          badge.textContent = isWord ? "Wort-Imposter" : "Fragen-Imposter";
+          badge.textContent = isQuiz ? "Quiz" : isWord ? "Wort-Imposter" : "Fragen-Imposter";
         }
 
         document.getElementById("wordHintSettingBox").classList.toggle("hidden", !isWord);
         document.getElementById("wordCategorySettingBox").classList.toggle("hidden", !isWord);
-        document.getElementById("questionSubmodeSettingBox").classList.toggle("hidden", isWord);
-        document.getElementById("questionInputSettingBox").classList.toggle("hidden", isWord);
+        document.getElementById("questionSubmodeSettingBox").classList.toggle("hidden", !isQuestion);
+        document.getElementById("questionInputSettingBox").classList.toggle("hidden", !isQuestion);
+        ["optImposterBox", "optStarterBox", "optTimerBox"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.toggle("hidden", isQuiz);
+        });
+        ["quizRoundsBox", "quizSecondsBox", "quizFeedbackBox"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.toggle("hidden", !isQuiz);
+        });
+        ["catCustomBtn", "catVaultBtn"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.toggle("hidden", isQuiz);
+        });
 
         this.updateSetupOptionLabels();
         this.renderPlayersSetup();
         this.renderCategoriesGrid();
-        this.switchView("view-setup");
       },
 
       getMaxImposters() {
@@ -4592,7 +5930,16 @@
             ? (this.state.showImposterHint ? "Mit Hinweis" : "Ohne Hinweis")
             : (submodeShortMap[this.state.questionSubmode] || "Beides");
           summaryOptions.textContent = `${impPart} • ${timerText} • ${extraPart}`;
+          if (this.state.mode === "quiz") {
+            summaryOptions.textContent = `${this.state.quizRounds} Runden • ${this.state.quizSeconds} Sek. • ${this.state.quizInstantFeedback ? "Sofort-Feedback" : "Auflösung am Ende"}`;
+          }
         }
+
+        const qRoundsLbl = document.getElementById("quizRoundsLabel");
+        if (qRoundsLbl) qRoundsLbl.textContent = this.state.quizRounds;
+        const qSecLbl = document.getElementById("quizSecondsBtnLabel");
+        if (qSecLbl) qSecLbl.textContent = `${this.state.quizSeconds} Sek.`;
+        this.toggleSwitchUI("toggleQuizFeedbackBtn", this.state.quizInstantFeedback);
       },
 
       changePlayerCount(delta) {
@@ -4926,14 +6273,15 @@
         const grid = document.getElementById("categoriesGrid");
         grid.innerHTML = "";
         const isWord = this.state.mode === "word";
-        const list = isWord ? WORD_CATEGORIES : QUESTION_CATEGORIES;
-        const activeSet = isWord ? this.state.activeWordCats : this.state.activeQuestionCats;
+        const isQuiz = this.state.mode === "quiz";
+        const list = isQuiz ? QUIZ_CATEGORIES : (isWord ? WORD_CATEGORIES : QUESTION_CATEGORIES);
+        const activeSet = this.getActiveCatSet();
 
         let totalItems = 0;
 
         list.forEach(cat => {
           const isSelected = activeSet.has(cat.id);
-          const count = isWord ? cat.words.length : cat.pairs.length;
+          const count = isQuiz ? cat.qs.length : (isWord ? cat.words.length : cat.pairs.length);
           if (isSelected) totalItems += count;
 
           const card = document.createElement("button");
@@ -4958,7 +6306,7 @@
             </div>
             <div class="min-w-0">
               <div class="font-semibold text-xs text-white leading-snug break-words">${cat.name}</div>
-              <div class="font-mono-num text-[10px] text-zinc-400 mt-0.5">${count} ${isWord ? "Wörter" : "Paare"}</div>
+              <div class="font-mono-num text-[10px] text-zinc-400 mt-0.5">${count} ${isQuiz ? "Fragen" : (isWord ? "Wörter" : "Paare")}</div>
             </div>
           `;
           grid.appendChild(card);
@@ -4980,13 +6328,17 @@
             <div class="text-[10px] text-zinc-400 mt-0.5">Neu erstellen</div>
           </div>
         `;
-        grid.appendChild(addShortcutTile);
+        if (!isQuiz) grid.appendChild(addShortcutTile);
 
-        document.getElementById("categorySectionTitle").textContent = isWord
+        document.getElementById("categorySectionTitle").textContent = isQuiz
+          ? `Quiz-Kategorien (${list.length})`
+          : isWord
           ? `Wort-Kategorien (${list.length})`
           : `Fragen-Welten (${list.length})`;
 
-        const statsText = isWord
+        const statsText = isQuiz
+          ? `${activeSet.size} / ${list.length} aktiv • ${totalItems} Quizfragen`
+          : isWord
           ? `${activeSet.size} / ${list.length} aktiv • ${totalItems} Wörter`
           : `${activeSet.size} / ${list.length} aktiv • ${totalItems} Fragen-Duelle`;
         document.getElementById("categoryPoolStats").textContent = statsText;
@@ -4999,7 +6351,7 @@
 
       toggleCategory(catId) {
         sfx.click();
-        const activeSet = this.state.mode === "word" ? this.state.activeWordCats : this.state.activeQuestionCats;
+        const activeSet = this.getActiveCatSet();
         if (activeSet.has(catId)) {
           if (activeSet.size <= 1) {
             this.showToast("Mindestens eine Kategorie muss aktiv bleiben", "fa-circle-exclamation");
@@ -5016,8 +6368,8 @@
       selectAllCategories(selectAll) {
         sfx.click();
         const isWord = this.state.mode === "word";
-        const list = isWord ? WORD_CATEGORIES : QUESTION_CATEGORIES;
-        const activeSet = isWord ? this.state.activeWordCats : this.state.activeQuestionCats;
+        const list = this.state.mode === "quiz" ? QUIZ_CATEGORIES : (isWord ? WORD_CATEGORIES : QUESTION_CATEGORIES);
+        const activeSet = this.getActiveCatSet();
         activeSet.clear();
         if (selectAll) {
           list.forEach(c => activeSet.add(c.id));
@@ -5030,6 +6382,10 @@
 
       startRound() {
         sfx.click();
+        if (this.state.mode === "quiz") {
+          this.startQuiz();
+          return;
+        }
         const isWord = this.state.mode === "word";
         const maxImp = this.getMaxImposters();
 
