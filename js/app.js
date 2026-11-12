@@ -336,7 +336,7 @@ const app = {
   closeTopOverlay() {
     const order = [
       "customSelectModal", "customCategoryModal", "editVaultItemModal", "vaultAuthModal",
-      "quizReviewModal", "installHelpModal", "dbModal", "starterModal", "timerModal", "themeModal", "rulesModal",
+      "answerDetailModal", "quizReviewModal", "installHelpModal", "dbModal", "starterModal", "timerModal", "themeModal", "rulesModal",
       "scoreModal", "categoriesSetupModal", "optionsSetupModal", "playersSetupModal"
     ];
     for (const id of order) {
@@ -762,7 +762,16 @@ const app = {
     });
 
     if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+      const hadController = Boolean(navigator.serviceWorker.controller);
       navigator.serviceWorker.register("sw.js").catch(() => {});
+      // Neue App-Version übernommen: einmal neu laden, damit alle Dateien zusammenpassen –
+      // aber nur außerhalb einer laufenden Runde
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!hadController || this.swReloading) return;
+        if ((this.nav.levels[this.nav.cur] ?? 0) >= 2) return;
+        this.swReloading = true;
+        location.reload();
+      });
     }
     this.updateInstallMenuUI();
   },
@@ -2447,7 +2456,7 @@ const app = {
         <div class="my-auto space-y-3 w-full min-w-0">
           <div class="p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 text-left">
             <div class="text-[10px] font-mono-num uppercase tracking-widest text-zinc-400">Deine Frage</div>
-            <h3 class="font-display text-sm sm:text-xl font-bold text-white leading-snug">
+            <h3 class="question-readable text-base sm:text-xl text-white leading-snug">
               ${assignedQuestion}
             </h3>
           </div>
@@ -2552,13 +2561,14 @@ const app = {
     const majBtn = document.getElementById("revealMajorityQBtn");
 
     const headline = document.getElementById("discussionHeadline");
-    const kicker = document.getElementById("discussionKicker");
+    // Fallback-Element, damit eine ältere zwischengespeicherte Oberfläche nie das Spiel blockiert
+    const kicker = document.getElementById("discussionKicker") || document.createElement("div");
 
     if (round.mode === "question") {
       // Die Frage der Crew steht groß oben – sie ist die Grundlage der Diskussion
       const len = round.mainQ.length;
-      const sizeCls = len <= 70 ? "text-xl sm:text-3xl" : len <= 110 ? "text-lg sm:text-2xl" : "text-base sm:text-xl";
-      headline.className = `font-display ${sizeCls} font-extrabold text-white tracking-tight leading-snug`;
+      const sizeCls = len <= 70 ? "text-xl sm:text-[1.75rem]" : len <= 110 ? "text-lg sm:text-2xl" : "text-base sm:text-xl";
+      headline.className = `question-readable ${sizeCls} text-white leading-snug`;
       headline.textContent = round.mainQ;
       kicker.classList.remove("hidden");
       kicker.classList.add("flex");
@@ -2573,11 +2583,14 @@ const app = {
       const grid = document.getElementById("answersListGrid");
       grid.innerHTML = "";
       this.state.players.forEach((p, i) => {
-        const box = document.createElement("div");
-        box.className = "px-2 py-1.5 sm:px-3.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2 sm:flex-col sm:items-start sm:justify-center sm:gap-0.5 min-w-0";
+        const box = document.createElement("button");
+        box.type = "button";
+        box.title = "Ganze Antwort anzeigen";
+        box.onclick = () => this.showAnswerDetail(i);
+        box.className = "text-left px-2 py-1.5 sm:px-3.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-black/30 border border-white/10 hover:border-white/30 active:scale-[0.98] transition-all flex items-center justify-between gap-2 sm:flex-col sm:items-start sm:justify-center sm:gap-0.5 min-w-0";
         box.innerHTML = `
           <div class="text-[11px] sm:text-xs font-medium text-zinc-400 truncate min-w-0 max-w-full">${i + 1}. ${this.escapeHTML(p.name)}</div>
-          <div class="font-mono-num font-bold text-xs sm:text-lg text-white shrink-0 max-w-[60%] sm:max-w-full truncate">
+          <div class="${round.slider ? "font-mono-num font-bold text-xs sm:text-lg" : "font-semibold text-xs sm:text-sm leading-snug"} text-white shrink-0 max-w-[60%] sm:max-w-full truncate">
             ${p.answer ? this.escapeHTML(p.answer) : "<span class='text-zinc-500 text-xs'>Mündlich</span>"}
           </div>
         `;
@@ -2609,6 +2622,19 @@ const app = {
     }
 
     this.switchView("view-discussion");
+  },
+
+  // Ganze (ggf. abgeschnittene) Antwort eines Spielers im Pop-up zeigen
+  showAnswerDetail(idx) {
+    const p = this.state.players[idx];
+    const round = this.state.currentRound;
+    if (!p || !round) return;
+    sfx.click();
+    document.getElementById("answerDetailAvatar").textContent = idx + 1;
+    document.getElementById("answerDetailName").textContent = p.name;
+    document.getElementById("answerDetailText").textContent = p.answer || "Mündlich beantwortet";
+    document.getElementById("answerDetailQuestion").textContent = round.mainQ || "";
+    this.animateOpenModal("answerDetailModal");
   },
 
   revealMajorityQuestionOnly() {

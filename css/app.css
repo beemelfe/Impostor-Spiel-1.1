@@ -826,8 +826,20 @@ input[type="text"], input[type="password"], textarea {
 
 #view-discussion[data-mode="question"] #timerContainerBlock {
   order: 3;
-  margin-top: auto;
+  margin-top: 0;
   margin-bottom: 0;
+}
+
+/* Inhalte der Diskussionskarten als Gruppe mittig zentrieren statt oben kleben + große Lücke */
+#view-discussion .disc-card {
+  justify-content: center;
+}
+
+/* Gut lesbare Frage (klare Schrift statt breiter Display-Schrift) */
+.question-readable {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  letter-spacing: -0.01em !important;
+  font-weight: 700;
 }
 
 @media (min-width: 640px) {
@@ -850,12 +862,12 @@ input[type="text"], input[type="password"], textarea {
 
   #view-discussion .disc-vote,
   #view-discussion .disc-board {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
   }
 
   #view-discussion .disc-list {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 2.5rem;
     overflow-y: auto;
   }
@@ -877,8 +889,8 @@ input[type="text"], input[type="password"], textarea {
   }
 
   #view-discussion[data-revealed="true"] .disc-col-left {
-    flex: 1 1 auto;
-    max-height: 30%;
+    flex: 0 1 auto;
+    max-height: 32%;
   }
 
   #view-discussion[data-revealed="true"] .disc-col-right {
@@ -886,7 +898,7 @@ input[type="text"], input[type="password"], textarea {
   }
 
   #view-discussion[data-revealed="true"] .disc-result {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
@@ -895,7 +907,7 @@ input[type="text"], input[type="password"], textarea {
   }
 
   #view-discussion[data-revealed="true"] #resolutionBox {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
     overflow-y: auto;
   }

@@ -1,6 +1,6 @@
 // Service Worker: macht die App offline nutzbar.
 // Nach Änderungen an Dateien CACHE_VERSION erhöhen, damit alle Geräte die neue Version laden.
-const CACHE_VERSION = "partyspiele-v1";
+const CACHE_VERSION = "partyspiele-v2";
 
 const PRECACHE = [
   "./",
@@ -57,28 +57,38 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Erst aus dem Cache antworten (schnell & offline), im Hintergrund aktualisieren
+// Online: immer zuerst die aktuelle Version aus dem Netz laden (so passen HTML, CSS und
+// JavaScript garantiert zusammen) und den Cache dabei auffrischen.
+// Offline oder bei sehr langsamer Verbindung: gespeicherte Version aus dem Cache nehmen.
+const NETWORK_TIMEOUT_MS = 4000;
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
 
-  event.respondWith(
-    caches.open(CACHE_VERSION).then(async (cache) => {
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_VERSION);
+    const fromNetwork = fetch(req, { cache: "no-cache" }).then((res) => {
+      if (res && res.ok) cache.put(req, res.clone());
+      return res;
+    });
+    try {
+      return await Promise.race([
+        fromNetwork,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), NETWORK_TIMEOUT_MS))
+      ]);
+    } catch (err) {
       const cached = await cache.match(req, { ignoreSearch: true });
-      const network = fetch(req)
-        .then((res) => {
-          if (res && res.ok) cache.put(req, res.clone());
-          return res;
-        })
-        .catch(() => null);
-      if (cached) {
-        event.waitUntil(network);
-        return cached;
+      if (cached) return cached;
+      if (req.mode === "navigate") {
+        const shell = await cache.match("index.html");
+        if (shell) return shell;
       }
-      const res = await network;
-      if (res) return res;
-      if (req.mode === "navigate") return cache.match("index.html");
-      return new Response("", { status: 504, statusText: "Offline" });
-    })
-  );
+      try {
+        return await fromNetwork;
+      } catch (e) {
+        return new Response("", { status: 504, statusText: "Offline" });
+      }
+    }
+  })());
 });

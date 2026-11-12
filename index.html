@@ -536,7 +536,7 @@
 
           <!-- Left Column: Discussion Status, Starter Player, Timer & Logged Answers -->
           <div class="disc-col disc-col-left lg:col-span-7 flex flex-col min-h-0">
-            <div class="disc-card surface-card rounded-3xl p-3 sm:p-7 flex-1 flex flex-col justify-between gap-2 sm:gap-4 overflow-y-auto min-h-0">
+            <div class="disc-card surface-card rounded-3xl p-3 sm:p-7 flex-1 flex flex-col justify-center gap-3 sm:gap-5 overflow-y-auto min-h-0">
               <div class="disc-head space-y-2 sm:space-y-3 shrink-0">
                 <div class="flex items-center justify-between gap-2">
                   <span class="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-semibold shrink-0">
@@ -583,7 +583,7 @@
               </div>
 
               <!-- Question Mode: Collected Answers / Slider Values Board -->
-              <div id="collectedAnswersBoard" class="disc-board hidden flex flex-col gap-1.5 sm:gap-3 sm:pt-3 sm:border-t border-white/10 lg:flex-1 lg:min-h-0">
+              <div id="collectedAnswersBoard" class="disc-board hidden flex flex-col gap-1.5 sm:gap-3 sm:pt-3 sm:border-t border-white/10 lg:min-h-0">
                 <div class="hidden sm:flex flex-wrap items-center justify-between gap-2 shrink-0">
                   <h4 class="text-xs font-semibold uppercase tracking-widest text-zinc-400">
                     <i class="fa-solid fa-list-ul mr-1"></i>Eure Antworten
@@ -598,14 +598,14 @@
                   <div id="majorityQuestionText" class="font-display font-bold text-xs sm:text-base text-white leading-snug"></div>
                 </div>
 
-                <div id="answersListGrid" class="disc-list grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 content-start pr-1 lg:flex-1 lg:min-h-0 lg:overflow-y-auto"></div>
+                <div id="answersListGrid" class="disc-list grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 content-start pr-1 lg:min-h-0 lg:max-h-[45vh] lg:overflow-y-auto"></div>
               </div>
             </div>
           </div>
 
           <!-- Right Column: Suspect Voting & Final Resolution -->
           <div class="disc-col disc-col-right lg:col-span-5 flex flex-col min-h-0">
-            <div class="disc-card surface-card rounded-3xl p-3 sm:p-6 flex-1 flex flex-col justify-between gap-2 sm:gap-4 overflow-y-auto min-h-0">
+            <div class="disc-card surface-card rounded-3xl p-3 sm:p-6 flex-1 flex flex-col justify-center gap-3 sm:gap-5 overflow-y-auto min-h-0">
               <div class="disc-vote flex flex-col gap-2 sm:gap-3">
                 <div class="shrink-0">
                   <h3 class="font-display font-bold text-base sm:text-lg text-white">Abstimmung</h3>
@@ -627,7 +627,7 @@
                 </button>
 
                 <div id="postRevealActions" class="hidden grid grid-cols-2 gap-2.5 pt-1">
-                  <button onclick="app.startRound()" class="py-3 sm:py-3.5 px-3 sm:px-4 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2">
+                  <button onclick="app.startRound()" class="py-3 sm:py-3.5 px-3 sm:px-4 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2 whitespace-nowrap">
                     <i class="fa-solid fa-rotate-right"></i>
                     <span>Nächste Runde</span>
                   </button>
@@ -715,7 +715,7 @@
           </div>
 
           <div class="flex-[1_1_0] min-h-0 rounded-2xl bg-white/5 border border-white/10 p-3 flex items-center justify-center text-center overflow-hidden">
-            <h2 id="quizQuestionText" class="font-display font-bold text-white leading-snug break-words max-w-full" style="font-size: 20px;"></h2>
+            <h2 id="quizQuestionText" class="question-readable font-bold text-white leading-snug break-words max-w-full" style="font-size: 20px;"></h2>
           </div>
 
           <div id="quizAnswers" class="flex-[1.8_1_0] min-h-0 grid grid-cols-1 grid-rows-4 gap-1.5 sm:gap-2"></div>
@@ -1396,6 +1396,32 @@
       </div>
 
       <div id="customSelectOptionsList" class="space-y-2 flex-1 min-h-0 overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: GANZE ANTWORT ANZEIGEN (Fragen-Imposter) -->
+  <div id="answerDetailModal" onclick="if(event.target===this) app.closeModal('answerDetailModal')" class="fixed inset-0 z-[60] hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-md w-full p-6 space-y-4 overflow-y-auto view-enter">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="answerDetailAvatar" class="w-10 h-10 rounded-xl bg-white text-black flex items-center justify-center font-mono-num font-bold text-sm shrink-0">1</div>
+          <div class="min-w-0">
+            <div class="text-[11px] uppercase tracking-widest text-zinc-400 font-semibold">Antwort von</div>
+            <h3 id="answerDetailName" class="font-display font-bold text-xl text-white truncate">Spieler</h3>
+          </div>
+        </div>
+        <button onclick="app.closeModal('answerDetailModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="answerDetailText" class="question-readable p-4 rounded-2xl bg-white/5 border border-white/10 text-lg text-white leading-snug break-words whitespace-pre-wrap"></div>
+      <div class="text-xs text-zinc-400 leading-relaxed">
+        <span class="font-semibold text-zinc-300">Frage der Crew:</span>
+        <span id="answerDetailQuestion"></span>
+      </div>
+      <button onclick="app.closeModal('answerDetailModal')" class="w-full py-3 rounded-2xl btn-primary text-xs sm:text-sm">
+        Schließen
+      </button>
     </div>
   </div>
 
