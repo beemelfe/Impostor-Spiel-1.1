@@ -718,7 +718,7 @@ const app = {
       const chips = this.state.players.map((p, i) => {
         const res = qz.results[i][r];
         if (!res) return "";
-        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold ${res.correct ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-rose-500/15 text-rose-300 border border-rose-500/30"}">
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold ${res.correct ? "chip-ok" : "chip-bad"}">
           <i class="fa-solid ${res.correct ? "fa-check" : "fa-xmark"}"></i>${this.escapeHTML(p.name)}${res.correct ? " · " + this.formatQuizSeconds(res.ms) : ""}
         </span>`;
       }).join("");
@@ -727,7 +727,7 @@ const app = {
       card.innerHTML = `
         <div class="text-[10px] font-mono-num uppercase tracking-widest text-zinc-400">Runde ${r + 1} • ${this.escapeHTML(q.cat)}</div>
         <div class="text-xs font-semibold text-white leading-snug">${this.escapeHTML(q.q)}</div>
-        <div class="text-xs text-emerald-300 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>${this.escapeHTML(q.right)}</div>
+        <div class="text-sm text-emerald-300 font-bold"><i class="fa-solid fa-circle-check mr-1"></i>Richtig: ${this.escapeHTML(q.right)}</div>
         <div class="flex flex-wrap gap-1">${chips}</div>
       `;
       list.appendChild(card);

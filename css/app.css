@@ -694,7 +694,6 @@ input[type="text"], input[type="password"], textarea {
 
 /* ---------- Niedrige Bildschirme (kleine Handys, Browserleisten) ---------- */
 @media (max-height: 740px) {
-  .welcome-hero-sub,
   .disc-sub {
     display: none !important;
   }
@@ -705,19 +704,6 @@ input[type="text"], input[type="password"], textarea {
 
   #cardBackFace .space-y-3\.5 > :not([hidden]) ~ :not([hidden]) {
     margin-top: 0.5rem;
-  }
-}
-
-@media (max-height: 780px) {
-  .welcome-card-desc {
-    display: none !important;
-  }
-}
-
-@media (max-height: 740px) {
-  .welcome-pill,
-  .welcome-badge {
-    display: none !important;
   }
 }
 
@@ -743,11 +729,44 @@ input[type="text"], input[type="password"], textarea {
   }
 }
 
-/* Willkommensseite auf sehr kleinen Handys (z. B. iPhone SE 1. Generation) */
-@media (max-height: 600px) {
-  #view-welcome .surface-card {
-    padding: 0.625rem 0.75rem;
-  }
+/* Willkommensseite: darf auf dem Handy scrollen, damit alle drei Spiele vollständig lesbar sind */
+#view-welcome {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
+}
+
+/* Bessere Lesbarkeit im hellen Modus: helle Grün-/Rot-/Gelbtöne werden dunkler */
+body[data-color-mode="light"] .text-emerald-200,
+body[data-color-mode="light"] .text-emerald-300,
+body[data-color-mode="light"] .text-emerald-400 {
+  color: #047857 !important;
+}
+
+body[data-color-mode="light"] .text-rose-300,
+body[data-color-mode="light"] .text-rose-300\/90,
+body[data-color-mode="light"] .text-rose-400 {
+  color: #be123c !important;
+}
+
+body[data-color-mode="light"] .text-amber-200,
+body[data-color-mode="light"] .text-amber-300 {
+  color: #b45309 !important;
+}
+
+/* Quiz-Rückblick: Chips mit kräftigem Hintergrund und weißer Schrift – in beiden Modi gut lesbar */
+.chip-ok,
+.chip-bad {
+  color: #ffffff !important;
+  border: 1px solid transparent;
+}
+
+.chip-ok {
+  background: #059669;
+}
+
+.chip-bad {
+  background: #e11d48;
 }
 
 /* Diskussion auf kleinen Handys noch etwas kompakter */

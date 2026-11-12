@@ -1,6 +1,6 @@
 // Service Worker: macht die App offline nutzbar.
 // Nach Änderungen an Dateien CACHE_VERSION erhöhen, damit alle Geräte die neue Version laden.
-const CACHE_VERSION = "partyspiele-v2";
+const CACHE_VERSION = "partyspiele-v3";
 
 const PRECACHE = [
   "./",
@@ -19,6 +19,7 @@ const PRECACHE = [
   "icons/icon-maskable-512.png",
   "icons/apple-touch-icon.png",
   "icons/favicon-32.png",
+  "icons/logo-96.png",
   "vendor/fonts/files/inter-latin-400-normal.woff2",
   "vendor/fonts/files/inter-latin-500-normal.woff2",
   "vendor/fonts/files/inter-latin-600-normal.woff2",
