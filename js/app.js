@@ -1186,6 +1186,7 @@ const app = {
     const badge = document.getElementById("setupModeBadge");
     if (badge) {
       badge.textContent = isQuiz ? "Quiz" : isWord ? "Wort-Imposter" : "Fragen-Imposter";
+      badge.dataset.mode = mode;
     }
 
     document.getElementById("wordHintSettingBox").classList.toggle("hidden", !isWord);

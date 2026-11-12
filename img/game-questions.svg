@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 180" role="img" aria-label="Zwei Sprechblasen mit Fragezeichen und ein Schätz-Regler">
+  <defs>
+    <linearGradient id="bubble" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f3e8ff"/>
+    </linearGradient>
+    <linearGradient id="dark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2340"/>
+      <stop offset="1" stop-color="#15111f"/>
+    </linearGradient>
+    <linearGradient id="fill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c084fc"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#4c1d95" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+
+  <!-- große Sprechblase (Crew) -->
+  <g filter="url(#shadow)" transform="rotate(-5 85 70)">
+    <path d="M34 22 h104 a16 16 0 0 1 16 16 v50 a16 16 0 0 1 -16 16 h-58 l-22 20 v-20 h-24 a16 16 0 0 1 -16 -16 v-50 a16 16 0 0 1 16 -16z" fill="url(#bubble)"/>
+    <text x="86" y="84" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="48" fill="#8b5cf6" text-anchor="middle">?</text>
+  </g>
+
+  <!-- kleine Sprechblase (Imposter) -->
+  <g filter="url(#shadow)" transform="rotate(9 168 76)">
+    <path d="M142 46 h52 a12 12 0 0 1 12 12 v34 a12 12 0 0 1 -12 12 h-12 v15 l-17 -15 h-23 a12 12 0 0 1 -12 -12 v-34 a12 12 0 0 1 12 -12z" fill="url(#dark)"/>
+    <text x="168" y="88" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="30" fill="#f472b6" text-anchor="middle">?!</text>
+  </g>
+
+  <!-- Schätz-Regler / Zeitstrahl -->
+  <g filter="url(#shadow)">
+    <rect x="22" y="138" width="176" height="24" rx="12" fill="#ffffff"/>
+    <rect x="22" y="138" width="104" height="24" rx="12" fill="url(#fill)"/>
+    <g stroke="#e9d5ff" stroke-width="2" stroke-linecap="round">
+      <line x1="146" y1="145" x2="146" y2="155"/>
+      <line x1="162" y1="145" x2="162" y2="155"/>
+      <line x1="178" y1="145" x2="178" y2="155"/>
+    </g>
+    <circle cx="126" cy="150" r="16" fill="#ffffff" stroke="#8b5cf6" stroke-width="5"/>
+    <path d="M126 126 l-6 -8 h12 z" fill="#ffffff"/>
+  </g>
+
+  <!-- Funkeln -->
+  <path d="M206 24 l3.5 9 9 3.5 -9 3.5 -3.5 9 -3.5 -9 -9 -3.5 9 -3.5z" fill="#ffffff" opacity="0.95"/>
+  <circle cx="16" cy="132" r="4.5" fill="#ffffff" opacity="0.65"/>
+  <circle cx="204" cy="118" r="3.5" fill="#ffffff" opacity="0.6"/>
+</svg>
