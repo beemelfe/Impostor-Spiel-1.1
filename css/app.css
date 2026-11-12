@@ -815,6 +815,32 @@ input[type="text"], input[type="password"], textarea {
   transition: width 0.1s linear, background-color 0.3s ease;
 }
 
+/* ---------- Diskussion beim Fragen-Imposter: Frage oben, Antworten darunter, Timer kompakt unten ---------- */
+#view-discussion[data-mode="question"] .disc-head {
+  order: 1;
+}
+
+#view-discussion[data-mode="question"] #collectedAnswersBoard {
+  order: 2;
+}
+
+#view-discussion[data-mode="question"] #timerContainerBlock {
+  order: 3;
+  margin-top: auto;
+  margin-bottom: 0;
+}
+
+@media (min-width: 640px) {
+  #view-discussion[data-mode="question"] #timerContainerBlock {
+    padding: 0.75rem 1rem;
+  }
+
+  #view-discussion[data-mode="question"] #timerDisplay {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+}
+
 /* ---------- Diskussions-Ansicht: Handy & Tablet hochkant ---------- */
 @media (max-width: 1023px) {
   #view-discussion .disc-col {

@@ -2551,30 +2551,42 @@ const app = {
     const majBanner = document.getElementById("majorityQuestionBanner");
     const majBtn = document.getElementById("revealMajorityQBtn");
 
+    const headline = document.getElementById("discussionHeadline");
+    const kicker = document.getElementById("discussionKicker");
+
     if (round.mode === "question") {
-      document.getElementById("discussionHeadline").textContent = "Wer hatte die abweichende Frage?";
+      // Die Frage der Crew steht groß oben – sie ist die Grundlage der Diskussion
+      const len = round.mainQ.length;
+      const sizeCls = len <= 70 ? "text-xl sm:text-3xl" : len <= 110 ? "text-lg sm:text-2xl" : "text-base sm:text-xl";
+      headline.className = `font-display ${sizeCls} font-extrabold text-white tracking-tight leading-snug`;
+      headline.textContent = round.mainQ;
+      kicker.classList.remove("hidden");
+      kicker.classList.add("flex");
       document.getElementById("discussionSubtext").textContent =
-        "Hier ist die richtige Hauptfrage der Crew! Prüft die Antworten und lasst jeden seine Antwort plausibel verteidigen.";
+        "Einer von euch hatte eine andere Frage. Wessen Antwort passt nicht dazu? Jeder muss seine Antwort verteidigen!";
       answersBoard.classList.remove("hidden");
-      // Immediately show the right Crew question at the end of Question Imposter
+      // Die Frage steht jetzt als Überschrift, das zusätzliche Banner wird nicht mehr gebraucht
       document.getElementById("majorityQuestionText").textContent = round.mainQ;
-      majBanner.classList.remove("hidden");
+      majBanner.classList.add("hidden");
       majBtn.classList.add("hidden");
 
       const grid = document.getElementById("answersListGrid");
       grid.innerHTML = "";
       this.state.players.forEach((p, i) => {
         const box = document.createElement("div");
-        box.className = "px-2 py-1.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2 min-w-0";
+        box.className = "px-2 py-1.5 sm:px-3.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2 sm:flex-col sm:items-start sm:justify-center sm:gap-0.5 min-w-0";
         box.innerHTML = `
-          <div class="text-[11px] sm:text-xs font-medium text-zinc-400 truncate min-w-0">${i + 1}. ${p.name}</div>
-          <div class="font-mono-num font-bold text-xs sm:text-sm text-white shrink-0 max-w-[60%] truncate">
-            ${p.answer ? p.answer : "<span class='text-zinc-500 text-xs'>Mündlich</span>"}
+          <div class="text-[11px] sm:text-xs font-medium text-zinc-400 truncate min-w-0 max-w-full">${i + 1}. ${this.escapeHTML(p.name)}</div>
+          <div class="font-mono-num font-bold text-xs sm:text-lg text-white shrink-0 max-w-[60%] sm:max-w-full truncate">
+            ${p.answer ? this.escapeHTML(p.answer) : "<span class='text-zinc-500 text-xs'>Mündlich</span>"}
           </div>
         `;
         grid.appendChild(box);
       });
     } else {
+      headline.className = "font-display text-lg sm:text-3xl font-extrabold text-white tracking-tight leading-tight";
+      kicker.classList.add("hidden");
+      kicker.classList.remove("flex");
       document.getElementById("discussionHeadline").textContent = "Wer kennt das Wort nicht?";
       document.getElementById("discussionSubtext").textContent =
         "Jeder nennt reihum ein Wort als Assoziation. Wer orientiert sich nur am subtilen Hinweis-Wort?";
@@ -2740,8 +2752,16 @@ const app = {
       `;
       requestAnimationFrame(() => this.fitAdaptiveWordElements(box));
     } else {
-      document.getElementById("majorityQuestionBanner").classList.remove("hidden");
       document.getElementById("revealMajorityQBtn").classList.add("hidden");
+
+      // Antworten der Imposter in der Liste markieren
+      [...document.getElementById("answersListGrid").children].forEach((box, i) => {
+        if (!round.imposterIndices.has(i)) return;
+        box.classList.remove("bg-black/30", "border-white/10");
+        box.classList.add("bg-rose-500/15", "border-rose-500/50");
+        const nameEl = box.firstElementChild;
+        if (nameEl) nameEl.innerHTML += ' <span class="text-rose-400 font-bold">· Imposter</span>';
+      });
 
       const factHTML = round.fact
         ? `

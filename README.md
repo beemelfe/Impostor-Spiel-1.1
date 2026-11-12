@@ -34,15 +34,16 @@ Alle bekommen dasselbe geheime Wort, nur der **Imposter** nicht. Er sieht stattd
 Alle beantworten geheim **dieselbe Frage**, nur der Imposter bekommt eine **andere Frage**, deren Antwort aber verblüffend ähnlich ist. Bei **Schätzfragen** stellt jeder seine Zahl auf einem Zeitstrahl ein.
 
 1. Jeder liest geheim seine Frage und gibt seine Antwort ein bzw. schiebt den Zeitstrahl.
-2. Am Ende werden alle Antworten und die **echte Frage der Crew** angezeigt.
+2. In der Diskussion steht die **Frage der Crew groß oben**, darunter alle Antworten.
 3. Jetzt muss jeder seine Antwort verteidigen. Wessen Antwort passt nicht ganz?
-4. Bei **„Auflösung anzeigen“** sieht man beide Fragen und die **richtige Lösung** als Fakten-Check.
+4. Bei **„Auflösung anzeigen“** wird der Imposter rot markiert und man sieht beide Fragen und die **richtige Lösung** als Fakten-Check.
 
 <p align="center">
-  <img src="docs/screenshots/fragen-zeitstrahl.jpg" width="220" alt="Schätzfrage mit Zeitstrahl">
-  <img src="docs/screenshots/fragen-aufloesung.jpg" width="220" alt="Auflösung mit beiden Fragen und Lösung">
+  <img src="docs/screenshots/fragen-zeitstrahl.jpg" width="200" alt="Schätzfrage mit Zeitstrahl">
+  <img src="docs/screenshots/fragen-diskussion.jpg" width="200" alt="Diskussion: Frage der Crew groß oben, darunter alle Antworten">
+  <img src="docs/screenshots/fragen-aufloesung.jpg" width="200" alt="Auflösung mit beiden Fragen und Lösung">
 </p>
-<p align="center"><sub>Schätzfrage mit Zeitstrahl · Auflösung mit beiden Fragen und Fakten-Check</sub></p>
+<p align="center"><sub>Schätzfrage mit Zeitstrahl · Diskussion: Frage oben, Antworten darunter · Auflösung mit Fakten-Check</sub></p>
 
 Es gibt Schätzfragen (Zahlen und Skala 1–10) und normale Fragen. Im Setup unter **Optionen → Fragen-Typ** kann man wählen.
 
@@ -93,21 +94,55 @@ So kann man sofort am Computer spielen. **Installieren und Offline-Modus gehen a
 
 ### Weg 2: Auf dem Handy als App installieren (empfohlen)
 
-Dafür muss die App einmal im Internet erreichbar sein. Das geht kostenlos mit **GitHub Pages**:
+Dafür muss die App einmal im Internet erreichbar sein. Danach installiert man sie mit einem Fingertipp aufs Handy. Am einfachsten geht das kostenlos mit **Netlify**.
 
-**A) Einmalig auf GitHub einrichten (am Computer):**
-1. Im Repository oben auf **„Settings“** klicken.
-2. Links im Menü **„Pages“** wählen.
-3. Bei **„Source“**: **„Deploy from a branch“** auswählen.
-4. Bei **„Branch“** den Branch mit der App auswählen (z. B. `main`), daneben **`/ (root)`**, dann **„Save“**.
-5. 1–2 Minuten warten und die Seite neu laden. Oben steht jetzt die Adresse, z. B.
-   `https://<dein-benutzername>.github.io/Impostor-Spiel-1.1/`
+#### Variante A: Netlify per Drag & Drop (am einfachsten, ohne GitHub-Einstellungen)
 
-> GitHub Pages ist für **öffentliche** Repositories kostenlos. Für ein **privates** Repository braucht man einen kostenpflichtigen GitHub-Plan oder einen anderen Webspace (dort einfach den ganzen Ordner hochladen).
+1. Die App wie in Weg 1 herunterladen und **entpacken**.
+2. **Den richtigen Ordner finden:** Gemeint ist der Ordner, in dem **direkt** `index.html` liegt, zusammen mit `css`, `js`, `vendor`, `icons`, `sw.js` und `manifest.webmanifest`.
+   > Achtung: Windows legt beim Entpacken oft einen Ordner **in** einem Ordner an (z. B. `Impostor-Spiel-…\Impostor-Spiel-…\index.html`). Dann den **inneren** Ordner nehmen, also den, bei dem man `index.html` sofort sieht.
+3. Im Browser **[app.netlify.com/drop](https://app.netlify.com/drop)** öffnen (kostenloses Konto anlegen bzw. anmelden).
+4. Diesen Ordner **mit der Maus in das Feld ziehen**. Nicht die ZIP-Datei und nicht einzelne Dateien.
+5. Nach wenigen Sekunden bekommst du eine Adresse wie `https://irgendein-name-123.netlify.app`. Unter **„Site configuration → Change site name“** kannst du einen schöneren Namen wählen, z. B. `https://unsere-partyspiele.netlify.app`.
 
-**B) Auf dem Handy installieren:**
-- **iPhone / iPad:** Adresse in **Safari** öffnen → unten auf **Teilen** (Quadrat mit Pfeil) → **„Zum Home-Bildschirm“** → **„Hinzufügen“**.
-- **Android:** Adresse in **Chrome** öffnen → oben rechts **⋮** → **„App installieren“** bzw. **„Zum Startbildschirm hinzufügen“**.
+Richtig sieht der hochgeladene Ordner so aus:
+```
+📁 (dieser Ordner wird hochgezogen)
+├── index.html
+├── manifest.webmanifest
+├── sw.js
+├── netlify.toml
+├── 📁 css
+├── 📁 js
+├── 📁 icons
+├── 📁 vendor
+└── 📁 docs        (nur Bilder für diese Anleitung, schadet nicht)
+```
+Die übrigen Dateien (`README.md`, `package.json`, `tailwind.config.js`, `tools/`, `impostor12.html`) stören nicht, sie werden einfach mit hochgeladen.
+
+**Später aktualisieren:** In Netlify bei der Seite auf **„Deploys“** gehen und den neuen, entpackten Ordner wieder in das Feld ziehen.
+
+#### Variante B: Netlify mit GitHub verbinden (aktualisiert sich automatisch)
+
+1. In Netlify **„Add new site → Import an existing project → GitHub“** wählen und dieses Repository auswählen.
+2. Den **Branch** mit der App wählen (z. B. `main`).
+3. **Build command:** leer lassen. **Publish directory:** leer lassen bzw. `.` (Punkt).
+   Die Datei `netlify.toml` im Repository stellt das bereits richtig ein.
+4. **„Deploy“** klicken. Bei jeder Änderung auf GitHub aktualisiert Netlify die Seite automatisch. Das funktioniert auch mit privaten Repositories.
+
+#### Variante C: GitHub Pages
+
+1. Im Repository oben auf **„Settings“** → links **„Pages“**.
+2. Bei **„Source“**: **„Deploy from a branch“**, dann den Branch (z. B. `main`) und **`/ (root)`** wählen, **„Save“**.
+3. Nach 1–2 Minuten steht oben die Adresse, z. B. `https://<dein-benutzername>.github.io/Impostor-Spiel-1.1/`.
+
+> GitHub Pages ist nur für **öffentliche** Repositories kostenlos. Bei einem privaten Repository lieber Netlify nehmen.
+
+#### Auf dem Handy installieren
+
+Die Adresse von Netlify oder GitHub Pages auf dem Handy öffnen:
+- **iPhone / iPad:** in **Safari** → unten auf **Teilen** (Quadrat mit Pfeil) → **„Zum Home-Bildschirm“** → **„Hinzufügen“**.
+- **Android:** in **Chrome** → oben rechts **⋮** → **„App installieren“** bzw. **„Zum Startbildschirm hinzufügen“**.
 
 Jetzt liegt **Partyspiele** als App-Icon auf dem Home-Bildschirm, startet im Vollbild und funktioniert auch im Flugmodus. Die Anleitung gibt es auch in der App: Logo antippen → **„Als App installieren“**.
 
@@ -128,6 +163,7 @@ Jetzt liegt **Partyspiele** als App-Icon auf dem Home-Bildschirm, startet im Vol
 | `vendor/` | Lokale Kopien von Tailwind-CSS, Font Awesome und Schriften (für den Offline-Modus) |
 | `icons/` | App-Icons |
 | `manifest.webmanifest` | Angaben für die Installation (Name, Icon, Farben) |
+| `netlify.toml` | Einstellungen für Netlify (kein Build nötig, Hauptordner veröffentlichen) |
 | `sw.js` | Service Worker: speichert die App für die Offline-Nutzung |
 | `docs/screenshots/` | Bilder für diese Anleitung |
 | `partyspiele.html` | Alte Adresse, leitet auf `index.html` weiter |

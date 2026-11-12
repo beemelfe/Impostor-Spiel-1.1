@@ -1,0 +1,16 @@
+# Netlify-Einstellungen: Die App braucht keinen Build-Schritt.
+# Alles liegt fertig im Hauptordner (index.html, css/, js/, vendor/, icons/ ...).
+[build]
+  publish = "."
+  command = ""
+
+# Service Worker nie zwischenspeichern, damit Updates sofort ankommen
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
