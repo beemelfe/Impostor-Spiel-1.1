@@ -1,82 +1,166 @@
-# Partyspiele – Wort-Imposter, Fragen-Imposter & Quiz
+# 🥂 Partyspiele – Imposter & Quiz
 
-Ein Handy, reihum weitergeben: drei Partyspiele als Web-App. Sie läuft im Browser, lässt sich auf dem Handy installieren und funktioniert danach auch ohne Internet.
+**Ein Handy, viele Freunde, drei Spiele.** Das Handy wird reihum weitergegeben, jeder schaut geheim auf seine Karte und danach wird diskutiert, geraten und gelacht. Die App läuft im Browser, lässt sich auf dem Handy installieren und funktioniert danach auch ohne Internet.
 
-## App öffnen
+<p align="center">
+  <img src="docs/screenshots/startseite.jpg" width="260" alt="Startseite mit den drei Spielen">
+</p>
 
-### Variante A: Am Computer ausprobieren (ohne Installation)
-1. Den kompletten Ordner herunterladen (auf GitHub: **Code → Download ZIP**) und entpacken.
-2. **`index.html`** doppelklicken. Die App öffnet sich im Browser.
+---
 
-So kann man sofort spielen. **Installieren und Offline-Modus funktionieren auf diesem Weg aber nicht**, weil Browser das nur für Seiten mit einer Internet-Adresse (`https://…`) erlauben.
+## 🎮 Die drei Spiele
 
-> Wichtig: Die Dateien müssen zusammenbleiben. `index.html` braucht die Ordner `css/`, `js/`, `vendor/` und `icons/` daneben.
+### 1. Wort-Imposter
 
-### Variante B: Auf dem Handy installieren (empfohlen)
-Die App muss einmal über eine `https://`-Adresse erreichbar sein. Am einfachsten geht das kostenlos mit **GitHub Pages**:
+Alle bekommen dasselbe geheime Wort, nur der **Imposter** nicht. Er sieht stattdessen ein zweideutiges **Hinweis-Wort** (kann man auch ausschalten).
 
-1. Auf GitHub im Repository **Settings → Pages** öffnen.
-2. Unter **Build and deployment → Source** „Deploy from a branch“ wählen.
-3. Den Branch mit der App (z. B. `main`) und den Ordner **`/ (root)`** auswählen und speichern.
-4. Nach ca. 1–2 Minuten erscheint dort die Adresse, z. B. `https://<benutzername>.github.io/Impostor-Spiel-1.1/`.
+1. Im Setup Spieler, Anzahl Imposter, Timer und Kategorien einstellen und **„Runde starten“** tippen.
+2. Das Handy geht reihum. Jeder tippt auf die verdeckte Karte, schaut sich geheim seine Rolle an, tippt **„Verbergen & weitergeben“** und gibt das Handy weiter.
+3. Danach nennt jeder reihum **ein Wort**, das zum geheimen Wort passt. Nicht zu offensichtlich, sonst errät der Imposter es.
+4. Gemeinsam diskutieren und abstimmen, wer der Imposter ist. Dann **„Auflösung anzeigen“**.
 
-> GitHub Pages ist für **öffentliche** Repositories kostenlos. Für private Repositories braucht man einen kostenpflichtigen GitHub-Plan.
+<p align="center">
+  <img src="docs/screenshots/karte-verdeckt.jpg" width="200" alt="Verdeckte Karte">
+  <img src="docs/screenshots/wort-crew.jpg" width="200" alt="Karte der Crew mit geheimem Wort">
+  <img src="docs/screenshots/wort-imposter.jpg" width="200" alt="Karte des Imposters mit Hinweis-Wort">
+  <img src="docs/screenshots/wort-diskussion.jpg" width="200" alt="Diskussion mit Timer und Abstimmung">
+</p>
+<p align="center"><sub>Verdeckte Karte · Crew sieht das Wort · Imposter sieht nur den Hinweis · Diskussion & Abstimmung</sub></p>
 
-Dann auf dem Handy:
-- **iPhone/iPad (Safari):** Adresse öffnen → **Teilen** → **„Zum Home-Bildschirm“**.
-- **Android (Chrome):** Adresse öffnen → **⋮** → **„App installieren“** bzw. **„Zum Startbildschirm hinzufügen“**.
+**Punkte:** Findet die Crew den Imposter, bekommt jedes Crew-Mitglied +1 Punkt. Bleibt der Imposter unentdeckt (oder errät das Wort), bekommt er +2 Punkte.
 
-Ab jetzt startet Partyspiele vom Home-Bildschirm wie eine normale App, im Vollbild und auch im Flugmodus. In der App gibt es außerdem im Logo-Menü den Punkt **„Als App installieren“** mit dieser Anleitung.
+### 2. Fragen-Imposter
 
-### Variante C: Lokaler Testserver (für Bastler)
-Im Ordner ausführen:
-```bash
-python3 -m http.server 8080
-```
-Dann `http://localhost:8080` im Browser öffnen. Hier funktionieren auch Offline-Modus und Installation (nur auf diesem Computer).
+Alle beantworten geheim **dieselbe Frage**, nur der Imposter bekommt eine **andere Frage**, deren Antwort aber verblüffend ähnlich ist. Bei **Schätzfragen** stellt jeder seine Zahl auf einem Zeitstrahl ein.
 
-## Ordnerstruktur
+1. Jeder liest geheim seine Frage und gibt seine Antwort ein bzw. schiebt den Zeitstrahl.
+2. Am Ende werden alle Antworten und die **echte Frage der Crew** angezeigt.
+3. Jetzt muss jeder seine Antwort verteidigen. Wessen Antwort passt nicht ganz?
+4. Bei **„Auflösung anzeigen“** sieht man beide Fragen und die **richtige Lösung** als Fakten-Check.
+
+<p align="center">
+  <img src="docs/screenshots/fragen-zeitstrahl.jpg" width="220" alt="Schätzfrage mit Zeitstrahl">
+  <img src="docs/screenshots/fragen-aufloesung.jpg" width="220" alt="Auflösung mit beiden Fragen und Lösung">
+</p>
+<p align="center"><sub>Schätzfrage mit Zeitstrahl · Auflösung mit beiden Fragen und Fakten-Check</sub></p>
+
+Es gibt Schätzfragen (Zahlen und Skala 1–10) und normale Fragen. Im Setup unter **Optionen → Fragen-Typ** kann man wählen.
+
+### 3. Quiz
+
+Ein Quiz für alle mit **700 Fragen** in 10 Kategorien. In jeder Runde bekommen alle **dieselbe Frage** mit vier Antworten und beantworten sie nacheinander gegen die Uhr.
+
+1. Das Handy an den angezeigten Spieler geben, der tippt **„Frage starten“**. Ab jetzt läuft die Zeit.
+2. Antwort antippen, **„Weiter“** und das Handy weitergeben.
+3. Nach allen Runden (Standard: 3) kommt die Rangliste: **Wer die meisten richtig hat, gewinnt. Bei Gleichstand gewinnt, wer schneller war.**
+
+<p align="center">
+  <img src="docs/screenshots/quiz-weitergeben.jpg" width="200" alt="Handy weitergeben">
+  <img src="docs/screenshots/quiz-frage.jpg" width="200" alt="Quizfrage mit vier Antworten">
+  <img src="docs/screenshots/quiz-ergebnis.jpg" width="200" alt="Rangliste am Ende">
+</p>
+<p align="center"><sub>Handy weitergeben · Frage gegen die Uhr · Rangliste mit Zeiten</sub></p>
+
+Im Setup kann man Anzahl der Runden, Zeit pro Frage, Kategorien und das Sofort-Feedback (richtig/falsch direkt anzeigen) einstellen.
+
+### Weitere Funktionen
+- **Wörter-, Fragen- & Quiz-Tresor** (Logo-Menü): eigene Wörter, Fragen und Quizfragen anlegen, bearbeiten, löschen und als CSV sichern. Mit Passwort geschützt, damit niemand spickt.
+- **Punktestand** über mehrere Runden.
+- **Design:** 5 Farbschemata, Hell/Dunkel oder automatisch wie das Gerät.
+- **Zurück-Wischen** auf dem Handy führt Schritt für Schritt zurück (Runde → Setup → Startseite).
+
+---
+
+## 📲 App öffnen – Schritt für Schritt
+
+Es gibt zwei Wege: **am Computer ausprobieren** oder **auf dem Handy als App installieren**.
+
+### Weg 1: Am Computer ausprobieren
+
+1. Auf GitHub oben auf den grünen Knopf **„Code“** klicken, dann **„Download ZIP“**.
+2. **Die ZIP-Datei entpacken – das ist der wichtigste Schritt!**
+   - **Windows:** Rechtsklick auf die ZIP-Datei → **„Alle extrahieren …“** → **„Extrahieren“**.
+   - **Mac:** ZIP-Datei doppelklicken, sie wird automatisch entpackt.
+3. Den **neuen, entpackten Ordner** öffnen und dort auf **`index.html`** doppelklicken.
+
+> ⚠️ **Nicht** `index.html` direkt in der ZIP-Datei doppelklicken! Windows zeigt den Inhalt einer ZIP-Datei zwar wie einen Ordner an, öffnet daraus aber nur die eine Datei. Dann fehlen Design und Spiel-Logik, und man sieht nur eine Liste aus Text und grauen Knöpfen. Die App zeigt in diesem Fall jetzt diesen Hinweis:
+>
+> <img src="docs/screenshots/zip-hinweis.jpg" width="420" alt="Hinweis: Bitte zuerst die ZIP-Datei entpacken">
+>
+> Woran man erkennt, dass man noch in der ZIP-Datei ist: Im Explorer gibt es eine Spalte **„Komprimierte Größe“**.
+
+So kann man sofort am Computer spielen. **Installieren und Offline-Modus gehen auf diesem Weg nicht**, weil Browser das nur für Seiten mit `https://`-Adresse erlauben. Dafür ist Weg 2 da.
+
+### Weg 2: Auf dem Handy als App installieren (empfohlen)
+
+Dafür muss die App einmal im Internet erreichbar sein. Das geht kostenlos mit **GitHub Pages**:
+
+**A) Einmalig auf GitHub einrichten (am Computer):**
+1. Im Repository oben auf **„Settings“** klicken.
+2. Links im Menü **„Pages“** wählen.
+3. Bei **„Source“**: **„Deploy from a branch“** auswählen.
+4. Bei **„Branch“** den Branch mit der App auswählen (z. B. `main`), daneben **`/ (root)`**, dann **„Save“**.
+5. 1–2 Minuten warten und die Seite neu laden. Oben steht jetzt die Adresse, z. B.
+   `https://<dein-benutzername>.github.io/Impostor-Spiel-1.1/`
+
+> GitHub Pages ist für **öffentliche** Repositories kostenlos. Für ein **privates** Repository braucht man einen kostenpflichtigen GitHub-Plan oder einen anderen Webspace (dort einfach den ganzen Ordner hochladen).
+
+**B) Auf dem Handy installieren:**
+- **iPhone / iPad:** Adresse in **Safari** öffnen → unten auf **Teilen** (Quadrat mit Pfeil) → **„Zum Home-Bildschirm“** → **„Hinzufügen“**.
+- **Android:** Adresse in **Chrome** öffnen → oben rechts **⋮** → **„App installieren“** bzw. **„Zum Startbildschirm hinzufügen“**.
+
+Jetzt liegt **Partyspiele** als App-Icon auf dem Home-Bildschirm, startet im Vollbild und funktioniert auch im Flugmodus. Die Anleitung gibt es auch in der App: Logo antippen → **„Als App installieren“**.
+
+---
+
+## 🛠️ Für Bastler
+
+### Ordnerstruktur
 
 | Datei / Ordner | Inhalt |
 | --- | --- |
-| `index.html` | Die App-Oberfläche (alle Ansichten und Pop-ups) |
+| `index.html` | Die App: alle Ansichten und Pop-ups |
 | `css/app.css` | Eigenes Design (Farben, Themes, Handy-Anpassungen) |
 | `js/data-words.js` | **Wort-Imposter:** Kategorien mit Wort + Hinweis |
-| `js/data-questions.js` | **Fragen-Imposter:** Fragen-Paare, Schätzfragen mit Lösungen |
+| `js/data-questions.js` | **Fragen-Imposter:** Fragen-Paare und Schätzfragen mit Lösungen |
 | `js/data-quiz.js` | **Quiz:** Fragen mit 1 richtigen und 3 falschen Antworten |
 | `js/app.js` | Die Spiel-Logik |
 | `vendor/` | Lokale Kopien von Tailwind-CSS, Font Awesome und Schriften (für den Offline-Modus) |
 | `icons/` | App-Icons |
 | `manifest.webmanifest` | Angaben für die Installation (Name, Icon, Farben) |
 | `sw.js` | Service Worker: speichert die App für die Offline-Nutzung |
-| `partyspiele.html` | Alte Adresse, leitet nur noch auf `index.html` weiter |
+| `docs/screenshots/` | Bilder für diese Anleitung |
+| `partyspiele.html` | Alte Adresse, leitet auf `index.html` weiter |
+| `impostor12.html` | Älteres, separates Spiel (unabhängig von dieser App) |
 
-## Fragen und Wörter bearbeiten
+### Fragen und Wörter bearbeiten
+- **In der App:** Logo-Menü → **Wörter-, Fragen- & Quiz-Tresor**. Diese Änderungen werden nur auf dem jeweiligen Gerät gespeichert. Mit **CSV-Export/-Import** kann man sie auf andere Geräte übertragen.
+- **Für alle Geräte:** direkt in `js/data-words.js`, `js/data-questions.js` oder `js/data-quiz.js` bearbeiten (das Format steht oben in jeder Datei).
 
-- **In der App:** Logo-Menü → **Wörter-, Fragen- & Quiz-Tresor** (passwortgeschützt). Dort kann man alles hinzufügen, ändern, löschen und als CSV sichern oder importieren. Diese Änderungen werden nur auf dem jeweiligen Gerät gespeichert.
-- **Für alle Geräte:** direkt in `js/data-words.js`, `js/data-questions.js` oder `js/data-quiz.js` bearbeiten (Formate stehen jeweils oben in der Datei).
+Werden **Standard-Fragen korrigiert**, in `js/app.js` die Zahl bei `DATA_VERSION` um 1 erhöhen. Dann übernehmen auch Geräte mit gespeichertem Spielstand die Korrekturen.
 
-Wenn du Standard-Fragen korrigierst, erhöhe in `js/app.js` die Zahl bei `DATA_VERSION`. Dann übernehmen auch Geräte mit gespeichertem Spielstand die Korrekturen.
-
-## Nach Änderungen: Update an alle Geräte verteilen
-
-Die installierte App speichert alle Dateien. Damit Handys eine neue Version laden:
+### Updates an installierte Handys verteilen
+Die installierte App speichert alle Dateien. Damit Handys eine neue Version bekommen:
 1. In `sw.js` die Zeile `const CACHE_VERSION = "partyspiele-v1";` hochzählen (z. B. `v2`).
 2. Änderungen auf GitHub hochladen.
-3. Die App lädt die neue Version im Hintergrund und zeigt sie beim nächsten Start an.
+3. Die App lädt die neue Version im Hintergrund und zeigt sie beim nächsten Start.
 
-Neue Dateien (z. B. weitere Bilder) müssen in `sw.js` in die Liste `PRECACHE` eingetragen werden, damit sie offline verfügbar sind.
+Neue Dateien müssen in `sw.js` in die Liste `PRECACHE` eingetragen werden, damit sie offline verfügbar sind.
 
-## Design-Klassen neu bauen (nur bei Änderungen am Layout)
+### Lokaler Testserver
+```bash
+python3 -m http.server 8080
+```
+Dann `http://localhost:8080` öffnen. Hier funktionieren auch Offline-Modus und Installation (nur auf diesem Computer).
 
-Das Layout nutzt Tailwind-CSS-Klassen, die als fertige Datei in `vendor/tailwind.css` liegen. Werden **neue** Tailwind-Klassen in `index.html` oder `js/*.js` verwendet, muss die Datei neu gebaut werden (Node.js nötig):
+### Design-Klassen neu bauen (nur bei Layout-Änderungen)
+Das Layout nutzt Tailwind-CSS-Klassen, die fertig in `vendor/tailwind.css` liegen. Nur wenn **neue** Tailwind-Klassen in `index.html` oder `js/*.js` verwendet werden, muss die Datei neu gebaut werden (Node.js nötig):
 ```bash
 npm install
 npm run build:css
 ```
-Wer nur Fragen oder Wörter ändert, braucht das nicht.
 
-## Lizenzen der eingebundenen Pakete
+### Lizenzen der eingebundenen Pakete
 - Font Awesome Free 6.5.1: Icons CC BY 4.0, Schriftdateien SIL OFL 1.1, Code MIT (siehe `vendor/fontawesome/LICENSE.txt`)
-- Schriften Inter, Syne und JetBrains Mono (über Fontsource): SIL Open Font License 1.1
+- Schriften Inter, Syne und JetBrains Mono (über Fontsource): SIL Open Font License 1.1 (siehe `vendor/fonts/LICENSE-OFL.txt`)
 - Tailwind CSS: MIT

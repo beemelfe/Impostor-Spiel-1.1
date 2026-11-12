@@ -316,6 +316,8 @@ const app = {
 
   syncHistory(viewId) {
     if (!this.nav.ready) return;
+    // Läuft gerade noch ein Zurück-Sprung, gleicht onPopState den Verlauf danach ab
+    if (this.nav.pending) return;
     const lv = this.nav.levels;
     const nl = lv[viewId] ?? 0;
     const cl = lv[this.nav.cur] ?? 0;
@@ -355,10 +357,26 @@ const app = {
   onPopState(e) {
     const st = (e && e.state) || {};
     if (this.nav.pending) {
-      const t = this.nav.pending;
+      // Ein von der App ausgelöster Zurück-Sprung ist angekommen: Verlauf an die
+      // aktuelle Ansicht anpassen (der Nutzer kann inzwischen schon weiter navigiert haben)
+      const lv = this.nav.levels;
+      const landed = lv[this.nav.pending] ?? 0;
+      const cur = this.nav.cur;
+      const cl = lv[cur] ?? 0;
       this.nav.pending = null;
-      try { history.replaceState({ view: t }, ""); } catch (err) {}
-      if (this.nav.cur !== t) this.applyViewFromNav(t);
+      try {
+        if (cl === landed) {
+          history.replaceState({ view: cur }, "");
+        } else if (cl > landed) {
+          history.replaceState({ view: cl >= 1 && landed === 0 ? "view-home" : "view-setup" }, "");
+          for (let l = landed + 1; l <= cl; l++) {
+            history.pushState({ view: l === cl ? cur : "view-setup" }, "");
+          }
+        } else {
+          this.nav.pending = cur;
+          history.go(-(landed - cl));
+        }
+      } catch (err) {}
       return;
     }
     if (this.closeTopOverlay()) {

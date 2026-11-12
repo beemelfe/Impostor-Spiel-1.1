@@ -192,6 +192,11 @@ body[data-color-mode="light"] input.estimate-slider {
   background: rgba(15, 23, 42, 0.14);
 }
 
+/* Ladehinweis aus index.html ausblenden, sobald diese Datei geladen ist */
+#loadErrorNotice {
+  display: none !important;
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
