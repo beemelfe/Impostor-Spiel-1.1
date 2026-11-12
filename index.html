@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
+  <title>PARTYSPIELE</title>
+
+  <!-- Web-App / Installation -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#09090b" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Partyspiele" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+  <!-- Schriften & Icons (lokal, funktionieren offline) -->
+  <link rel="stylesheet" href="vendor/fonts/fonts.css" />
+  <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css" />
+
+  <!-- App-Design, danach Tailwind-Utilities (lokal gebaut) -->
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="vendor/tailwind.css" />
+</head>
+
+<body data-theme="obsidian" data-color-mode="dark" class="relative selection:bg-white selection:text-black">
+
+  <!-- Subtle Background Grid & Ambient Light -->
+  <div class="fixed inset-0 bg-grid-pattern pointer-events-none z-0"></div>
+  <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+  <div class="fixed top-[-20%] left-1/2 -translate-x-1/2 w-[650px] h-[350px] rounded-full blur-[130px] opacity-20 pointer-events-none z-0 transition-colors duration-700" style="background: var(--accent);"></div>
+
+  <div class="app-shell relative z-10 h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col justify-between max-w-4xl mx-auto">
+
+    <!-- Minimal Header: Click Party Logo to Open Full App Menu -->
+    <header class="relative flex items-center justify-between mb-2 sm:mb-4 shrink-0">
+      <div class="relative">
+        <button id="logoMenuTrigger" onclick="app.toggleLogoMenu()" class="group flex items-center gap-3 sm:gap-3.5 p-1.5 pr-3.5 sm:p-2 sm:pr-4 rounded-2xl surface-card hover:border-white/25 transition-all focus:outline-none">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center bg-white text-black font-display font-extrabold text-lg tracking-tighter shadow-sm group-hover:scale-105 transition-transform">
+            <i class="fa-solid fa-champagne-glasses text-base"></i>
+          </div>
+          <div class="text-left">
+            <div class="flex items-center gap-2">
+              <span class="font-display font-extrabold text-base sm:text-lg tracking-tight text-white">PARTYSPIELE</span>
+              <i id="logoMenuChevron" class="fa-solid fa-chevron-down text-[10px] text-zinc-400 transition-transform duration-300"></i>
+            </div>
+            <div class="hidden sm:block text-[11px] text-zinc-400 font-medium">Menü & Optionen</div>
+          </div>
+        </button>
+
+        <!-- Dropdown Command Menu attached to Logo -->
+        <div id="logoDropdownMenu" class="hidden absolute left-0 mt-3 w-72 sm:w-80 surface-card rounded-3xl p-2.5 z-50 shadow-2xl border border-white/15 menu-enter">
+          <div class="px-3 py-2 border-b border-white/5 mb-1.5 flex items-center justify-between">
+            <span class="text-[11px] font-semibold uppercase tracking-widest text-zinc-400">Partyspiele & Tools</span>
+            <span class="text-[11px] font-mono-num text-zinc-500">v4.0</span>
+          </div>
+
+          <div class="space-y-1">
+            <button onclick="app.closeLogoMenu(); app.goHome();" class="w-full px-3.5 py-2 sm:py-2.5 rounded-2xl hover:bg-white/10 flex items-center justify-between text-left transition-colors group">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-zinc-300 group-hover:text-white">
+                  <i class="fa-solid fa-house text-xs"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-white">Spielauswahl</div>
+                  <div class="text-[11px] text-zinc-400">Partyspiel wählen</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-arrow-right text-[10px] text-zinc-500 group-hover:translate-x-0.5 transition-transform"></i>
+            </button>
+
+            <button onclick="app.closeLogoMenu(); app.openWelcomeScreen();" class="w-full px-3.5 py-2 sm:py-2.5 rounded-2xl hover:bg-white/10 flex items-center justify-between text-left transition-colors group">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-zinc-300 group-hover:text-white">
+                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-white">Spiel-Vorstellung</div>
+                  <div class="text-[11px] text-zinc-400">Willkommensseite & Überblick</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+            </button>
+
+            <button onclick="app.closeLogoMenu(); app.requestOpenVault('words');" class="w-full px-3.5 py-2 sm:py-2.5 rounded-2xl hover:bg-white/10 flex items-center justify-between text-left transition-colors group">
+              <div class="flex items-center gap-3 min-w-0">
+                <div id="menuVaultIconBox" class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-zinc-300 group-hover:text-white shrink-0">
+                  <i class="fa-solid fa-vault text-xs"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-semibold text-white truncate">Wörter- & Fragen-Tresor</span>
+                    <span id="menuVaultLockBadge" class="text-[9px] font-mono-num uppercase px-1.5 py-0.5 rounded bg-white/10 text-zinc-300 shrink-0">
+                      <i class="fa-solid fa-lock text-[8px]"></i> Geschützt
+                    </span>
+                  </div>
+                  <div id="menuVaultSubtext" class="text-[11px] text-zinc-400 truncate">Anpassen, Kategorien & CSV-Backup</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500 shrink-0"></i>
+            </button>
+
+            <button onclick="app.closeLogoMenu(); app.openModal('scoreModal');" class="w-full px-3.5 py-2 sm:py-2.5 rounded-2xl hover:bg-white/10 flex items-center justify-between text-left transition-colors group">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-zinc-300 group-hover:text-white">
+                  <i class="fa-solid fa-trophy text-xs"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-white">Punktestand</div>
+                  <div class="text-[11px] text-zinc-400">Rangliste & Punkte verwalten</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+            </button>
+
+            <button onclick="app.closeLogoMenu(); app.openModal('rulesModal');" class="w-full px-3.5 py-2 sm:py-2.5 rounded-2xl hover:bg-white/10 flex items-center justify-between text-left transition-colors group">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-zinc-300 group-hover:text-white">
+                  <i class="fa-solid fa-book-open text-xs"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-white">Spielregeln</div>
+                  <div class="text-[11px] text-zinc-400">Kurzanleitung für alle Spiele</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+            </button>
+
+            <button onclick="app.closeLogoMenu(); app.openModal('themeModal');" class="w-full px-3.5 py-2 sm:py-2.5 rounded-2xl hover:bg-white/10 flex items-center justify-between text-left transition-colors group">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-zinc-300 group-hover:text-white">
+                  <i class="fa-solid fa-swatchbook text-xs"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-white">Design & Darstellung</div>
+                  <div class="text-[11px] text-zinc-400">Farbschema & Gerät / Black / White Mode</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+            </button>
+
+            <button id="menuInstallBtn" onclick="app.closeLogoMenu(); app.installApp();" class="w-full px-3.5 py-2 sm:py-2.5 rounded-2xl hover:bg-white/10 flex items-center justify-between text-left transition-colors group">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-zinc-300 group-hover:text-white">
+                  <i class="fa-solid fa-mobile-screen-button text-xs"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-white">Als App installieren</div>
+                  <div class="text-[11px] text-zinc-400">Auf den Home-Bildschirm & offline spielen</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+            </button>
+          </div>
+
+          <div class="mt-2 pt-2 border-t border-white/5 px-3 py-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-zinc-400">Soundeffekte</span>
+              <button id="soundToggleBtn" onclick="app.toggleSound()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-white flex items-center gap-2 transition-colors">
+                <i id="soundIcon" class="fa-solid fa-volume-high text-emerald-400"></i>
+                <span id="soundStatusText">Aktiv</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Right: Quick Home Button when inside a game -->
+      <div class="flex items-center gap-2">
+        <button id="headerQuickHomeBtn" onclick="app.goHome()" class="hidden pill-button px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-zinc-300 flex items-center gap-2">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Spiele</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Dynamic Toast Notification -->
+    <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 z-[90] pointer-events-none flex flex-col items-center gap-2"></div>
+
+    <main id="mainContent" class="flex-1 min-h-0 flex flex-col justify-center overflow-hidden">
+
+      <!-- VIEW: WELCOME / FIRST-TIME ONBOARDING SHOWCASE -->
+      <section id="view-welcome" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-4xl mx-auto w-full gap-2.5 sm:gap-4">
+        <div class="surface-card rounded-3xl p-3 sm:p-6 text-center flex flex-col items-center justify-center shrink-0">
+          <div class="welcome-pill inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] font-semibold text-white mb-1.5">
+            <i class="fa-solid fa-champagne-glasses text-[10px]"></i>
+            <span>Willkommen bei Partyspiele</span>
+          </div>
+          <h1 class="font-display text-lg sm:text-3xl font-extrabold text-white tracking-tight">
+            Drei Partyspiele. Ein Gerät.
+          </h1>
+          <p class="welcome-hero-sub text-xs sm:text-sm text-zinc-400 max-w-lg mt-1 leading-relaxed">
+            Reicht das Smartphone reihum weiter, enttarnt den Imposter oder testet euer Wissen im Quiz.
+          </p>
+        </div>
+
+        <!-- 2 Intro Showcase Cards with Direct Start -->
+        <div class="flex-1 min-h-0 grid grid-cols-1 grid-rows-3 sm:grid-rows-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+          <!-- Intro Game 1: Wort-Imposter -->
+          <div class="surface-card rounded-3xl p-3.5 sm:p-6 flex flex-col justify-between gap-2 border border-white/10 min-h-0 overflow-hidden">
+            <div class="space-y-2 sm:space-y-2.5 min-h-0">
+              <div class="flex items-center justify-between gap-2">
+                <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-white text-black flex items-center justify-center text-base sm:text-xl shadow-sm shrink-0">
+                  <i class="fa-solid fa-fingerprint"></i>
+                </div>
+                <span class="welcome-badge font-mono-num text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl bg-white/10 text-zinc-200 truncate">
+                  750 Wörter • 15 Welten
+                </span>
+              </div>
+              <div>
+                <h2 class="font-display text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+                  1. Wort-Imposter
+                </h2>
+                <p class="welcome-card-desc text-xs text-zinc-400 leading-relaxed mt-1">
+                  Alle Crew-Spieler sehen dasselbe geheime Wort. Der Imposter tappt im Dunkeln, erhält aber optional ein <strong class="text-white">zweideutiges Hinweis-Wort</strong> zum Bluffen.
+                </p>
+              </div>
+            </div>
+
+            <button onclick="app.startFromWelcome('word')" class="w-full py-2.5 sm:py-3.5 px-4 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2 shrink-0">
+              <span>Wort-Imposter starten</span>
+              <i class="fa-solid fa-play text-[10px]"></i>
+            </button>
+          </div>
+
+          <!-- Intro Game 2: Fragen-Imposter -->
+          <div class="surface-card rounded-3xl p-3.5 sm:p-6 flex flex-col justify-between gap-2 border border-white/10 min-h-0 overflow-hidden">
+            <div class="space-y-2 sm:space-y-2.5 min-h-0">
+              <div class="flex items-center justify-between gap-2">
+                <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-white text-black flex items-center justify-center text-base sm:text-xl shadow-sm shrink-0">
+                  <i class="fa-solid fa-sliders"></i>
+                </div>
+                <span class="welcome-badge font-mono-num text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl bg-white/10 text-zinc-200 truncate">
+                  410 Duelle • Zeitstrahl
+                </span>
+              </div>
+              <div>
+                <h2 class="font-display text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+                  2. Fragen-Imposter
+                </h2>
+                <p class="welcome-card-desc text-xs text-zinc-400 leading-relaxed mt-1">
+                  Jeder beantwortet geheim eine Frage oder stellt den <strong class="text-white">Zeitstrahl-Slider</strong> ein. Der Imposter hat eine andere Frage mit verblüffend ähnlicher Antwort!
+                </p>
+              </div>
+            </div>
+
+            <button onclick="app.startFromWelcome('question')" class="w-full py-2.5 sm:py-3.5 px-4 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2 shrink-0">
+              <span>Fragen-Imposter starten</span>
+              <i class="fa-solid fa-play text-[10px]"></i>
+            </button>
+          </div>
+
+          <!-- Intro Game 3: Quiz -->
+          <div class="surface-card rounded-3xl p-3.5 sm:p-6 flex flex-col justify-between gap-2 border border-white/10 min-h-0 overflow-hidden">
+            <div class="space-y-2 sm:space-y-2.5 min-h-0">
+              <div class="flex items-center justify-between gap-2">
+                <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-white text-black flex items-center justify-center text-base sm:text-xl shadow-sm shrink-0">
+                  <i class="fa-solid fa-circle-question"></i>
+                </div>
+                <span class="welcome-badge font-mono-num text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl bg-white/10 text-zinc-200 truncate">
+                  700 Fragen • 10 Welten
+                </span>
+              </div>
+              <div>
+                <h2 class="font-display text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+                  3. Quiz
+                </h2>
+                <p class="welcome-card-desc text-xs text-zinc-400 leading-relaxed mt-1">
+                  Das Handy geht reihum, jeder beantwortet <strong class="text-white">dieselbe Quizfrage</strong> gegen die Uhr. Es gewinnt, wer die meisten richtig hat – und bei Gleichstand der Schnellere!
+                </p>
+              </div>
+            </div>
+
+            <button onclick="app.startFromWelcome('quiz')" class="w-full py-2.5 sm:py-3.5 px-4 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2 shrink-0">
+              <span>Quiz starten</span>
+              <i class="fa-solid fa-play text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <button onclick="app.completeWelcomeIntro()" class="w-full py-2.5 sm:py-3.5 rounded-2xl pill-button text-xs sm:text-sm font-semibold text-zinc-200 flex items-center justify-center gap-2 shrink-0">
+          <span>Zur Spielauswahl</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </section>
+
+      <!-- VIEW: HOME (Full-height balanced cards without top or bottom dead space) -->
+      <section id="view-home" class="view-section view-enter h-full flex-1 min-h-0 flex flex-col justify-center max-w-4xl mx-auto w-full">
+        <div class="flex-1 min-h-0 grid grid-cols-1 grid-rows-3 sm:grid-rows-1 sm:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-5 w-full">
+          <!-- Game 1: Wort-Imposter -->
+          <div onclick="app.selectGameMode('word')" class="surface-card surface-interactive rounded-3xl p-4 sm:p-5 lg:p-8 cursor-pointer flex flex-col justify-between group relative overflow-hidden h-full min-h-0">
+            <div class="flex items-center justify-between gap-2">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:scale-105 group-hover:bg-white group-hover:text-black transition-all duration-300 shrink-0">
+                <i class="fa-solid fa-fingerprint text-xl sm:text-2xl"></i>
+              </div>
+              <span class="font-mono-num text-[11px] font-semibold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300">
+                15 Kategorien
+              </span>
+            </div>
+
+            <div class="my-auto py-1 sm:py-2 space-y-1 sm:space-y-1.5 min-w-0">
+              <h2 class="font-display text-2xl sm:text-xl lg:text-3xl font-extrabold text-white tracking-tight break-words">
+                Wort-Imposter
+              </h2>
+              <p class="home-desc text-zinc-400 text-xs sm:text-sm leading-relaxed">
+                Geheimes Wort & subtiler Ein-Wort-Hinweis
+              </p>
+            </div>
+
+            <div class="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-white">
+              <span>Spiel konfigurieren</span>
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black flex items-center justify-center transition-all">
+                <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game 2: Fragen-Imposter -->
+          <div onclick="app.selectGameMode('question')" class="surface-card surface-interactive rounded-3xl p-4 sm:p-5 lg:p-8 cursor-pointer flex flex-col justify-between group relative overflow-hidden h-full min-h-0">
+            <div class="flex items-center justify-between gap-2">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:scale-105 group-hover:bg-white group-hover:text-black transition-all duration-300 shrink-0">
+                <i class="fa-solid fa-sliders text-xl sm:text-2xl"></i>
+              </div>
+              <span class="font-mono-num text-[11px] font-semibold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300">
+                Zeitstrahl & Text
+              </span>
+            </div>
+
+            <div class="my-auto py-1 sm:py-2 space-y-1 sm:space-y-1.5 min-w-0">
+              <h2 class="font-display text-2xl sm:text-xl lg:text-3xl font-extrabold text-white tracking-tight break-words">
+                Fragen-Imposter
+              </h2>
+              <p class="home-desc text-zinc-400 text-xs sm:text-sm leading-relaxed">
+                Fragen-Duelle & interaktiver Circa-Zeitstrahl
+              </p>
+            </div>
+
+            <div class="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-white">
+              <span>Spiel konfigurieren</span>
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black flex items-center justify-center transition-all">
+                <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game 3: Quiz -->
+          <div onclick="app.selectGameMode('quiz')" class="surface-card surface-interactive rounded-3xl p-4 sm:p-5 lg:p-8 cursor-pointer flex flex-col justify-between group relative overflow-hidden h-full min-h-0">
+            <div class="flex items-center justify-between gap-2">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:scale-105 group-hover:bg-white group-hover:text-black transition-all duration-300 shrink-0">
+                <i class="fa-solid fa-circle-question text-xl sm:text-2xl"></i>
+              </div>
+              <span class="font-mono-num text-[11px] font-semibold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300">
+                700 Fragen
+              </span>
+            </div>
+
+            <div class="my-auto py-1 sm:py-2 space-y-1 sm:space-y-1.5 min-w-0">
+              <h2 class="font-display text-2xl sm:text-xl lg:text-3xl font-extrabold text-white tracking-tight break-words">
+                Quiz
+              </h2>
+              <p class="home-desc text-zinc-400 text-xs sm:text-sm leading-relaxed">
+                Reihum raten – Treffer & Tempo zählen
+              </p>
+            </div>
+
+            <div class="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-white">
+              <span>Spiel konfigurieren</span>
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black flex items-center justify-center transition-all">
+                <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: SETUP (Full-height distributed 3-Button Hub: Spieler, Optionen, Kategorien + Start) -->
+      <section id="view-setup" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-xl mx-auto w-full gap-2.5 sm:gap-4">
+        <div class="flex items-center justify-between shrink-0">
+          <button onclick="app.goHome()" class="pill-button px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-zinc-300">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Zurück</span>
+          </button>
+          <div id="setupModeBadge" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/5 text-white border border-white/10">
+            Wort-Imposter
+          </div>
+        </div>
+
+        <!-- 3 Main Collapsed Trigger Buttons stretched evenly across available height -->
+        <div class="flex-1 min-h-0 grid grid-cols-1 grid-rows-3 gap-2.5 sm:gap-3.5">
+          <!-- 1. Button: Spieler -->
+          <button type="button" onclick="app.openModal('playersSetupModal')" class="w-full h-full min-h-0 surface-card surface-interactive rounded-3xl px-4 sm:px-7 py-2 text-left flex items-center justify-between gap-2 group">
+            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div class="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-all shrink-0">
+                <i class="fa-solid fa-users text-base sm:text-xl"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-display font-bold text-lg sm:text-xl text-white">Spieler</div>
+                <div id="setupSummaryPlayers" class="text-xs sm:text-sm text-zinc-400 truncate mt-0.5">5 Spieler bereit</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+              <span id="setupBadgePlayerCount" class="font-mono-num text-xs sm:text-sm font-bold px-3 sm:px-3.5 py-1.5 rounded-xl bg-white/10 text-white">5</span>
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black flex items-center justify-center transition-all">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+              </div>
+            </div>
+          </button>
+
+          <!-- 2. Button: Optionen -->
+          <button type="button" onclick="app.openModal('optionsSetupModal')" class="w-full h-full min-h-0 surface-card surface-interactive rounded-3xl px-4 sm:px-7 py-2 text-left flex items-center justify-between gap-2 group">
+            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div class="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-all shrink-0">
+                <i class="fa-solid fa-sliders text-base sm:text-xl"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-display font-bold text-lg sm:text-xl text-white">Optionen</div>
+                <div id="setupSummaryOptions" class="text-xs sm:text-sm text-zinc-400 truncate mt-0.5">1 Imposter • 3 Min. • Mit Hinweis</div>
+              </div>
+            </div>
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black flex items-center justify-center transition-all shrink-0">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </div>
+          </button>
+
+          <!-- 3. Button: Kategorien -->
+          <button type="button" onclick="app.openModal('categoriesSetupModal')" class="w-full h-full min-h-0 surface-card surface-interactive rounded-3xl px-4 sm:px-7 py-2 text-left flex items-center justify-between gap-2 group">
+            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div class="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-all shrink-0">
+                <i class="fa-solid fa-layer-group text-base sm:text-xl"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="font-display font-bold text-lg sm:text-xl text-white">Kategorien</div>
+                <div id="setupSummaryCategories" class="text-xs sm:text-sm text-zinc-400 truncate mt-0.5">Alle Kategorien aktiv</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+              <span id="setupBadgeCategoryCount" class="font-mono-num text-xs sm:text-sm font-bold px-3 sm:px-3.5 py-1.5 rounded-xl bg-white/10 text-white">15</span>
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black flex items-center justify-center transition-all">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Start Round Button -->
+        <div class="shrink-0">
+          <button onclick="app.startRound()" class="w-full py-3.5 sm:py-5 px-6 rounded-2xl btn-primary text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl">
+            <span>Runde starten</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- VIEW: PASS & REVEAL CARD (Fills available height without dead space) -->
+      <section id="view-pass" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-md mx-auto w-full gap-2.5 sm:gap-3">
+        <!-- Minimal Progress Bar -->
+        <div class="surface-card rounded-2xl px-3.5 py-2 sm:px-4 sm:py-3 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="passPlayerAvatar" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-black flex items-center justify-center font-mono-num font-bold text-xs sm:text-sm shrink-0">
+              1
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] text-zinc-400 font-medium">Nächster Spieler</div>
+              <div id="passPlayerName" class="font-display font-bold text-sm sm:text-base text-white truncate">Spieler 1</div>
+            </div>
+          </div>
+          <div id="passProgressBadge" class="font-mono-num px-3 py-1 rounded-lg bg-white/5 text-xs font-semibold text-zinc-300 border border-white/5 shrink-0">
+            1 / 5
+          </div>
+        </div>
+
+        <!-- 3D Flip Card Stage dynamically filling remaining height -->
+        <div class="perspective-stage w-full flex-1 min-h-0">
+          <div id="roleCardInner" class="card-3d-wrapper">
+
+            <!-- CARD FRONT (CLOSED) -->
+            <div onclick="app.flipCard(true)" class="card-face surface-card p-6 sm:p-7 flex flex-col items-center justify-between text-center cursor-pointer hover:border-white/25 transition-all">
+              <div class="w-full flex items-center justify-between text-[11px] font-mono-num text-zinc-500 uppercase tracking-widest">
+                <span>Verdeckte Karte</span>
+                <span><i class="fa-solid fa-lock"></i> Privat</span>
+              </div>
+
+              <div class="my-auto space-y-4 sm:space-y-5 w-full min-w-0">
+                <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+                  <div class="absolute inset-0 rounded-full border border-white/15 pulse-slow"></div>
+                  <div class="w-20 h-20 rounded-3xl bg-white/5 border border-white/15 flex items-center justify-center text-white">
+                    <i class="fa-solid fa-fingerprint text-3xl"></i>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <div class="text-xs font-medium text-zinc-400">Gib das Gerät an</div>
+                  <h2 id="cardFrontPlayerTitle" class="font-display text-3xl font-extrabold text-white tracking-tight break-words">Spieler 1</h2>
+                  <p class="pass-hint-text text-xs text-zinc-400 max-w-[240px] mx-auto leading-relaxed">
+                    Stelle sicher, dass niemand sonst auf das Display blickt, bevor du deine Karte öffnest.
+                  </p>
+                </div>
+              </div>
+
+              <div class="w-full py-3.5 rounded-2xl bg-white/5 border border-white/10 font-semibold text-xs text-white flex items-center justify-center gap-2">
+                <span>Tippen zum Aufdecken</span>
+              </div>
+            </div>
+
+            <!-- CARD BACK (REVEALED ROLE / WORD / QUESTION + SLIDER) -->
+            <div id="cardBackFace" class="card-face card-face-back surface-card p-5 sm:p-7 flex flex-col justify-between text-center">
+              <!-- Populated dynamically via JS -->
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: DISCUSSION & RESOLUTION (Everything fits one screen; only long lists scroll inside their own card) -->
+      <section id="view-discussion" data-mode="word" data-revealed="false" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-center w-full overflow-hidden">
+        <div class="h-full flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-12 gap-2.5 sm:gap-5 overflow-hidden pr-0.5">
+
+          <!-- Left Column: Discussion Status, Starter Player, Timer & Logged Answers -->
+          <div class="disc-col disc-col-left lg:col-span-7 flex flex-col min-h-0">
+            <div class="disc-card surface-card rounded-3xl p-3 sm:p-7 flex-1 flex flex-col justify-between gap-2 sm:gap-4 overflow-y-auto min-h-0">
+              <div class="disc-head space-y-2 sm:space-y-3 shrink-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-semibold shrink-0">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Diskussionsrunde</span>
+                  </span>
+
+                  <div class="text-xs text-zinc-400 min-w-0 truncate sm:ml-auto">
+                    Startet: <strong id="starterPlayerName" class="text-white">Spieler 1</strong>
+                  </div>
+                </div>
+
+                <div class="space-y-1 sm:space-y-1.5">
+                  <h2 id="discussionHeadline" class="font-display text-lg sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+                    Wer blufft in der Runde?
+                  </h2>
+                  <p id="discussionSubtext" class="disc-sub text-zinc-400 text-xs sm:text-sm leading-relaxed">
+                    Reihum nennt jeder einen passenden Begriff. Hört genau hin, wer nur vage über das Hinweis-Wort spekuliert!
+                  </p>
+                </div>
+              </div>
+
+              <!-- Timer Block (Automatically hides controls if "Kein Timer" is chosen) -->
+              <div id="timerContainerBlock" class="px-3 py-1.5 sm:p-5 rounded-2xl bg-black/30 border border-white/5 flex items-center justify-between gap-2 sm:gap-4 sm:flex-wrap my-auto shrink-0">
+                <div>
+                  <div class="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-500 font-semibold">Verbleibende Zeit</div>
+                  <div id="timerDisplay" class="font-mono-num text-2xl sm:text-5xl font-bold text-white tracking-tight sm:mt-0.5">
+                    03:00
+                  </div>
+                </div>
+                <div id="timerControlButtons" class="flex items-center gap-2">
+                  <button id="timerToggleBtn" onclick="app.toggleTimer()" class="pill-button px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-pause"></i>
+                    <span>Pause</span>
+                  </button>
+                  <button onclick="app.addTimerSeconds(30)" class="pill-button px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs font-semibold text-zinc-300">
+                    +30s
+                  </button>
+                </div>
+              </div>
+
+              <!-- Question Mode: Collected Answers / Slider Values Board -->
+              <div id="collectedAnswersBoard" class="disc-board hidden flex flex-col gap-1.5 sm:gap-3 sm:pt-2 sm:border-t border-white/5">
+                <div class="hidden sm:flex flex-wrap items-center justify-between gap-2 shrink-0">
+                  <h4 class="text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                    Eingeloggte Antworten
+                  </h4>
+                  <button onclick="app.revealMajorityQuestionOnly()" id="revealMajorityQBtn" class="pill-button px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white">
+                    Hauptfrage aufdecken
+                  </button>
+                </div>
+
+                <div id="majorityQuestionBanner" class="hidden p-2.5 sm:p-3.5 rounded-2xl bg-white/5 border border-white/15 space-y-0.5 sm:space-y-1 view-enter shrink-0">
+                  <div class="hidden sm:block text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Hauptfrage der Crew</div>
+                  <div id="majorityQuestionText" class="font-display font-bold text-xs sm:text-base text-white leading-snug"></div>
+                </div>
+
+                <div id="answersListGrid" class="disc-list grid grid-cols-2 gap-1.5 sm:gap-2 content-start lg:max-h-40 pr-1"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Suspect Voting & Final Resolution -->
+          <div class="disc-col disc-col-right lg:col-span-5 flex flex-col min-h-0">
+            <div class="disc-card surface-card rounded-3xl p-3 sm:p-6 flex-1 flex flex-col justify-between gap-2 sm:gap-4 overflow-y-auto min-h-0">
+              <div class="disc-vote flex flex-col gap-2 sm:gap-3">
+                <div class="shrink-0">
+                  <h3 class="font-display font-bold text-base sm:text-lg text-white">Abstimmung</h3>
+                  <p class="disc-sub text-xs text-zinc-400">Tippe auf Spieler, um Verdacht-Stimmen zu notieren.</p>
+                </div>
+
+                <div id="suspectVotingGrid" class="disc-list grid grid-cols-2 gap-1.5 sm:gap-2 content-start lg:max-h-48 pr-1"></div>
+              </div>
+
+              <!-- Reveal Resolution Box -->
+              <div class="disc-result space-y-2 sm:space-y-2.5 sm:pt-3 sm:border-t border-white/5 shrink-0">
+                <div id="resolutionBox" class="hidden p-2.5 sm:p-4 rounded-2xl bg-black/45 border border-white/15 space-y-1.5 sm:space-y-3 view-enter">
+                  <!-- Populated when revealed -->
+                </div>
+
+                <button id="revealImposterBtn" onclick="app.revealRoundResult()" class="w-full py-3 sm:py-4 px-6 rounded-2xl btn-accent text-sm sm:text-base flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-eye"></i>
+                  <span>Auflösung anzeigen</span>
+                </button>
+
+                <div id="postRevealActions" class="hidden grid grid-cols-2 gap-2.5 pt-1">
+                  <button onclick="app.startRound()" class="py-3 sm:py-3.5 px-3 sm:px-4 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Nächste Runde</span>
+                  </button>
+                  <button onclick="app.openSetup()" class="py-3 sm:py-3.5 px-3 sm:px-4 rounded-2xl pill-button font-semibold text-xs sm:text-sm text-zinc-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Setup</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- VIEW: QUIZ HANDOFF (Handy weitergeben) -->
+      <section id="view-quiz-pass" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-md mx-auto w-full gap-2.5 sm:gap-3">
+        <div class="surface-card rounded-2xl px-3.5 py-2 sm:px-4 sm:py-3 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-black flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-circle-question text-sm"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] text-zinc-400 font-medium">Quiz</div>
+              <div id="quizPassRound" class="font-display font-bold text-sm sm:text-base text-white truncate">Runde 1 von 3</div>
+            </div>
+          </div>
+          <div id="quizPassProgress" class="font-mono-num px-3 py-1 rounded-lg bg-white/5 text-xs font-semibold text-zinc-300 border border-white/5 shrink-0">
+            1 / 5
+          </div>
+        </div>
+
+        <div class="surface-card rounded-3xl flex-1 min-h-0 p-5 sm:p-7 flex flex-col items-center justify-between text-center">
+          <div class="w-full flex items-center justify-between text-[11px] font-mono-num text-zinc-500 uppercase tracking-widest gap-2">
+            <span>Verdeckte Frage</span>
+            <span id="quizPassTimeInfo" class="truncate">15 Sek.</span>
+          </div>
+
+          <div class="my-auto space-y-4 sm:space-y-5 w-full min-w-0">
+            <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+              <div class="absolute inset-0 rounded-full border border-white/15 pulse-slow"></div>
+              <div class="w-20 h-20 rounded-3xl bg-white/5 border border-white/15 flex items-center justify-center text-white">
+                <i class="fa-solid fa-circle-question text-3xl"></i>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="text-xs font-medium text-zinc-400">Gib das Handy an</div>
+              <h2 id="quizPassPlayerName" class="font-display text-3xl font-extrabold text-white tracking-tight break-words">Spieler 1</h2>
+              <p class="pass-hint-text text-xs text-zinc-400 max-w-[250px] mx-auto leading-relaxed">
+                Sobald du „Frage starten“ tippst, läuft die Zeit. Alle anderen bitte wegschauen!
+              </p>
+            </div>
+          </div>
+
+          <button onclick="app.startQuizQuestion()" class="w-full py-3.5 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2 shrink-0">
+            <span>Frage starten</span>
+            <i class="fa-solid fa-play text-[10px]"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- VIEW: QUIZ FRAGE -->
+      <section id="view-quiz-play" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-md mx-auto w-full gap-2.5 sm:gap-3">
+        <div class="surface-card rounded-2xl px-3.5 py-2 sm:px-4 sm:py-3 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="quizPlayAvatar" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-black flex items-center justify-center font-mono-num font-bold text-xs sm:text-sm shrink-0">1</div>
+            <div class="min-w-0">
+              <div class="text-[11px] text-zinc-400 font-medium">Am Zug</div>
+              <div id="quizPlayName" class="font-display font-bold text-sm sm:text-base text-white truncate">Spieler 1</div>
+            </div>
+          </div>
+          <div id="quizPlayRound" class="font-mono-num px-3 py-1 rounded-lg bg-white/5 text-xs font-semibold text-zinc-300 border border-white/5 shrink-0">
+            Runde 1 / 3
+          </div>
+        </div>
+
+        <div class="surface-card rounded-3xl flex-1 min-h-0 p-3 sm:p-5 flex flex-col gap-2 sm:gap-3">
+          <div class="flex items-center justify-between gap-2 text-[11px] font-mono-num text-zinc-400 uppercase tracking-widest shrink-0">
+            <span id="quizPlayCat" class="truncate min-w-0">Kategorie</span>
+            <span id="quizPlayTimeText" class="shrink-0 text-white font-bold">15,0 s</span>
+          </div>
+          <div class="h-1.5 rounded-full bg-white/10 overflow-hidden shrink-0">
+            <div id="quizTimeBar" class="h-full rounded-full" style="width:100%; background: var(--accent);"></div>
+          </div>
+
+          <div class="flex-[1_1_0] min-h-0 rounded-2xl bg-white/5 border border-white/10 p-3 flex items-center justify-center text-center overflow-hidden">
+            <h2 id="quizQuestionText" class="font-display font-bold text-white leading-snug break-words max-w-full" style="font-size: 20px;"></h2>
+          </div>
+
+          <div id="quizAnswers" class="flex-[1.8_1_0] min-h-0 grid grid-cols-1 grid-rows-4 gap-1.5 sm:gap-2"></div>
+
+          <div class="shrink-0 h-11 sm:h-12 flex items-center gap-2">
+            <div id="quizFeedbackText" class="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-zinc-400 truncate">Tippe auf deine Antwort</div>
+            <button id="quizNextBtn" onclick="app.nextQuizStep()" class="hidden py-2.5 px-4 rounded-xl btn-primary text-xs items-center gap-2 shrink-0">
+              <span id="quizNextBtnText">Weiter</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: QUIZ ERGEBNIS -->
+      <section id="view-quiz-result" class="view-section hidden h-full flex-1 min-h-0 flex flex-col justify-between max-w-xl mx-auto w-full gap-2.5 sm:gap-3">
+        <div class="surface-card rounded-3xl p-3.5 sm:p-6 flex-1 min-h-0 flex flex-col gap-2.5 sm:gap-4">
+          <div class="text-center shrink-0 space-y-1">
+            <div class="quiz-res-icon w-11 h-11 mx-auto rounded-2xl bg-white text-black flex items-center justify-center">
+              <i class="fa-solid fa-trophy text-lg"></i>
+            </div>
+            <div class="text-[11px] font-mono-num uppercase tracking-widest text-zinc-400">Quiz beendet – Sieger</div>
+            <h2 id="quizWinnerText" class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight break-words">–</h2>
+            <div id="quizWinnerSub" class="text-xs text-zinc-400">–</div>
+          </div>
+
+          <div id="quizRankList" class="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1"></div>
+
+          <div class="grid grid-cols-2 gap-2 shrink-0">
+            <button onclick="app.openQuizReview()" class="py-2.5 px-3 rounded-2xl pill-button text-xs font-semibold text-white flex items-center justify-center gap-2">
+              <i class="fa-solid fa-list-check text-[11px]"></i>
+              <span>Rückblick</span>
+            </button>
+            <button id="quizAwardBtn" onclick="app.awardQuizPoint()" class="py-2.5 px-3 rounded-2xl pill-button text-xs font-semibold text-white flex items-center justify-center gap-2">
+              <i class="fa-solid fa-trophy text-[11px]"></i>
+              <span id="quizAwardBtnText">+1 Punkt Sieger</span>
+            </button>
+            <button onclick="app.startRound()" class="py-3 px-3 rounded-2xl btn-primary text-xs sm:text-sm flex items-center justify-center gap-2">
+              <i class="fa-solid fa-rotate-right"></i>
+              <span>Nochmal</span>
+            </button>
+            <button onclick="app.openSetup()" class="py-3 px-3 rounded-2xl pill-button font-semibold text-xs sm:text-sm text-zinc-200 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-sliders"></i>
+              <span>Setup</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: SPIELER SETUP POPUP -->
+  <div id="playersSetupModal" onclick="if(event.target===this) app.closeModal('playersSetupModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-4 sm:space-y-5 flex flex-col view-enter">
+      <div class="flex items-center justify-between gap-2 shrink-0">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Spieler verwalten</h3>
+          <p class="text-xs text-zinc-400">3 bis 16 Spieler • Namen direkt antippen & anpassen</p>
+        </div>
+        <button onclick="app.closeModal('playersSetupModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Top Counter Bar + Quick Number Presets -->
+      <div class="p-3 sm:p-4 rounded-2xl bg-black/35 border border-white/10 space-y-2.5 sm:space-y-3 shrink-0">
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="text-xs font-semibold text-white">Anzahl der Spieler</div>
+            <div class="text-[11px] text-zinc-400">Schnellauswahl oder per Plus/Minus</div>
+          </div>
+          <div class="flex items-center gap-2 bg-black/50 rounded-2xl p-1 border border-white/10 shrink-0">
+            <button onclick="app.changePlayerCount(-1)" class="w-9 h-9 rounded-xl hover:bg-white/10 flex items-center justify-center text-white transition-colors">
+              <i class="fa-solid fa-minus text-xs"></i>
+            </button>
+            <span id="playerCountLabel" class="font-mono-num font-bold text-lg w-9 text-center text-white">5</span>
+            <button onclick="app.changePlayerCount(1)" class="w-9 h-9 rounded-xl hover:bg-white/10 flex items-center justify-center text-white transition-colors">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 flex-wrap pt-1">
+          <button type="button" onclick="app.setExactPlayerCount(3)" class="pill-button px-2.5 py-1 rounded-lg text-[11px] font-mono-num font-semibold text-zinc-300">3</button>
+          <button type="button" onclick="app.setExactPlayerCount(4)" class="pill-button px-2.5 py-1 rounded-lg text-[11px] font-mono-num font-semibold text-zinc-300">4</button>
+          <button type="button" onclick="app.setExactPlayerCount(5)" class="pill-button px-2.5 py-1 rounded-lg text-[11px] font-mono-num font-semibold text-zinc-300">5</button>
+          <button type="button" onclick="app.setExactPlayerCount(6)" class="pill-button px-2.5 py-1 rounded-lg text-[11px] font-mono-num font-semibold text-zinc-300">6</button>
+          <button type="button" onclick="app.setExactPlayerCount(8)" class="pill-button px-2.5 py-1 rounded-lg text-[11px] font-mono-num font-semibold text-zinc-300">8</button>
+          <button type="button" onclick="app.setExactPlayerCount(10)" class="pill-button px-2.5 py-1 rounded-lg text-[11px] font-mono-num font-semibold text-zinc-300">10</button>
+          <button type="button" onclick="app.setExactPlayerCount(12)" class="pill-button px-2.5 py-1 rounded-lg text-[11px] font-mono-num font-semibold text-zinc-300">12</button>
+        </div>
+      </div>
+
+      <!-- Redesigned Player List for Popup -->
+      <div id="playerNamesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 overflow-y-auto pr-1 flex-1 min-h-[7rem] content-start"></div>
+
+      <div class="flex items-center gap-2.5 pt-2 border-t border-white/10 shrink-0">
+        <button type="button" onclick="app.changePlayerCount(1)" class="py-3 px-4 rounded-2xl pill-button text-xs font-semibold text-white flex items-center justify-center gap-2">
+          <i class="fa-solid fa-user-plus text-[11px]"></i>
+          <span>+ Spieler</span>
+        </button>
+        <button type="button" onclick="app.closeModal('playersSetupModal')" class="flex-1 py-3 px-5 rounded-2xl btn-primary text-xs sm:text-sm font-semibold">
+          Fertig
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: OPTIONEN SETUP POPUP -->
+  <div id="optionsSetupModal" onclick="if(event.target===this) app.closeModal('optionsSetupModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-4 sm:space-y-5 overflow-y-auto view-enter">
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Spiel-Optionen</h3>
+          <p class="text-xs text-zinc-400">Regeln & Ablauf für diese Runde anpassen</p>
+        </div>
+        <button onclick="app.closeModal('optionsSetupModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5 sm:space-y-3.5">
+        <!-- Imposter Counter + Random Toggle -->
+        <div id="optImposterBox" class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="font-semibold text-sm text-white">Anzahl Imposter</div>
+            <div id="imposterModeSubtext" class="text-xs text-zinc-400">Feste Anzahl in der Runde</div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button id="randomImposterToggleBtn" onclick="app.toggleRandomImposterCount()" class="px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1.5 bg-black/40 border-white/10 text-zinc-400 hover:text-white" title="Zufällige Anzahl an Impostern">
+              <i class="fa-solid fa-shuffle text-[10px]"></i>
+              <span>Zufall</span>
+            </button>
+            <div id="imposterStepperBox" class="flex items-center gap-1 bg-black/40 rounded-xl p-1 border border-white/10">
+              <button onclick="app.changeImposterCount(-1)" class="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-white">
+                <i class="fa-solid fa-minus text-[10px]"></i>
+              </button>
+              <span id="imposterCountLabel" class="font-mono-num font-bold text-sm w-6 text-center text-white">1</span>
+              <button onclick="app.changeImposterCount(1)" class="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-white">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Starter Player Option -->
+        <div id="optStarterBox" class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="font-semibold text-sm text-white">Startspieler</div>
+            <div class="text-xs text-zinc-400">Wer beginnt die Diskussionsrunde?</div>
+          </div>
+          <button onclick="app.openStarterModal()" class="pill-button px-3.5 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-2 shrink-0 max-w-[45%]">
+            <i class="fa-solid fa-dice text-zinc-400"></i>
+            <span id="starterSelectionLabel" class="truncate">Zufällig</span>
+            <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+          </button>
+        </div>
+
+        <!-- Word-Imposter Specific Single-Word Hint Mode Selector -->
+        <div id="wordHintSettingBox" class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 space-y-2">
+          <div>
+            <div class="font-semibold text-sm text-white">Hinweis-Modus</div>
+            <div class="text-xs text-zinc-400">Zweideutiges Hinweis-Wort für den Imposter</div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-black/40 border border-white/10">
+            <button id="hintModeOnBtn" type="button" onclick="app.setImposterHintMode(true)" class="py-2 px-3 rounded-xl text-xs font-semibold transition-all bg-white text-black flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-[11px]"></i>
+              <span>Mit Hinweis</span>
+            </button>
+            <button id="hintModeOffBtn" type="button" onclick="app.setImposterHintMode(false)" class="py-2 px-3 rounded-xl text-xs font-semibold transition-all text-zinc-400 hover:text-white flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-eye-slash text-[11px]"></i>
+              <span>Ohne Hinweis</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Show Category to Imposter Option -->
+        <div id="wordCategorySettingBox" class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="pr-3 min-w-0">
+            <div class="font-semibold text-sm text-white">Kategorie zeigen</div>
+            <div class="text-xs text-zinc-400">Imposter sieht das Oberthema</div>
+          </div>
+          <button id="toggleCatVisibilityBtn" onclick="app.toggleImposterCategory()" class="w-12 h-7 rounded-full bg-white p-1 transition-all flex items-center justify-end shrink-0">
+            <span class="w-5 h-5 rounded-full bg-black shadow-sm transition-transform"></span>
+          </button>
+        </div>
+
+        <!-- Question-Imposter Specific Submode Filter: Circa (Slider) vs. Normal vs. Both -->
+        <div id="questionSubmodeSettingBox" class="hidden p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="pr-2 min-w-0">
+            <div class="font-semibold text-sm text-white">Fragen-Typ</div>
+            <div class="text-xs text-zinc-400">Circa-Slider, Klassisch oder Beides</div>
+          </div>
+          <button type="button" onclick="app.openQuestionSubmodePopup()" class="pill-button px-3.5 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-2 shrink-0 max-w-[48%]">
+            <i class="fa-solid fa-sliders text-zinc-400"></i>
+            <span id="questionSubmodeBtnLabel" class="truncate">Beides</span>
+            <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+          </button>
+        </div>
+
+        <!-- Question-Imposter Specific Input Option -->
+        <div id="questionInputSettingBox" class="hidden p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="pr-3 min-w-0">
+            <div class="font-semibold text-sm text-white">Antworten & Slider einloggen</div>
+            <div class="text-xs text-zinc-400">Auf dem Gerät eingeben & gemeinsam aufdecken</div>
+          </div>
+          <button id="toggleWrittenAnswersBtn" onclick="app.toggleWrittenAnswers()" class="w-12 h-7 rounded-full bg-white p-1 transition-all flex items-center justify-end shrink-0">
+            <span class="w-5 h-5 rounded-full bg-black shadow-sm transition-transform"></span>
+          </button>
+        </div>
+
+        <!-- Discussion Timer Setting -->
+        <div id="optTimerBox" class="p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="font-semibold text-sm text-white">Diskussions-Timer</div>
+            <div class="text-xs text-zinc-400">Zeitlimit für die Runde</div>
+          </div>
+          <button type="button" onclick="app.openModal('timerModal')" class="pill-button px-3.5 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-2 shrink-0">
+            <i class="fa-regular fa-clock text-zinc-400"></i>
+            <span id="timerDurationBtnLabel">3 Minuten</span>
+            <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+          </button>
+        </div>
+
+        <!-- Quiz: Anzahl Runden -->
+        <div id="quizRoundsBox" class="hidden p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="font-semibold text-sm text-white">Anzahl Runden</div>
+            <div class="text-xs text-zinc-400">Pro Runde 1 Frage für alle Spieler</div>
+          </div>
+          <div class="flex items-center gap-1 bg-black/40 rounded-xl p-1 border border-white/10 shrink-0">
+            <button onclick="app.changeQuizRounds(-1)" class="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-white">
+              <i class="fa-solid fa-minus text-[10px]"></i>
+            </button>
+            <span id="quizRoundsLabel" class="font-mono-num font-bold text-sm w-6 text-center text-white">3</span>
+            <button onclick="app.changeQuizRounds(1)" class="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-white">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quiz: Zeit pro Frage -->
+        <div id="quizSecondsBox" class="hidden p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="font-semibold text-sm text-white">Zeit pro Frage</div>
+            <div class="text-xs text-zinc-400">Schneller richtig = besser</div>
+          </div>
+          <button type="button" onclick="app.openQuizSecondsPopup()" class="pill-button px-3.5 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-2 shrink-0">
+            <i class="fa-regular fa-clock text-zinc-400"></i>
+            <span id="quizSecondsBtnLabel">15 Sek.</span>
+            <i class="fa-solid fa-chevron-right text-[10px] text-zinc-500"></i>
+          </button>
+        </div>
+
+        <!-- Quiz: Sofort-Feedback -->
+        <div id="quizFeedbackBox" class="hidden p-3 sm:p-4 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2">
+          <div class="pr-3 min-w-0">
+            <div class="font-semibold text-sm text-white">Sofort-Feedback</div>
+            <div class="text-xs text-zinc-400">Richtig/Falsch direkt nach der Antwort zeigen</div>
+          </div>
+          <button id="toggleQuizFeedbackBtn" onclick="app.toggleQuizFeedback()" class="w-12 h-7 rounded-full bg-white p-1 transition-all flex items-center justify-end shrink-0">
+            <span class="w-5 h-5 rounded-full bg-black shadow-sm transition-transform"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 pt-1 sm:pt-2">
+        <button type="button" onclick="app.openModal('rulesModal')" class="py-3 px-4 rounded-2xl pill-button text-xs font-semibold text-zinc-300 flex items-center gap-2">
+          <i class="fa-regular fa-circle-question"></i>
+          <span>Spielregeln</span>
+        </button>
+        <button type="button" onclick="app.closeModal('optionsSetupModal')" class="flex-1 py-3 px-5 rounded-2xl btn-primary text-xs sm:text-sm font-semibold">
+          Fertig
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KATEGORIEN SETUP POPUP -->
+  <div id="categoriesSetupModal" onclick="if(event.target===this) app.closeModal('categoriesSetupModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-2xl w-full p-6 sm:p-7 space-y-4 sm:space-y-5 flex flex-col view-enter">
+      <div class="flex flex-wrap items-center justify-between gap-2 shrink-0">
+        <div class="min-w-0">
+          <h3 id="categorySectionTitle" class="font-display font-bold text-xl text-white">Kategorien</h3>
+          <p id="categoryPoolStats" class="text-xs text-zinc-400">750 Wörter aktiv</p>
+        </div>
+        <button onclick="app.closeModal('categoriesSetupModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-white/10 shrink-0">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button id="catCustomBtn" onclick="app.openCustomCategoryModal()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-black hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-folder-plus text-[10px]"></i>
+            <span>+ Eigene Kategorie</span>
+          </button>
+          <button id="catVaultBtn" onclick="app.requestOpenVault(app.state.mode === 'quiz' ? 'quiz' : app.state.mode === 'question' ? 'questions' : 'words')" class="pill-button px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+            <i class="fa-solid fa-vault text-[10px] text-zinc-400"></i>
+            <span>Tresor</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="app.selectAllCategories(true)" class="pill-button px-3 py-1.5 rounded-xl text-xs font-semibold text-white">
+            Alle
+          </button>
+          <button onclick="app.selectAllCategories(false)" class="pill-button px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-400">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Dynamic Categories Grid -->
+      <div id="categoriesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5 overflow-y-auto pr-1 flex-1 min-h-[8rem] content-start"></div>
+
+      <div class="pt-2 border-t border-white/10 shrink-0">
+        <button type="button" onclick="app.closeModal('categoriesSetupModal')" class="w-full py-3.5 rounded-2xl btn-primary text-xs sm:text-sm font-semibold">
+          Auswahl übernehmen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: THEME CUSTOMIZER (With System/Device Auto Mode + Black/White Mode) -->
+  <div id="themeModal" onclick="if(event.target===this) app.closeModal('themeModal')" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-md w-full p-6 space-y-4 sm:space-y-5 view-enter">
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Design & Darstellung</h3>
+          <p class="text-xs text-zinc-400">Passt sich standardmäßig deinem Gerät an</p>
+        </div>
+        <button onclick="app.closeModal('themeModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Device / Black / White Mode Segmented Switch -->
+      <div class="p-1.5 rounded-2xl bg-black/40 border border-white/10 grid grid-cols-3 gap-1.5">
+        <button id="themeModalSystemBtn" type="button" onclick="app.setColorMode('system')" class="py-2.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all bg-white text-black shadow-sm">
+          <i class="fa-solid fa-laptop-mobile text-[11px]"></i>
+          <span>Gerät</span>
+        </button>
+        <button id="themeModalDarkBtn" type="button" onclick="app.setColorMode('dark')" class="py-2.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all text-zinc-400 hover:text-white">
+          <i class="fa-solid fa-moon text-[11px]"></i>
+          <span>Black</span>
+        </button>
+        <button id="themeModalLightBtn" type="button" onclick="app.setColorMode('light')" class="py-2.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all text-zinc-400 hover:text-white">
+          <i class="fa-solid fa-sun text-[11px]"></i>
+          <span>White</span>
+        </button>
+      </div>
+
+      <div class="space-y-1.5 sm:space-y-2">
+        <button onclick="app.setTheme('obsidian')" class="w-full p-3 sm:p-3.5 rounded-2xl pill-button flex items-center justify-between text-left">
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-full bg-rose-500 border border-white/20"></span>
+            <div>
+              <div class="font-semibold text-sm text-white">Obsidian Crimson</div>
+              <div class="text-xs text-zinc-400">Karmesinrot & Kontrast</div>
+            </div>
+          </div>
+          <i id="themeCheck_obsidian" class="fa-solid fa-check text-xs text-white"></i>
+        </button>
+
+        <button onclick="app.setTheme('emerald')" class="w-full p-3 sm:p-3.5 rounded-2xl pill-button flex items-center justify-between text-left">
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-full bg-emerald-500 border border-white/20"></span>
+            <div>
+              <div class="font-semibold text-sm text-white">Midnight Emerald</div>
+              <div class="text-xs text-zinc-400">Smaragd & Mintgrün</div>
+            </div>
+          </div>
+          <i id="themeCheck_emerald" class="fa-solid fa-check text-xs text-transparent"></i>
+        </button>
+
+        <button onclick="app.setTheme('nordic')" class="w-full p-3 sm:p-3.5 rounded-2xl pill-button flex items-center justify-between text-left">
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-full bg-sky-400 border border-white/20"></span>
+            <div>
+              <div class="font-semibold text-sm text-white">Nordic Slate</div>
+              <div class="text-xs text-zinc-400">Arktisches Blau & Schiefer</div>
+            </div>
+          </div>
+          <i id="themeCheck_nordic" class="fa-solid fa-check text-xs text-transparent"></i>
+        </button>
+
+        <button onclick="app.setTheme('amber')" class="w-full p-3 sm:p-3.5 rounded-2xl pill-button flex items-center justify-between text-left">
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-full bg-amber-500 border border-white/20"></span>
+            <div>
+              <div class="font-semibold text-sm text-white">Warm Amber</div>
+              <div class="text-xs text-zinc-400">Goldgelb & Kupfer</div>
+            </div>
+          </div>
+          <i id="themeCheck_amber" class="fa-solid fa-check text-xs text-transparent"></i>
+        </button>
+
+        <button onclick="app.setTheme('mono')" class="w-full p-3 sm:p-3.5 rounded-2xl pill-button flex items-center justify-between text-left">
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-full bg-zinc-400 border border-white/20"></span>
+            <div>
+              <div class="font-semibold text-sm text-white">Pure Monochrome</div>
+              <div class="text-xs text-zinc-400">Minimalistischer Kontrast</div>
+            </div>
+          </div>
+          <i id="themeCheck_mono" class="fa-solid fa-check text-xs text-transparent"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DISCUSSION TIMER POPUP -->
+  <div id="timerModal" onclick="if(event.target===this) app.closeModal('timerModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-md w-full p-6 space-y-4 sm:space-y-5 view-enter">
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Diskussions-Timer</h3>
+          <p class="text-xs text-zinc-400">Wähle das Zeitlimit für die Diskussionsrunde</p>
+        </div>
+        <button onclick="app.closeModal('timerModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="timerPresetGrid" class="grid grid-cols-2 gap-2 sm:gap-2.5"></div>
+
+      <div class="p-3 sm:p-4 rounded-2xl bg-black/35 border border-white/10 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-semibold text-zinc-300">Individuelle Dauer</span>
+          <span id="customTimerPreviewLabel" class="font-mono-num text-xs font-bold px-2.5 py-1 rounded-lg bg-white/10 text-white">3 Minuten</span>
+        </div>
+        <input id="customTimerRangeInput" type="range" min="0" max="15" step="1" value="3"
+          oninput="app.previewCustomTimer(this.value)"
+          class="estimate-slider" />
+        <div class="flex justify-between text-[10px] font-mono-num text-zinc-500">
+          <span>Kein Timer (0)</span>
+          <span>15 Min.</span>
+        </div>
+      </div>
+
+      <button onclick="app.closeModal('timerModal')" class="w-full py-3.5 rounded-2xl btn-primary text-xs sm:text-sm">
+        Übernehmen
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: STARTER PLAYER POPUP -->
+  <div id="starterModal" onclick="if(event.target===this) app.closeModal('starterModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-md w-full p-6 space-y-4 sm:space-y-5 flex flex-col view-enter">
+      <div class="flex items-center justify-between gap-2 shrink-0">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Startspieler wählen</h3>
+          <p class="text-xs text-zinc-400">Wer soll die Diskussionsrunde eröffnen?</p>
+        </div>
+        <button onclick="app.closeModal('starterModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="starterPlayerList" class="space-y-2 flex-1 min-h-0 overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: VAULT PASSWORD AUTHENTICATION & ENCRYPTION -->
+  <div id="vaultAuthModal" onclick="if(event.target===this) app.closeModal('vaultAuthModal')" class="fixed inset-0 z-[70] hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-4 sm:space-y-5 view-enter">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center text-white shrink-0">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 id="vaultAuthTitle" class="font-display font-bold text-lg text-white">Tresor verschlüsseln</h3>
+            <p id="vaultAuthSubtitle" class="text-xs text-zinc-400">Schutz vor neugierigen Mitspielern</p>
+          </div>
+        </div>
+        <button onclick="app.closeModal('vaultAuthModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p id="vaultAuthDescription" class="text-xs text-zinc-300 leading-relaxed">
+        Lege beim ersten Öffnen ein Passwort fest, damit während des Spielabends niemand heimlich die Wörter oder Hinweise im Tresor nachschauen kann.
+      </p>
+
+      <div class="space-y-3">
+        <div class="space-y-1.5">
+          <label id="vaultPassLabel1" class="text-[11px] font-semibold text-zinc-400 block">Tresor-Passwort</label>
+          <input id="vaultPasswordInput" type="password" placeholder="Passwort eingeben..."
+            onkeydown="if(event.key==='Enter') app.submitVaultAuth()"
+            class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-white/40" />
+        </div>
+
+        <div id="vaultPassConfirmWrap" class="space-y-1.5">
+          <label class="text-[11px] font-semibold text-zinc-400 block">Passwort wiederholen</label>
+          <input id="vaultPasswordConfirmInput" type="password" placeholder="Passwort bestätigen..."
+            onkeydown="if(event.key==='Enter') app.submitVaultAuth()"
+            class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-white/40" />
+        </div>
+      </div>
+
+      <div class="flex gap-2.5 pt-1">
+        <button onclick="app.closeModal('vaultAuthModal')" class="flex-1 py-3 rounded-2xl pill-button text-xs font-semibold text-zinc-300">
+          Abbrechen
+        </button>
+        <button onclick="app.submitVaultAuth()" id="vaultAuthSubmitBtn" class="flex-1 py-3 px-2 rounded-2xl btn-primary text-xs font-semibold">
+          Tresor entsperren
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SCOREBOARD -->
+  <div id="scoreModal" onclick="if(event.target===this) app.closeModal('scoreModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-md w-full p-6 space-y-4 sm:space-y-5 flex flex-col view-enter">
+      <div class="flex items-center justify-between gap-2 shrink-0">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Punktestand</h3>
+          <p class="text-xs text-zinc-400">Manuell oder nach Rundenende vergeben</p>
+        </div>
+        <button onclick="app.closeModal('scoreModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="scoreboardList" class="space-y-2 flex-1 min-h-0 overflow-y-auto pr-1"></div>
+
+      <div class="flex justify-between items-center gap-2 pt-3 border-t border-white/10 shrink-0">
+        <button onclick="app.resetScores()" class="text-xs text-zinc-400 hover:text-white transition-colors text-left">
+          Alle Punkte zurücksetzen
+        </button>
+        <button onclick="app.closeModal('scoreModal')" class="px-5 py-2.5 rounded-xl btn-primary text-xs shrink-0">
+          Schließen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GAME RULES -->
+  <div id="rulesModal" onclick="if(event.target===this) app.closeModal('rulesModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-4 sm:space-y-5 overflow-y-auto view-enter">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="font-display font-bold text-xl text-white">Spielregeln</h3>
+        <button onclick="app.closeModal('rulesModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 sm:space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed">
+        <div class="p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
+          <div class="font-display font-bold text-white text-base">1. Wort-Imposter</div>
+          <p class="text-zinc-400">
+            Reicht das Smartphone reihum weiter. Alle Crew-Mitglieder sehen dasselbe geheime Wort. Der Imposter erfährt das Wort nicht, erhält aber optional ein einzelnes <strong>zweideutiges Hinweis-Wort</strong> (z. B. Wort: <em>Meer</em> → Hinweis: <em>Höhenunterschied</em>; Wort: <em>Eckball</em> → Hinweis: <em>Kurve</em>). Reihum sagt jeder einen Begriff dazu – wer blufft?
+          </p>
+        </div>
+
+        <div class="p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
+          <div class="font-display font-bold text-white text-base">2. Fragen- & Circa-Imposter</div>
+          <p class="text-zinc-400">
+            Jeder Spieler liest geheim seine Frage und gibt seine Antwort ein (oder nutzt bei <strong>Circa-Schätzfragen</strong> den interaktiven Slider). Der Imposter hat jedoch eine leicht abweichende Frage erhalten, die zu einem verblüffend ähnlichen Wert führt! Danach wird die Hauptfrage der Gruppe aufgedeckt und jeder muss seine Antwort plausibel verteidigen.
+          </p>
+        </div>
+
+        <div class="p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
+          <div class="font-display font-bold text-white text-base">3. Quiz</div>
+          <p class="text-zinc-400">
+            Das Handy geht reihum. In jeder Runde bekommen alle <strong>dieselbe Quizfrage</strong> mit vier Antworten (Reihenfolge je Spieler gemischt) und müssen sie gegen die Uhr beantworten. Am Ende gewinnt, wer die meisten Fragen richtig hat – bei Gleichstand entscheidet, wer <strong>schneller</strong> war.
+          </p>
+        </div>
+      </div>
+
+      <button onclick="app.closeModal('rulesModal')" class="w-full py-3.5 rounded-2xl btn-primary text-xs sm:text-sm">
+        Verstanden
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOM CATEGORY CREATOR (ALWAYS IN FOREGROUND z-[75]) -->
+  <div id="customCategoryModal" onclick="if(event.target===this) app.closeModal('customCategoryModal')" class="fixed inset-0 z-[75] hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-4 sm:space-y-5 overflow-y-auto view-enter">
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Eigene Kategorie erstellen</h3>
+          <p class="text-xs text-zinc-400">Erstelle ein eigenes Thema mit Wörtern, Fragen oder Quizfragen</p>
+        </div>
+        <button onclick="app.closeModal('customCategoryModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 sm:space-y-4">
+        <div class="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/10">
+          <button id="newCatTypeWordBtn" type="button" onclick="app.setNewCategoryType('word')" class="py-2 rounded-xl text-xs font-semibold bg-white text-black transition-all">
+            Wörter
+          </button>
+          <button id="newCatTypeQuestionBtn" type="button" onclick="app.setNewCategoryType('question')" class="py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-all">
+            Fragen
+          </button>
+          <button id="newCatTypeQuizBtn" type="button" onclick="app.setNewCategoryType('quiz')" class="py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-all">
+            Quiz
+          </button>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-zinc-300">Name der Kategorie</label>
+          <input id="newCategoryNameInput" type="text" placeholder="z.B. Insider-Witze, Fußballverein, Urlaub..."
+            class="w-full bg-black/45 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-white/40" />
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-zinc-300">Icon wählen</label>
+          <div id="newCategoryIconGrid" class="grid grid-cols-6 gap-1.5 sm:gap-2"></div>
+        </div>
+
+        <div id="newCatInitialWordsSection" class="p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2 sm:space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-x-2">
+            <span class="text-xs font-semibold text-white">Erste Wörter hinzufügen (optional)</span>
+            <span class="text-[11px] text-zinc-400">Format: Wort ; Hinweis</span>
+          </div>
+          <textarea id="newCategoryBulkInput" rows="4"
+            placeholder="Schreibe ein Paar pro Zeile, z.B.:&#10;Eckball ; Kurve&#10;Meer ; Höhenunterschied&#10;Stammtisch ; Glocke"
+            class="w-full bg-black/45 border border-white/15 rounded-xl p-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/40"></textarea>
+        </div>
+      </div>
+
+      <div class="flex gap-2.5 pt-1 sm:pt-2">
+        <button onclick="app.closeModal('customCategoryModal')" class="flex-1 py-3 rounded-2xl pill-button text-xs font-semibold text-zinc-300">
+          Abbrechen
+        </button>
+        <button onclick="app.saveNewCategory()" class="flex-1 py-3 rounded-2xl btn-primary text-xs font-semibold">
+          Kategorie anlegen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT INDIVIDUAL WORD OR QUESTION IN VAULT (WITH 2-STEP DELETE CONFIRMATION) -->
+  <div id="editVaultItemModal" onclick="if(event.target===this) app.closeModal('editVaultItemModal')" class="fixed inset-0 z-[75] hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-md w-full p-6 space-y-4 sm:space-y-5 overflow-y-auto view-enter">
+      <div class="flex items-center justify-between gap-2">
+        <h3 id="editVaultModalTitle" class="font-display font-bold text-xl text-white">Eintrag bearbeiten</h3>
+        <button onclick="app.closeModal('editVaultItemModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="editVaultModalBody" class="space-y-3"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+        <button id="deleteVaultItemBtn" onclick="app.deleteCurrentEditingVaultItem()" class="px-4 py-3 rounded-2xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-xs font-semibold text-rose-300 flex items-center gap-1.5 transition-all">
+          <i class="fa-solid fa-trash text-[11px]"></i>
+          <span id="deleteVaultItemBtnText">Löschen</span>
+        </button>
+        <div class="flex gap-2">
+          <button onclick="app.closeModal('editVaultItemModal')" class="px-4 py-3 rounded-2xl pill-button text-xs font-semibold text-zinc-300">
+            Abbrechen
+          </button>
+          <button onclick="app.saveEditedVaultItem()" class="px-5 py-3 rounded-2xl btn-primary text-xs font-semibold">
+            Speichern
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: UNIVERSAL APP-STYLED SELECTION POPUP (REPLACES NATIVE DROPDOWNS) -->
+  <div id="customSelectModal" onclick="if(event.target===this) app.closeModal('customSelectModal')" class="fixed inset-0 z-[80] hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-md w-full p-6 space-y-3 sm:space-y-4 flex flex-col view-enter">
+      <div class="flex items-center justify-between gap-2 shrink-0">
+        <div class="min-w-0">
+          <h3 id="customSelectModalTitle" class="font-display font-bold text-xl text-white">Auswahl treffen</h3>
+          <p id="customSelectModalSubtitle" class="text-xs text-zinc-400">Wähle eine Option aus der Liste</p>
+        </div>
+        <button onclick="app.closeModal('customSelectModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="customSelectOptionsList" class="space-y-2 flex-1 min-h-0 overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: APP INSTALLIEREN (Hilfe) -->
+  <div id="installHelpModal" onclick="if(event.target===this) app.closeModal('installHelpModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-md w-full p-6 space-y-3 sm:space-y-4 overflow-y-auto view-enter">
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Als App installieren</h3>
+          <p class="text-xs text-zinc-400">Danach startet Partyspiele wie eine normale App – auch ohne Internet.</p>
+        </div>
+        <button onclick="app.closeModal('installHelpModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="installHelpFileNote" class="hidden p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 leading-relaxed">
+        Du hast die Datei direkt vom Gerät geöffnet. Installieren und Offline-Modus funktionieren nur, wenn die App über eine Internet-Adresse (https://…) geöffnet wird, z. B. über GitHub Pages.
+      </div>
+
+      <div class="flex flex-col gap-2.5 text-xs text-zinc-300 leading-relaxed">
+        <div id="installHelpIOS" class="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+          <div class="font-semibold text-sm text-white"><i class="fa-brands fa-apple mr-1.5"></i>iPhone / iPad (Safari)</div>
+          <p>1. Seite in <strong>Safari</strong> öffnen. 2. Unten auf <strong>Teilen</strong> <i class="fa-solid fa-arrow-up-from-bracket"></i> tippen. 3. <strong>„Zum Home-Bildschirm“</strong> wählen und bestätigen.</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+          <div class="font-semibold text-sm text-white"><i class="fa-brands fa-android mr-1.5"></i>Android (Chrome)</div>
+          <p>1. Seite in <strong>Chrome</strong> öffnen. 2. Oben rechts auf <strong>⋮</strong> tippen. 3. <strong>„App installieren“</strong> oder <strong>„Zum Startbildschirm hinzufügen“</strong> wählen.</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+          <div class="font-semibold text-sm text-white"><i class="fa-solid fa-laptop mr-1.5"></i>Computer (Chrome / Edge)</div>
+          <p>In der Adressleiste rechts auf das <strong>Installieren-Symbol</strong> klicken.</p>
+        </div>
+      </div>
+
+      <button onclick="app.closeModal('installHelpModal')" class="w-full py-3 rounded-2xl btn-primary text-xs sm:text-sm">
+        Verstanden
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: QUIZ RÜCKBLICK -->
+  <div id="quizReviewModal" onclick="if(event.target===this) app.closeModal('quizReviewModal')" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-lg w-full p-6 space-y-3 sm:space-y-4 flex flex-col view-enter">
+      <div class="flex items-center justify-between gap-2 shrink-0">
+        <div class="min-w-0">
+          <h3 class="font-display font-bold text-xl text-white">Fragen-Rückblick</h3>
+          <p class="text-xs text-zinc-400">Richtige Antworten & wer wie schnell war</p>
+        </div>
+        <button onclick="app.closeModal('quizReviewModal')" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400 shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="quizReviewList" class="space-y-2 flex-1 min-h-0 overflow-y-auto pr-1"></div>
+
+      <button onclick="app.closeModal('quizReviewModal')" class="w-full py-3 rounded-2xl btn-primary text-xs sm:text-sm shrink-0">
+        Schließen
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: DATABASE / VAULT EXPLORER (CATEGORY OVERVIEW + DRILLDOWN + CSV BACKUP) -->
+  <div id="dbModal" onclick="if(event.target===this) app.closeVaultModal()" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="modal-sheet surface-card rounded-3xl max-w-4xl w-full p-4 sm:p-6 space-y-3 sm:space-y-4 flex flex-col view-enter overflow-hidden">
+      <div class="flex items-start sm:items-center justify-between gap-2 shrink-0">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="font-display font-bold text-lg sm:text-xl text-white">Wörter-, Fragen- & Quiz-Tresor</h3>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-unlock-keyhole"></i> Gesichert
+            </span>
+          </div>
+          <p class="text-xs text-zinc-400 truncate">Kategorie wählen, Einträge anpassen oder CSV-Backup erstellen</p>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="app.exportBackupCSV()" class="px-2.5 py-1.5 rounded-xl pill-button text-[11px] font-semibold text-zinc-300 flex items-center gap-1.5" title="Alle Wörter, Kategorien & Fragen als CSV-Datei herunterladen">
+            <i class="fa-solid fa-file-arrow-down text-[10px]"></i>
+            <span class="hidden md:inline">CSV-Export</span>
+          </button>
+          <button onclick="app.triggerImportCSV()" class="px-2.5 py-1.5 rounded-xl pill-button text-[11px] font-semibold text-zinc-300 flex items-center gap-1.5" title="Wörter & Kategorien aus CSV-Datei importieren">
+            <i class="fa-solid fa-file-arrow-up text-[10px]"></i>
+            <span class="hidden md:inline">CSV-Import</span>
+          </button>
+          <input id="csvBackupFileInput" type="file" accept=".csv,text/csv" class="hidden" onchange="app.handleImportCSVFile(event)" />
+          <button onclick="app.changeVaultPasswordPrompt()" class="px-2.5 py-1.5 rounded-xl pill-button text-[11px] font-semibold text-zinc-300 flex items-center gap-1.5" title="Passwort ändern">
+            <i class="fa-solid fa-key text-[10px]"></i>
+            <span class="hidden sm:inline">Passwort</span>
+          </button>
+          <button onclick="app.closeVaultModal()" class="w-8 h-8 rounded-xl pill-button flex items-center justify-center text-zinc-400" title="Tresor schließen & wieder verschlüsseln">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-2.5 w-full shrink-0">
+        <div class="flex flex-wrap gap-1.5 shrink-0">
+          <button id="dbTabWords" onclick="app.switchDbTab('words')" class="px-3 sm:px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-black transition-all">
+            750 Wörter
+          </button>
+          <button id="dbTabQuestions" onclick="app.switchDbTab('questions')" class="px-3 sm:px-3.5 py-2 rounded-xl text-xs font-semibold pill-button text-zinc-300 transition-all">
+            180 Fragen
+          </button>
+          <button id="dbTabQuiz" onclick="app.switchDbTab('quiz')" class="px-3 sm:px-3.5 py-2 rounded-xl text-xs font-semibold pill-button text-zinc-300 transition-all">
+            700 Quiz
+          </button>
+          <button id="dbTabCustom" onclick="app.switchDbTab('custom')" class="px-3 sm:px-3.5 py-2 rounded-xl text-xs font-semibold pill-button text-zinc-300 transition-all">
+            + Global & Backup
+          </button>
+        </div>
+
+        <div id="dbFilterToolbar" class="flex items-center gap-2 w-full md:w-auto min-w-0 flex-1 md:max-w-md justify-end">
+          <button id="dbCategoryPopupTrigger" type="button" onclick="app.openVaultCategoryFilterPopup()" class="pill-button px-3 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-2 shrink-0 max-w-[45%] sm:max-w-[210px]">
+            <i class="fa-solid fa-layer-group text-zinc-400 text-[11px] shrink-0"></i>
+            <span id="dbCategoryFilterLabel" class="truncate">Kategorie-Übersicht</span>
+            <i class="fa-solid fa-chevron-down text-[9px] text-zinc-500 shrink-0"></i>
+          </button>
+          <div class="relative flex-1 min-w-0">
+            <i class="fa-solid fa-magnifying-glass text-[10px] text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            <input id="dbSearchInput" oninput="app.renderVaultList()" type="text" placeholder="Begriff suchen..." class="w-full min-w-0 bg-black/40 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/30" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Contextual Category Header + Direct Add Bar when inside a specific category -->
+      <div id="dbCategoryDetailHeader" class="hidden p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2 sm:space-y-3 shrink-0">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <button onclick="app.selectVaultCategory(null)" class="pill-button px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 flex items-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-arrow-left text-[10px]"></i>
+              <span>Kategorien</span>
+            </button>
+            <div class="flex items-center gap-2 min-w-0">
+              <i id="dbDetailCatIcon" class="fa-solid fa-folder text-white text-sm"></i>
+              <h4 id="dbDetailCatTitle" class="font-display font-bold text-base text-white truncate">Kategorie</h4>
+              <span id="dbDetailCatCount" class="font-mono-num text-[11px] px-2 py-0.5 rounded-md bg-white/10 text-zinc-300 shrink-0">50</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Direct Add inside Word Category -->
+        <div id="dbDirectAddWordBar" class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <input id="directCatWordInput" type="text" placeholder="Neues Wort in dieser Kategorie..." class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none min-w-0" />
+          <input id="directCatHintInput" type="text" placeholder="Ein-Wort-Hinweis (z.B. Kurve)..." class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none min-w-0" />
+          <button onclick="app.addDirectInSelectedCategory()" class="py-2 px-4 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>Direkt hinzufügen</span>
+          </button>
+        </div>
+
+        <!-- Direct Add inside Question Category -->
+        <div id="dbDirectAddQuestionBar" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <input id="directCatMainQInput" type="text" placeholder="Hauptfrage für Crew..." class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none min-w-0" />
+          <input id="directCatImpQInput" type="text" placeholder="Abweichende Imposter-Frage..." class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none min-w-0" />
+          <button onclick="app.addDirectInSelectedCategory()" class="py-2 px-4 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>Frage hinzufügen</span>
+          </button>
+        </div>
+
+        <!-- Direct Add inside Quiz Category -->
+        <div id="dbDirectAddQuizBar" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          <input id="directQuizQInput" type="text" placeholder="Quizfrage..." class="sm:col-span-2 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none min-w-0" />
+          <input id="directQuizRightInput" type="text" placeholder="Richtige Antwort" class="bg-black/40 border border-emerald-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none min-w-0" />
+          <input id="directQuizWrong1Input" type="text" placeholder="Falsche Antwort 1" class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none min-w-0" />
+          <input id="directQuizWrong2Input" type="text" placeholder="Falsche Antwort 2" class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none min-w-0" />
+          <input id="directQuizWrong3Input" type="text" placeholder="Falsche Antwort 3" class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none min-w-0" />
+          <button onclick="app.addDirectInSelectedCategory()" class="sm:col-span-2 py-2 px-4 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>Quizfrage hinzufügen</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Vault Categories / Items List Container -->
+      <div id="dbVaultContainer" class="flex-1 overflow-y-auto pr-1 min-h-[8rem] sm:min-h-[260px]">
+        <div id="dbVaultList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5"></div>
+      </div>
+
+      <!-- Global Add & Category Creator + CSV Backup Tab -->
+      <div id="dbCustomCreator" class="hidden space-y-4 sm:space-y-5 p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/10 overflow-y-auto flex-1 min-h-0 view-enter">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 sm:pb-4 border-b border-white/10">
+          <div class="min-w-0">
+            <h4 class="font-display font-bold text-sm text-white">Neue Kategorie anlegen</h4>
+            <p class="text-xs text-zinc-400">Erstelle eigene Wort- oder Fragen-Kategorien im Vordergrund</p>
+          </div>
+          <button onclick="app.openCustomCategoryModal()" class="py-2.5 px-4 rounded-xl bg-white text-black font-semibold text-xs flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-95 transition-transform">
+            <i class="fa-solid fa-folder-plus"></i>
+            <span>+ Eigene Kategorie erstellen</span>
+          </button>
+        </div>
+
+        <div class="space-y-2.5">
+          <h4 class="font-display font-bold text-sm text-white">Global: Wort + Ein-Wort-Hinweis hinzufügen</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-2.5">
+            <button type="button" onclick="app.openGlobalWordCatPopup()" class="pill-button rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white flex items-center justify-between gap-2">
+              <span id="customWordCategoryBtnLabel" class="truncate">Alltag & Haushalt</span>
+              <i class="fa-solid fa-chevron-down text-[10px] text-zinc-400"></i>
+            </button>
+            <input id="customWordInput" type="text" placeholder="Wort (z.B. Eckball)" class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-white/35 transition-colors min-w-0" />
+            <input id="customHintInput" type="text" placeholder="Ein-Wort-Hinweis (z.B. Kurve)" class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-white/35 transition-colors min-w-0" />
+            <button onclick="app.addCustomWord()" class="py-2.5 px-4 rounded-xl btn-primary text-xs">
+              Wort speichern
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 pt-3 border-t border-white/5">
+          <h4 class="font-display font-bold text-sm text-white">Global: Fragen-Duell hinzufügen</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-2.5">
+            <button type="button" onclick="app.openGlobalQuestionCatPopup()" class="pill-button rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white flex items-center justify-between gap-2">
+              <span id="customQuestionCategoryBtnLabel" class="truncate">Schätzfragen</span>
+              <i class="fa-solid fa-chevron-down text-[10px] text-zinc-400"></i>
+            </button>
+            <input id="customMainQInput" type="text" placeholder="Hauptfrage für Crew..." class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-white/35 transition-colors min-w-0" />
+            <input id="customImpQInput" type="text" placeholder="Gegenfrage für Imposter..." class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-white/35 transition-colors min-w-0" />
+            <button onclick="app.addCustomQuestion()" class="py-2.5 px-4 rounded-xl btn-primary text-xs">
+              Frage speichern
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 pt-3 border-t border-white/5">
+          <h4 class="font-display font-bold text-sm text-white">Global: Quizfrage hinzufügen</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+            <button type="button" onclick="app.openGlobalQuizCatPopup()" class="pill-button rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white flex items-center justify-between gap-2">
+              <span id="customQuizCategoryBtnLabel" class="truncate">Geografie & Länder</span>
+              <i class="fa-solid fa-chevron-down text-[10px] text-zinc-400"></i>
+            </button>
+            <input id="customQuizQInput" type="text" placeholder="Quizfrage..." class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-white/35 transition-colors min-w-0" />
+            <input id="customQuizRightInput" type="text" placeholder="Richtige Antwort" class="bg-black/40 border border-emerald-500/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-white/35 transition-colors min-w-0" />
+            <input id="customQuizWrong1Input" type="text" placeholder="Falsche Antwort 1" class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-white/35 transition-colors min-w-0" />
+            <input id="customQuizWrong2Input" type="text" placeholder="Falsche Antwort 2" class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-white/35 transition-colors min-w-0" />
+            <input id="customQuizWrong3Input" type="text" placeholder="Falsche Antwort 3" class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-white/35 transition-colors min-w-0" />
+            <button onclick="app.addCustomQuiz()" class="sm:col-span-2 py-2.5 px-4 rounded-xl btn-primary text-xs">
+              Quizfrage speichern
+            </button>
+          </div>
+        </div>
+
+        <!-- CSV Backup Section -->
+        <div class="space-y-3 pt-4 border-t border-white/10">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="min-w-0">
+              <h4 class="font-display font-bold text-sm text-white">CSV-Backup & Wiederherstellung</h4>
+              <p class="text-xs text-zinc-400">Sichere alle Kategorien, Wörter, Hinweise, Fragen und Quizfragen als CSV-Datei oder lade ein Backup hoch</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="app.exportBackupCSV()" class="py-2.5 px-4 rounded-xl pill-button text-xs font-semibold text-white flex items-center gap-2">
+                <i class="fa-solid fa-download"></i>
+                <span>CSV-Backup herunterladen</span>
+              </button>
+              <button onclick="app.triggerImportCSV()" class="py-2.5 px-4 rounded-xl btn-primary text-xs font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-upload"></i>
+                <span>CSV-Datei importieren</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daten (hier können Wörter, Fragen und Quizfragen bearbeitet werden) -->
+  <script src="js/data-words.js"></script>
+  <script src="js/data-questions.js"></script>
+  <script src="js/data-quiz.js"></script>
+  <!-- Spiel-Logik -->
+  <script src="js/app.js"></script>
+</body>
+</html>
